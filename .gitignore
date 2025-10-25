@@ -1,4 +1,14 @@
-# --- Logs ---
+# Python / Backend
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+.env
+.env.*
+
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -7,25 +17,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# --- Frontend Build Files ---
+# Frontend
 node_modules/
 dist/
 dist-ssr/
 *.local
 
-# --- Backend Python Environment ---
-venv/
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.pyc
-*.pdb
-*.egg-info/
-.env
-.env.*
-
-# --- Editor / System Files ---
+# Editors / OS
 .vscode/*
 !.vscode/extensions.json
 .idea/
@@ -36,6 +34,6 @@ __pycache__/
 *.sln
 *.sw?
 
-# --- Miscellaneous ---
+# Misc
 *.bak
 *.tmp
