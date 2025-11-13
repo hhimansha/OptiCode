@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from assessment_system import CodingSkillAssessor
 
 app = Flask(__name__)
+CORS(app)
 assessor = CodingSkillAssessor()
 
 @app.route('/')

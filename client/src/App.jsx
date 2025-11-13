@@ -1,24 +1,26 @@
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import './App.css';
 import AssessmentUI from "./components/AssessmentUI";
+import CodingExerciseRealtime from "./components/CodingExerciseRealtime";
 
-function App() {
+function AssessmentPage() {
   const [result, setResult] = useState(null);
+  const navigate = useNavigate();
 
-  // Function to handle submission from AssessmentUI
   const handlePredict = async (quizAnswers) => {
     try {
-      const response = await fetch('http://localhost:5000/api/predict-skill', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quiz_answers: quizAnswers }),
       });
 
       const data = await response.json();
-      setResult(data); // Set prediction result to display
+      setResult(data);
     } catch (err) {
       console.error("Error calling API:", err);
-      alert("Failed to get prediction. Check console for details.");
+      alert("Failed to predict");
     }
   };
 
@@ -26,17 +28,29 @@ function App() {
     <div>
       <h1>OptiCode Skill Predictor</h1>
 
+      {!result && <AssessmentUI onSubmit={handlePredict} />}
+
       {result && (
         <div className="result">
           <h3>Predicted Skill: {result.skill_level}</h3>
           <p>Confidence: {result.confidence}</p>
+
+          <button onClick={() => navigate("/exercise")}>
+            Start Coding Exercise →
+          </button>
         </div>
       )}
-
-      {/* Pass handlePredict to AssessmentUI */}
-      <AssessmentUI onSubmit={handlePredict} />
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<AssessmentPage />} />
+        <Route path="/exercise" element={<CodingExerciseRealtime />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
