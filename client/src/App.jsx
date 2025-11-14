@@ -3,6 +3,7 @@ import { useState } from 'react';
 import './App.css';
 import AssessmentUI from "./components/AssessmentUI";
 import CodingExerciseRealtime from "./components/CodingExerciseRealtime";
+import Form from "./Login_signup/Form"; // Import your Form component
 
 function AssessmentPage() {
   const [result, setResult] = useState(null);
@@ -48,8 +49,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AssessmentPage />} />
+        {/* Set Form as the default route */}
+        <Route path="/" element={<Form />} />
+        <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/exercise" element={<CodingExerciseRealtime />} />
+        {/* Add the face route that your Form component navigates to */}
+        <Route path="/face" element={<AssessmentPage />} />
       </Routes>
     </BrowserRouter>
   );
