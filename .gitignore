@@ -37,3 +37,5 @@ dist-ssr/
 # Misc
 *.bak
 *.tmp
+train.csv 
+test.csv 
