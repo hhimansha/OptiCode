@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from typing import List, Dict, Any
+from research_analysis import ResearchBasedAnalyzer  # Add this import
 
 class CodingSkillAssessor:
     def __init__(self, model_path: str = 'coding_skill_classifier.pkl', 
@@ -14,6 +15,7 @@ class CodingSkillAssessor:
             self.feature_names = ['foundational_coding', 'problem_solving', 'workflow', 
                                 'tools', 'computational', 'confidence', 'average_score']
             self.quiz_structure = self._define_quiz_structure()
+            self.research_analyzer = ResearchBasedAnalyzer()  # Add research analyzer
             print("Assessment system loaded successfully!")
         except FileNotFoundError as e:
             print(f"Error loading files: {e}")
@@ -69,6 +71,9 @@ class CodingSkillAssessor:
         
         print(f"Prediction: {skill_level} (Confidence: {confidence}%)")
         
+        # Generate research-based analysis
+        research_analysis = self._generate_research_analysis(skill_level, features)
+        
         class_probabilities = {}
         for i, class_name in enumerate(self.encoder.classes_):
             class_probabilities[class_name] = f"{prediction_proba[i]*100:.1f}%"
@@ -78,46 +83,17 @@ class CodingSkillAssessor:
             'confidence': f"{confidence}%",
             'confidence_raw': confidence,
             'category_scores': features,
-            'probabilities': class_probabilities
+            'probabilities': class_probabilities,
+            'research_analysis': research_analysis  # Add research analysis
         }
-
-def display_results(prediction: Dict, analysis: Dict):
-    print("\n" + "="*60)
-    print("CODING SKILL ASSESSMENT RESULTS")
-    print("="*60)
     
-    print(f"OVERALL ASSESSMENT:")
-    print(f"  Skill Level: {prediction['skill_level']}")
-    print(f"  Confidence: {prediction['confidence']}")
-    print(f"  Overall Score: {prediction['category_scores']['average_score']}/5.0")
-    
-    print(f"CATEGORY SCORES:")
-    for category, score in prediction['category_scores'].items():
-        if category != 'average_score':
-            stars = "*" * int(score)
-            print(f"  {category.replace('_', ' ').title():<20}: {score:.2f} {stars}")
-    
-    print(f"PROBABILITY DISTRIBUTION:")
-    for level in ['Beginner', 'Intermediate', 'Advanced']:
-        if level in prediction['probabilities']:
-            print(f"  {level:<12}: {prediction['probabilities'][level]}")
-    
-    print(f"STRENGTHS:")
-    if analysis['strengths']:
-        for strength in analysis['strengths']:
-            print(f"  [STRONG] {strength['message']} (Score: {strength['score']})")
-    else:
-        print("  No standout strengths identified")
-    
-    print(f"IMPROVEMENT AREAS:")
-    if analysis['improvement_areas']:
-        for area in analysis['improvement_areas']:
-            print(f"  [NEEDS WORK] {area['message']} (Score: {area['score']})")
-    else:
-        print("  No major improvement areas identified")
-    
-    print(f"RECOMMENDATIONS:")
-    for i, recommendation in enumerate(analysis['recommendations'], 1):
-        print(f"  {i}. {recommendation}")
-    
-    print("="*60)
+    def _generate_research_analysis(self, skill_level: str, category_scores: Dict[str, float]) -> Dict[str, Any]:
+        """Generate research-based analysis of the assessment results"""
+        return {
+            'cognitive_patterns': self.research_analyzer.analyze_cognitive_patterns(category_scores),
+            'research_insights': self.research_analyzer.generate_research_insights(category_scores),
+            'research_recommendations': self.research_analyzer.get_research_based_recommendations(
+                skill_level, category_scores
+            ),
+            'research_principles_applied': list(self.research_analyzer.research_principles.keys())
+        }

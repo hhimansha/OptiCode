@@ -1,150 +1,123 @@
 # coding_skill_assessor/03_demo.py
-from assessment_system import CodingSkillAssessor, display_results
+from typing import Dict
+from assessment_system import CodingSkillAssessor
 
-def run_demo():
-    print("CODING SKILL ASSESSMENT SYSTEM DEMO")
-    print("=" * 50)
+def display_enhanced_results(prediction: Dict):
+    print("\n" + "="*70)
+    print("ENHANCED CODING SKILL ASSESSMENT RESULTS (Research-Based)")
+    print("="*70)
+    
+    # Original results
+    print(f"📊 OVERALL ASSESSMENT:")
+    print(f"  Skill Level: {prediction['skill_level']}")
+    print(f"  Confidence: {prediction['confidence']}")
+    print(f"  Overall Score: {prediction['category_scores']['average_score']}/5.0")
+    
+    print(f"\n📈 CATEGORY SCORES:")
+    for category, score in prediction['category_scores'].items():
+        if category != 'average_score':
+            stars = "★" * int(score)
+            dots = "☆" * (5 - int(score))
+            print(f"  {category.replace('_', ' ').title():<20}: {score:.2f} {stars}{dots}")
+    
+    # Research-based insights
+    research = prediction.get('research_analysis', {})
+    
+    print(f"\n🔬 RESEARCH-BASED INSIGHTS:")
+    if research.get('research_insights'):
+        for insight in research['research_insights']:
+            urgency_icon = "⚠️" if insight['urgency'] == 'improvement_needed' else "✅"
+            print(f"  {urgency_icon} {insight['principle']}")
+            print(f"     Insight: {insight['insight']}")
+            print(f"     Evidence: {insight['evidence']}")
+            print(f"     Recommendation: {insight['recommendation']}")
+    else:
+        print("  No specific research insights identified")
+    
+    print(f"\n🧠 COGNITIVE PATTERNS:")
+    if research.get('cognitive_patterns'):
+        for pattern in research['cognitive_patterns']:
+            print(f"  🔍 {pattern['pattern']}")
+            print(f"     Description: {pattern['description']}")
+            print(f"     Research Basis: {pattern['research_basis']}")
+            print(f"     Implication: {pattern['implication']}")
+    else:
+        print("  No distinct cognitive patterns identified")
+    
+    print(f"\n🎯 RESEARCH-BASED RECOMMENDATIONS:")
+    if research.get('research_recommendations'):
+        for i, rec in enumerate(research['research_recommendations'], 1):
+            print(f"  {i}. {rec}")
+    else:
+        print("  No specific recommendations available")
+    
+    print(f"\n📚 RESEARCH PRINCIPLES APPLIED:")
+    if research.get('research_principles_applied'):
+        principles = research['research_principles_applied']
+        print(f"  • Lister et al. - Code Reading & Comprehension")
+        print(f"  • Soloway - Mental Models & Program Mechanisms") 
+        print(f"  • Parnas - Modular Design & Information Hiding")
+    
+    print(f"\n📊 PROBABILITY DISTRIBUTION:")
+    for level in ['Beginner', 'Intermediate', 'Advanced']:
+        if level in prediction['probabilities']:
+            print(f"  {level:<12}: {prediction['probabilities'][level]}")
+    
+    print("="*70)
+
+def run_enhanced_demo():
+    print("ENHANCED CODING SKILL ASSESSMENT SYSTEM DEMO")
+    print("Now with Research-Based Insights!")
+    print("=" * 60)
     
     try:
         assessor = CodingSkillAssessor()
-        print("Assessor initialized successfully!")
+        print("✅ Enhanced assessor initialized successfully!")
     except Exception as e:
-        print(f"Failed to initialize assessor: {e}")
+        print(f"❌ Failed to initialize assessor: {e}")
         return
     
+    # Test profiles with different skill patterns
     student_profiles = {
-        "Beginner Student": 
-            [0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        "Strong Code Reader": 
+            [4, 4, 4, 3, 4,   # High foundational_coding
+             2, 2, 3, 2, 2,   # Medium problem_solving  
+             3, 3, 2, 3, 3,   # Medium workflow
+             3, 3, 3, 3, 3,   # Medium tools
+             2, 2, 3, 2, 2,   # Medium computational
+             4, 4, 3, 4, 4],  # High confidence
         
-        "Intermediate Student":
-            [2, 2, 3, 2, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3],
+        "Strong Problem Solver":
+            [2, 2, 3, 2, 2,   # Medium foundational_coding
+             4, 4, 4, 4, 4,   # High problem_solving
+             3, 3, 3, 3, 3,   # Medium workflow
+             3, 3, 3, 3, 3,   # Medium tools
+             4, 4, 4, 4, 4,   # High computational
+             4, 4, 4, 4, 4],  # High confidence
         
-        "Advanced Student":
-            [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+        "Design-Oriented Thinker":
+            [3, 3, 3, 3, 3,   # Medium foundational_coding
+             3, 3, 3, 3, 3,   # Medium problem_solving
+             4, 4, 4, 4, 4,   # High workflow
+             4, 4, 4, 4, 4,   # High tools
+             3, 3, 3, 3, 3,   # Medium computational
+             4, 4, 4, 4, 4]   # High confidence
     }
     
     for profile_name, quiz_answers in student_profiles.items():
-        print(f"\n{'='*50}")
-        print(f"TESTING: {profile_name}")
-        print(f"{'='*50}")
+        print(f"\n{'='*60}")
+        print(f"🧪 TESTING: {profile_name}")
+        print(f"{'='*60}")
         
         try:
             prediction = assessor.predict_skill_level(quiz_answers)
-            
-            # Generate analysis without calling predict again
-            analysis = get_analysis_from_prediction(prediction)
-            
-            display_results(prediction, analysis)
+            display_enhanced_results(prediction)
             
         except Exception as e:
-            print(f"Error processing {profile_name}: {e}")
+            print(f"❌ Error processing {profile_name}: {e}")
             continue
     
-    print("\nDemo completed successfully!")
-
-def get_analysis_from_prediction(prediction):
-    """Generate analysis from existing prediction without re-predicting"""
-    scores = prediction['category_scores']
-    
-    analysis = {
-        'strengths': [],
-        'improvement_areas': [],
-        'recommendations': []
-    }
-    
-    # Identify strengths and improvement areas
-    for category, score in scores.items():
-        if category != 'average_score':
-            category_name = category.replace('_', ' ').title()
-            if score >= 4.0:
-                analysis['strengths'].append({
-                    'category': category_name,
-                    'score': score,
-                    'message': f"Excellent performance in {category_name}"
-                })
-            elif score <= 2.5:
-                analysis['improvement_areas'].append({
-                    'category': category_name, 
-                    'score': score,
-                    'message': f"Needs improvement in {category_name}"
-                })
-    
-    # Generate recommendations
-    skill_level = prediction['skill_level']
-    if skill_level == 'Beginner':
-        analysis['recommendations'] = [
-            "Focus on basic programming concepts and syntax",
-            "Practice with simple coding exercises daily", 
-            "Learn fundamental algorithms and data structures",
-            "Build small projects to gain hands-on experience",
-            "Join coding communities for support and guidance"
-        ]
-    elif skill_level == 'Intermediate':
-        analysis['recommendations'] = [
-            "Work on larger, more complex projects",
-            "Learn about software design patterns and architecture",
-            "Practice debugging and troubleshooting complex issues", 
-            "Collaborate with other developers on group projects",
-            "Study advanced algorithms and optimization techniques"
-        ]
-    else:  # Advanced
-        analysis['recommendations'] = [
-            "Contribute to open source projects",
-            "Mentor other developers and share knowledge", 
-            "Explore advanced algorithms and system design",
-            "Learn about DevOps, testing, and deployment strategies",
-            "Stay updated with latest technologies and frameworks"
-        ]
-    
-    return analysis
-
-def interactive_mode():
-    print("\nINTERACTIVE MODE")
-    print("=" * 30)
-    print("Enter quiz responses for a custom student profile")
-    print("For each question, enter 0-4 (0=lowest, 4=highest)")
-    
-    try:
-        assessor = CodingSkillAssessor()
-    except Exception as e:
-        print(f"Failed to initialize assessor: {e}")
-        return
-    
-    print("\nPlease enter 30 numbers (0-4) separated by spaces:")
-    print("Example: 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3")
-    
-    try:
-        input_str = input("Quiz answers: ").strip()
-        quiz_answers = [int(x) for x in input_str.split()]
-        
-        if len(quiz_answers) != 30:
-            print("Please enter exactly 30 numbers")
-            return
-            
-    except ValueError:
-        print("Please enter valid numbers (0-4)")
-        return
-    except Exception as e:
-        print(f"Error: {e}")
-        return
-    
-    try:
-        prediction = assessor.predict_skill_level(quiz_answers)
-        analysis = get_analysis_from_prediction(prediction)
-        display_results(prediction, analysis)
-    except Exception as e:
-        print(f"Error during assessment: {e}")
+    print("\n🎉 Enhanced demo completed successfully!")
 
 if __name__ == "__main__":
-    print("Coding Skill Assessment System")
-    print("1. Run Demo")
-    print("2. Interactive Mode")
-    
-    choice = input("Select mode (1 or 2): ").strip()
-    
-    if choice == "1":
-        run_demo()
-    elif choice == "2":
-        interactive_mode()
-    else:
-        print("Invalid choice")
+    run_enhanced_demo()

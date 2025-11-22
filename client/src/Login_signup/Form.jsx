@@ -34,6 +34,7 @@ const Form = () => {
     : 'http://localhost:5000/api/users/register';
 
   try {
+    console.log('🟡 Making request to:', url);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -41,23 +42,25 @@ const Form = () => {
       body: JSON.stringify(formData),
     });
 
+    console.log('🟡 Response status:', response.status);
     const data = await response.json();
+    console.log('🟡 Response data:', data);
 
     if (data.success) {
       setLoginSuccess(true);
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
       if (isLogin) {
-        navigate('/face'); // <-- redirect after login
+        navigate('/face');
       }
-
     } else {
       setLoginSuccess(false);
       setErrorMessage(data.message || 'Something went wrong. Try again.');
     }
   } catch (error) {
+    console.error('🔴 Network error:', error);
     setLoginSuccess(false);
-    setErrorMessage('Something went wrong. Try again.');
+    setErrorMessage('Network error: ' + error.message);
   } finally {
     setIsLoading(false);
   }

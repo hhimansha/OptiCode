@@ -1,72 +1,59 @@
-// client/src/components/CodingExerciseRealtime.jsx
 import React, { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { io } from "socket.io-client";
-import debounce from "lodash.debounce";
 
-const socket = io("http://localhost:4000"); // adjust URL/port if needed
+// Call FastAPI backend to generate task
+async function fetchTask(skillLevel) {
+  const res = await fetch("http://localhost:8000/generate-task", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ skill_level: skillLevel })
+  });
+  const data = await res.json();
+  return data.task;
+}
 
-export default function CodingExerciseRealtime({ studentId = "demo-student", 
-  question = { 
-    id: "demo-q", 
-    text: "Write a function to add two numbers", 
-    language: "javascript", 
-    starter: "function add(a, b) {\n  return a + b;\n}" 
-  } }) {
-  const [code, setCode] = useState(question.starter || "");
-  const [analysis, setAnalysis] = useState({ issues: [], weaknesses: [], hints: [], skill: null });
-  const questionId = question._id || question.id;
-  const skillRef = useRef("Beginner"); // you can keep student's skill here (update from server)
+export default function CodingExerciseAdaptive({ studentSkill = "Beginner" }) {
+  const [task, setTask] = useState(null);
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const taskIdRef = useRef(null);
 
   useEffect(() => {
-    // join room
-    if (studentId) socket.emit("join", { studentId });
-
-    socket.on("analysisResult", (data) => {
-      setAnalysis(data);
-      if (data.skill) skillRef.current = data.skill;
-    });
-
-    socket.on("analysisError", (err) => {
-      console.error("analysisError", err);
-    });
-
-    return () => {
-      socket.off("analysisResult");
-      socket.off("analysisError");
-    };
-  }, [studentId]);
-
-  // Debounced emit (700ms) — adjust if you want faster/slower
-  const debouncedEmit = useRef(
-    debounce((c) => {
-      socket.emit("analyze", {
-        studentId,
-        questionId,
-        code: c,
-        language: question.language || "javascript",
-        // optionally send last known skill for tailored hints
-        skill: skillRef.current
+    setLoading(true);
+    fetchTask(studentSkill)
+      .then((task) => {
+        setTask(task);
+        setCode(task.starter_code || "");
+        taskIdRef.current = task.title || "task-1";
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to fetch task");
+        setLoading(false);
       });
-    }, 700)
-  ).current;
+  }, [studentSkill]);
 
   function handleEditorChange(value) {
     setCode(value);
-    debouncedEmit(value);
   }
 
   function handleSubmit() {
-    // final submission should be implemented via separate REST or socket 'submit' event
-    socket.emit("submit", { studentId, questionId, code, language: question.language || "javascript" });
+    console.log("Submitting code for task:", taskIdRef.current);
+    console.log(code);
   }
+
+  if (loading) return <div>Loading adaptive task...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div>
-      <h3>{question.text || question.title}</h3>
+      <h3>{task.title}</h3>
+      <p>{task.description}</p>
       <Editor
         height="360px"
-        defaultLanguage={question.language || "javascript"}
+        defaultLanguage="python"
         value={code}
         onChange={handleEditorChange}
         options={{ minimap: { enabled: false }, fontSize: 14 }}
@@ -76,23 +63,18 @@ export default function CodingExerciseRealtime({ studentId = "demo-student",
         <button onClick={handleSubmit}>Submit</button>
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        <strong>Real-time hints (skill: {analysis.skill || skillRef.current})</strong>
-        <div style={{ marginTop: 8 }}>
-          {analysis.hints.map((h, i) => (
-            <div key={i} style={{ background: "#f6f8fa", padding: "8px", marginBottom: "6px", borderRadius: 6 }}>
-              {h}
-            </div>
-          ))}
-        </div>
-
-        <details style={{ marginTop: 8 }}>
-          <summary>Issues (raw)</summary>
+      {task.testcases && task.testcases.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <strong>Test Cases:</strong>
           <ul>
-            {analysis.issues.map((it, i) => <li key={i}>{it}</li>)}
+            {task.testcases.map((t, i) => (
+              <li key={i}>
+                <code>Input: {t.input} → Output: {t.output}</code>
+              </li>
+            ))}
           </ul>
-        </details>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
