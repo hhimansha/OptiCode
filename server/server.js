@@ -75,6 +75,36 @@ app.post('/api/predict-skill', async (req, res) => {
   }
 });
 
+//TASK GENERATOR (FastAPI 8000)
+
+app.post('/api/generate-task', async (req, res) => {
+  try {
+    console.log("📡 Forwarding to FastAPI Task Generator:", req.body);
+
+    const fastResponse = await fetch("http://127.0.0.1:8000/generate-task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+
+    if (!fastResponse.ok) {
+      throw new Error(`Task generator API returned ${fastResponse.status}`);
+    }
+
+    const result = await fastResponse.json();
+    console.log("✅ Task Generated:", result.generated_task);
+
+    res.json(result);
+
+  } catch (error) {
+    console.error("❌ Task Generator Error:", error);
+    res.status(500).json({
+      error: "Failed to connect to task generator",
+      details: error.message
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

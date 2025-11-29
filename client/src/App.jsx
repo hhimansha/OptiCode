@@ -4,6 +4,7 @@ import './App.css';
 import AssessmentUI from "./components/AssessmentUI";
 import CodingExerciseRealtime from "./components/CodingExerciseRealtime";
 import Form from "./Login_signup/Form";
+import TaskEditor from "./components/TaskEditor";
 
 function AssessmentPage() {
   const [result, setResult] = useState(null);
@@ -30,6 +31,46 @@ function AssessmentPage() {
     } catch (err) {
       console.error("Error calling API:", err);
       alert("Failed to predict - check if Node.js server is running on port 5000");
+    }
+  };
+
+  const mapSkillToLevel = (skillLabel) => {
+    switch (skillLabel) {
+      case "Beginner": return 1;
+      case "Intermediate": return 3;
+      case "Advanced": return 5;
+      default: return 3;
+    }
+  };
+
+  const handleStartExercise = async () => {
+    try {
+      const numericSkill = mapSkillToLevel(result.skill_level);
+
+      console.log("📡 Requesting task for skill:", numericSkill);
+
+      const response = await fetch("http://localhost:5000/api/generate-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_skill: numericSkill }),
+      });
+
+      const taskData = await response.json();
+      console.log("✅ Generated Task:", taskData);
+
+      navigate("/exercise", {
+        state: {
+          skillLevel: result.skill_level,
+          numericSkill,
+          generatedTask: taskData.generated_task,
+          referenceTask: taskData.reference_task,
+          referenceConcept: taskData.reference_concept,
+        },
+      });
+
+    } catch (err) {
+      console.error("❌ Error starting exercise:", err);
+      alert("Failed to generate task. Check Node + FastAPI + Gemini.");
     }
   };
 
@@ -66,9 +107,12 @@ function AssessmentPage() {
            </ul>
 
 
-          <button onClick={() => navigate("/exercise")}>
+          <button onClick={handleStartExercise}>
             Start Coding Exercise →
           </button>
+
+
+
         </div>
       )}
     </div>
@@ -81,7 +125,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Form />} />
         <Route path="/assessment" element={<AssessmentPage />} />
-        <Route path="/exercise" element={<CodingExerciseRealtime />} />
+        <Route path="/exercise" element={<TaskEditor />} />
         <Route path="/face" element={<AssessmentPage />} />
       </Routes>
     </BrowserRouter>

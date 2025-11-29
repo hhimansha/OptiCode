@@ -1,6 +1,6 @@
 fastapi
-uvicorn[standard]
-pandas
+uvicorn
+pydantic
+google-generativeai
 python-dotenv
 requests
-python-multipart
