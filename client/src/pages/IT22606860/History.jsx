@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrash, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import { getHistory, deleteHistory, clearAllHistory } from '../services/api';
-import CodeEditor from '../components/CodeEditor';
+import { getHistory, deleteHistory, clearAllHistory } from '../../services/api';
+import CodeEditor from '../../components/CodeEditor';
+import '../../styles/History.css';
 
 const History = () => {
   const [history, setHistory] = useState([]);
@@ -102,8 +103,8 @@ const History = () => {
           <>
             <div className="history-list">
               {history.map((item) => (
-                <div 
-                  key={item._id} 
+                <div
+                  key={item._id}
                   className={`history-item ${selectedItem?._id === item._id ? 'active' : ''}`}
                   onClick={() => setSelectedItem(item)}
                 >
@@ -120,7 +121,7 @@ const History = () => {
                       </span>
                     )}
                     <div className="history-actions">
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedItem(item);
@@ -129,7 +130,7 @@ const History = () => {
                       >
                         <FaEye />
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(item._id);
@@ -146,7 +147,7 @@ const History = () => {
 
             {pagination && pagination.pages > 1 && (
               <div className="pagination">
-                <button 
+                <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
                   className="pagination-button"
@@ -156,7 +157,7 @@ const History = () => {
                 <span className="pagination-info">
                   Page {page} of {pagination.pages}
                 </span>
-                <button 
+                <button
                   onClick={() => setPage(page + 1)}
                   disabled={page === pagination.pages}
                   className="pagination-button"
@@ -174,7 +175,7 @@ const History = () => {
                   <p><strong>Language:</strong> {selectedItem.language}</p>
                   <p><strong>Date:</strong> {formatDate(selectedItem.createdAt)}</p>
                 </div>
-                
+
                 <div className="code-comparison">
                   <div className="code-section">
                     <h3>Original Code</h3>
@@ -185,7 +186,7 @@ const History = () => {
                       height="300px"
                     />
                   </div>
-                  
+
                   <div className="code-section">
                     <h3>Refactored Code</h3>
                     <CodeEditor
