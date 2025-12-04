@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { connectDB } from './Config/db.js';
 import userRoutes from './routers/Userrouter.js';
+import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
+import livekitRouter from './routers/livekitRouter.js';
 
 dotenv.config();
 
@@ -29,6 +31,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/ai-interview', Ai_interviewrouter);
+
+
+app.use('/api/livekit', livekitRouter);
 
 // ✅ Start server
 app.listen(PORT, () => {
