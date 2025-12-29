@@ -6,6 +6,8 @@ import bodyParser from 'body-parser';
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Userrouter from './routes/Userrouter.js';
+import taskRoutes from "./routes/taskRoutes.js";
+
 
 dotenv.config();
 
@@ -26,19 +28,21 @@ app.use(cookieParser());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URL)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.log("❌ Mongo Error:", err));
+  .then(() => console.log(" MongoDB Connected"))
+  .catch(err => console.log(" Mongo Error:", err));
 
   
   // ADD DEBUG ROUTE FIRST
 app.get('/api/debug', (req, res) => {
-  console.log('🟡 Debug route hit');
+  console.log(' Debug route hit');
   res.json({ message: 'Debug route works!' });
 });
 
-console.log('🟡 Registering user routes...');
+console.log(' Registering user routes...');
 // ADD THIS LINE - Register user routes
 app.use('/api/users', Userrouter);
+app.use("/api/tasks", taskRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('OptiCode Server is running');
@@ -48,10 +52,10 @@ app.get('/', (req, res) => {
 // Endpoint to forward quiz answers to the Python ML API
 app.post('/api/predict-skill', async (req, res) => {
   try {
-    console.log('📡 Received quiz request at /api/predict-skill');
+    console.log(' Received quiz request at /api/predict-skill');
     console.log('Request body:', req.body);
     
-    const flaskResponse = await fetch('http://127.0.0.1:8001/api/predict-skill', {
+    const flaskResponse = await fetch(`${process.env.SKILL_MODEL_URL}/api/predict-skill`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body)
@@ -64,10 +68,10 @@ app.post('/api/predict-skill', async (req, res) => {
     }
     
     const result = await flaskResponse.json();
-    console.log('✅ Prediction successful:', result.skill_level);
+    console.log(' Prediction successful:', result.skill_level);
     res.json(result);
   } catch (error) {
-    console.error('❌ Error in /api/predict-skill:', error);
+    console.error(' Error in /api/predict-skill:', error);
     res.status(500).json({ 
       error: 'Failed to connect to skill model',
       details: error.message 
@@ -77,33 +81,7 @@ app.post('/api/predict-skill', async (req, res) => {
 
 //TASK GENERATOR (FastAPI 8000)
 
-app.post('/api/generate-task', async (req, res) => {
-  try {
-    console.log("📡 Forwarding to FastAPI Task Generator:", req.body);
 
-    const fastResponse = await fetch("http://127.0.0.1:8000/generate-task", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body)
-    });
-
-    if (!fastResponse.ok) {
-      throw new Error(`Task generator API returned ${fastResponse.status}`);
-    }
-
-    const result = await fastResponse.json();
-    console.log("✅ Task Generated:", result.generated_task);
-
-    res.json(result);
-
-  } catch (error) {
-    console.error("❌ Task Generator Error:", error);
-    res.status(500).json({
-      error: "Failed to connect to task generator",
-      details: error.message
-    });
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

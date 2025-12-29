@@ -14,7 +14,7 @@ function AssessmentPage() {
     try {
       console.log('Sending quiz answers to proxy:', quizAnswers);
       
-      // ✅ USING PROXY ROUTE (not direct Flask)
+      //  USING PROXY ROUTE (not direct Flask)
       const response = await fetch("http://localhost:5000/api/predict-skill", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
@@ -47,16 +47,21 @@ function AssessmentPage() {
     try {
       const numericSkill = mapSkillToLevel(result.skill_level);
 
-      console.log("📡 Requesting task for skill:", numericSkill);
+      console.log(" Requesting task for skill:", numericSkill);
 
-      const response = await fetch("http://localhost:5000/api/generate-task", {
+      const response = await fetch("http://localhost:5000/api/tasks/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ student_skill: numericSkill }),
       });
 
       const taskData = await response.json();
-      console.log("✅ Generated Task:", taskData);
+      console.log(" Generated Task:", taskData);
+
+      sessionStorage.setItem(
+      "generatedTask",
+      taskData.generated_task
+      );
 
       navigate("/exercise", {
         state: {
@@ -69,7 +74,7 @@ function AssessmentPage() {
       });
 
     } catch (err) {
-      console.error("❌ Error starting exercise:", err);
+      console.error(" Error starting exercise:", err);
       alert("Failed to generate task. Check Node + FastAPI + Gemini.");
     }
   };

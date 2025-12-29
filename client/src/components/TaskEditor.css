@@ -1,0 +1,68 @@
+.task-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #111827;
+}
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.skill {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.skill span {
+  font-weight: bold;
+  color: #22c55e;
+}
+
+.task-box {
+  background: #111827;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  width: 800px;
+}
+
+.task-text {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #d1d5db;
+}
+
+.solution-title {
+  margin-bottom: 10px;
+}
+
+.editor-wrapper {
+  border: 1px solid #1f2933;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.submit-btn {
+  display: block;
+  margin: 0 auto;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #1d4ed8;
+}
+
+

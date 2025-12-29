@@ -1,102 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import MonacoEditor from '@monaco-editor/react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
+import Editor from "@monaco-editor/react";
+import "./TaskEditor.css";
+import { useState, useEffect } from "react";
 
-const TaskEditor = () => {
+export default function TaskEditor() {
   const location = useLocation();
-  const {
-    generatedTask,
-    referenceTask,
-    referenceConcept,
-    skillLevel
-  } = location.state || {};
 
-  const [task, setTask] = useState(generatedTask || "");
-  const [reference, setReference] = useState(referenceTask || "");
-  const [studentCode, setStudentCode] = useState("# Write your Python solution here\n");
+  const [generatedTask, setGeneratedTask] = useState("");
+  const [skillLevel, setSkillLevel] = useState("Unknown");
+  const [code, setCode] = useState("# Write your Python solution here\n");
 
+  // ✅ LOAD TASK SAFELY AFTER RENDER
   useEffect(() => {
-    // ✅ If task already passed from AssessmentPage, do NOT call API again
-    if (generatedTask) {
-      console.log("✅ Using task from navigation state");
-      return;
-    }
-  }, [generatedTask]);
+    if (location.state?.generatedTask) {
+      setGeneratedTask(location.state.generatedTask);
+      setSkillLevel(location.state.skillLevel);
 
-  const handleEditorChange = (value) => {
-    setStudentCode(value);
-  };
+      // persist backup
+      sessionStorage.setItem(
+        "generatedTask",
+        location.state.generatedTask
+      );
+    } else {
+      const storedTask = sessionStorage.getItem("generatedTask");
+      if (storedTask) {
+        setGeneratedTask(storedTask);
+      }
+    }
+  }, [location.state]);
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "auto" }}>
-      <h1>Adaptive Coding Task</h1>
-      {skillLevel && <p><b>Predicted Skill:</b> {skillLevel}</p>}
-      {referenceConcept && <p><b>Concept:</b> {referenceConcept}</p>}
+    <div className="task-container">
+      <h1 className="title">Adaptive Coding Task</h1>
 
-      {reference && (
-        <>
-          <h3>Reference Example</h3>
-          <div
-            style={{
-              background: "#222",
-              color: "#ccc",
-              padding: "12px",
-              borderRadius: "8px",
-              marginBottom: "20px",
-              fontFamily: "monospace",
-              whiteSpace: "pre-wrap"
-            }}
-          >
-            {reference}
-          </div>
-        </>
-      )}
+      <p className="skill">
+        Predicted Skill: <span>{skillLevel}</span>
+      </p>
 
-      <h2>Your Task</h2>
-      <div
-        style={{
-          background: "#111",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-          fontSize: "18px",
-          fontWeight: "bold",
-          whiteSpace: "pre-wrap"
-        }}
-      >
-        {task || "⚠️ No task generated"}
+      <div className="task-box">
+        <h3>Your Task</h3>
+        <p className="task-text">
+          {generatedTask || "Task generation failed"}
+        </p>
       </div>
 
-      <h2>Your Solution</h2>
-      <MonacoEditor
-        height="500px"
-        width="100%"
-        defaultLanguage="python"
-        value={studentCode}
-        onChange={handleEditorChange}
-        theme="vs-dark"
-        options={{
-          automaticLayout: true,
-          fontSize: 16,
-          minimap: { enabled: false }
-        }}
-      />
+      <h3 className="solution-title">Your Solution</h3>
 
-      <button
-        style={{
-          marginTop: "15px",
-          padding: "10px 20px",
-          fontSize: "18px",
-          borderRadius: "6px",
-          cursor: "pointer"
-        }}
-        onClick={() => alert("Submit evaluation coming next")}
-      >
+      <div className="editor-wrapper">
+        <Editor
+          height="400px"
+          language="python"
+          theme="vs-dark"
+          value={code}
+          onChange={(value) => setCode(value)}
+          options={{
+            fontSize: 16,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+          }}
+        />
+      </div>
+
+      <button className="submit-btn">
         Submit Code
       </button>
     </div>
   );
-};
-
-export default TaskEditor;
+}
