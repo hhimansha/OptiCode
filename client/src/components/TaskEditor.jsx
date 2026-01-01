@@ -10,7 +10,7 @@ export default function TaskEditor() {
   const [skillLevel, setSkillLevel] = useState("Unknown");
   const [code, setCode] = useState("# Write your Python solution here\n");
 
-  // ✅ LOAD TASK SAFELY AFTER RENDER
+  //  LOAD TASK SAFELY AFTER RENDER
   useEffect(() => {
     if (location.state?.generatedTask) {
       setGeneratedTask(location.state.generatedTask);
