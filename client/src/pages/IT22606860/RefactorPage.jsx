@@ -1,5 +1,5 @@
 // ============================================
-// client/src/pages/IT22606860/RefactorPage.jsx (Tailwind)
+// client/src/pages/IT22606860/RefactorPage.jsx (FIXED)
 // ============================================
 import React, { useState } from 'react';
 import { FaMagic, FaCopy, FaDownload, FaTrash } from 'react-icons/fa';
@@ -12,7 +12,7 @@ const RefactorPage = () => {
     const [instruction, setInstruction] = useState('Refactor this code to improve readability and efficiency');
     const [inputCode, setInputCode] = useState('');
     const [refactoredCode, setRefactoredCode] = useState('');
-    const [language, setLanguage] = useState('javascript');
+    const [language, setLanguage] = useState('python'); // ✅ CHANGED: Default to 'python'
     const [loading, setLoading] = useState(false);
     const [processingTime, setProcessingTime] = useState(null);
 
@@ -31,7 +31,7 @@ const RefactorPage = () => {
 
             if (response.success) {
                 setRefactoredCode(response.refactored_code);
-                // setProcessingTime(response.data.processingTime); // Backend might not return this yet
+                setProcessingTime(response.processing_time); // ✅ CHANGED: Use processing_time
                 toast.success('Code refactored successfully!');
             } else {
                 toast.error(response.message || 'Failed to refactor code');
@@ -77,7 +77,7 @@ const RefactorPage = () => {
                         Code Refactoring
                     </h1>
                     <p className="text-gray-400 text-lg">
-                        Transform your code with AI-powered refactoring
+                        Transform your Python code with AI-powered refactoring
                     </p>
                 </div>
 
@@ -98,7 +98,7 @@ const RefactorPage = () => {
                             />
                         </div>
 
-                        {/* Language Select */}
+                        {/* Language Select - ✅ UPDATED: Only Python shown */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-300 mb-2">
                                 Programming Language
@@ -108,14 +108,18 @@ const RefactorPage = () => {
                                 onChange={(e) => setLanguage(e.target.value)}
                                 className="select-primary w-full"
                             >
-                                <option value="javascript">JavaScript</option>
                                 <option value="python">Python</option>
+                                {/* ✅ Other languages commented out - only Python supported */}
+                                {/* <option value="javascript">JavaScript</option>
                                 <option value="java">Java</option>
                                 <option value="cpp">C++</option>
                                 <option value="typescript">TypeScript</option>
                                 <option value="go">Go</option>
-                                <option value="rust">Rust</option>
+                                <option value="rust">Rust</option> */}
                             </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Currently supports Python only
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -233,7 +237,7 @@ const RefactorPage = () => {
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-blue-400 mt-1">•</span>
-                                <span>Select the correct programming language for accurate syntax</span>
+                                <span>Currently supports Python code only</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-blue-400 mt-1">•</span>
