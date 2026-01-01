@@ -9,6 +9,14 @@ import Userrouter from './routes/Userrouter.js';
 import taskRoutes from "./routes/taskRoutes.js";
 
 
+// 🔥 Keep HF Space awake (prevents cold start)
+setInterval(() => {
+  fetch("https://ashani-shashikala-qwen-lora-task-generator.hf.space/")
+    .catch(() => {});
+}, 5 * 60 * 1000); // every 5 minutes
+
+
+
 dotenv.config();
 
 const app = express();
