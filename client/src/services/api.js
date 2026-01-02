@@ -1,6 +1,6 @@
 // ============================================
 // OPTICODE/client/src/services/api.js
-// Combined API service - Express Backend + Python ML Service
+// Combined API service - Express Backend + Python ML Service + Compiler
 // ============================================
 
 import axios from 'axios';
@@ -81,16 +81,45 @@ export const refactorCode = async (code, instruction, language) => {
         return response.data;
     } catch (error) {
         if (error.response) {
-            // Server returned an error
             throw new Error(error.response.data.message || 'Failed to refactor code');
         } else if (error.request) {
-            // Network error
             throw new Error('Cannot connect to refactoring service. Make sure the Python API is running on ' + ML_API_URL);
         } else {
             throw new Error(error.message || 'An unexpected error occurred');
         }
     }
 };
+
+// ============================================
+// EXECUTE CODE ENDPOINT (Python ML Service)
+// ============================================
+
+/**
+ * Execute Python code and get output
+ * @param {string} code - Python code to execute
+ * @returns {Promise} Response with execution output/error
+ */
+export const executeCode = async (code) => {
+    try {
+        const response = await mlApi.post('/api/execute', {
+            code: code
+        });
+
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw new Error(error.response.data.message || 'Failed to execute code');
+        } else if (error.request) {
+            throw new Error('Cannot connect to execution service. Make sure the Python API is running on ' + ML_API_URL);
+        } else {
+            throw new Error(error.message || 'An unexpected error occurred');
+        }
+    }
+};
+
+// ============================================
+// ML SERVICE HEALTH CHECK
+// ============================================
 
 /**
  * Check if ML service is healthy
