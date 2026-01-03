@@ -5,6 +5,7 @@ import Form from './Login_signup/Form'
 import Chatbot from './AI Interview/Chatbot'
 //import AIInterview from './component/AIInterview'
 import LiveInterview from './component/IT22639226/LiveKitRoom'
+import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/chat" element={<Chatbot />} />
       
         <Route path="/livekit"element={<LiveInterview/>}/>  
+        <Route path="/interview" element={<Interviewquestion/>} />
       </Routes>
     </>
   )
