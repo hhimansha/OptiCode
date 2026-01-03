@@ -1,0 +1,107 @@
+/**
+ * Concept Graph Styles
+ * Student: IT22601360
+ */
+
+.concept-graph {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.concept-graph-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+}
+
+.concept-graph svg {
+    display: block;
+}
+
+/* Nodes */
+.concept-graph .nodes circle {
+    transition: all 0.2s;
+}
+
+.concept-graph .nodes circle:hover {
+    filter: brightness(1.1);
+    stroke-width: 3px;
+}
+
+.concept-graph .nodes text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    pointer-events: none;
+}
+
+/* Links */
+.concept-graph .links line {
+    stroke-linecap: round;
+}
+
+/* Tooltip */
+.graph-tooltip {
+    position: absolute;
+    padding: 10px 14px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 100;
+    max-width: 200px;
+}
+
+.graph-tooltip strong {
+    display: block;
+    font-size: 0.875rem;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.tooltip-category {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: capitalize;
+    margin-bottom: 4px;
+}
+
+.tooltip-confidence {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+/* Legend */
+.graph-legend {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
