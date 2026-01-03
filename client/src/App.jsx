@@ -1,10 +1,12 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
-import Face from './AI Interview/Face'
-import Form from './Login_signup/Form'
+
 import Chatbot from './AI Interview/Chatbot'
 //import AIInterview from './component/AIInterview'
 import LiveInterview from './component/IT22639226/LiveKitRoom'
+import Face from './modules/AI Interview/Face'
+
+import Form from './pages/Login_signup/Form'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 const App = () => {
