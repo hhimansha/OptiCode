@@ -5,7 +5,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/IT22606860/Home'
 import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
-import Face from './modules/AI Interview/Face'
+import Face from './modules/AI Interview/Face.jsx'
 import Form from './pages/Login_signup/Form'
 
 // Components
