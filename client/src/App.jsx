@@ -67,9 +67,11 @@ function AssessmentPage() {
         state: {
           skillLevel: result.skill_level,
           numericSkill,
-          generatedTask: taskData.generated_task,
-          referenceTask: taskData.reference_task,
-          referenceConcept: taskData.reference_concept,
+          //generatedTask: taskData.generated_task,
+          //referenceTask: taskData.reference_task,
+          //referenceConcept: taskData.reference_concept,
+          confidence: result.confidence,
+          categoryScores: result.category_scores,
         },
       });
 
