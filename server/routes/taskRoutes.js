@@ -5,112 +5,119 @@ const router = express.Router();
 
 /**
  * POST /api/tasks/generate
- * Body: { student_skill, confidence, categoryScores }
+ * Body: { student_skill }
  */
 router.post("/generate", async (req, res) => {
   try {
-    const { student_skill, confidence, categoryScores } = req.body;
+    const { student_skill } = req.body;
 
     if (!student_skill) {
       return res.status(400).json({ error: "student_skill is required" });
     }
 
-    //  Compute weakest area PER REQUEST
-    let weakestArea = "general problem solving";
-
-    if (categoryScores && typeof categoryScores === "object") {
-      weakestArea = Object.entries(categoryScores)
-        .sort((a, b) => a[1] - b[1])[0][0];
-    }
-
+    // ---------- PROMPT ----------
     let prompt = "";
 
     if (student_skill <= 2) {
       prompt = `
-You are an adaptive coding tutor.
+Generate ONE simple Python coding task for a BEGINNER student.
 
-Student profile:
-- Level: Beginner
-- Confidence: ${confidence}%
-- Weak area: ${weakestArea}
+Rules:
+- Describe the task in plain English
+- Do NOT include code
+- Do NOT include function definitions
+- Use print, variables, loops, or simple if conditions
 
-Generate ONE simple Python task that helps improve the weak area.
-Use print, variables, loops, or simple conditions.
-
-Return ONLY one line starting with "Task:".
+Output format:
+Task: <one clear sentence>.
 `;
     } else if (student_skill <= 4) {
       prompt = `
-You are an adaptive coding tutor.
+Generate ONE Python coding task for an INTERMEDIATE student.
 
-Student profile:
-- Level: Intermediate
-- Confidence: ${confidence}%
-- Weak area: ${weakestArea}
+Rules:
+- Describe the task in plain English
+- Do NOT include code
+- Do NOT include function definitions
+- The task must require writing a function
+- The task must involve a loop or conditional logic
 
-Generate ONE Python task that focuses on improving this weak area.
-Functions and loops allowed.
-No advanced algorithms.
-
-Return ONLY one line starting with "Task:".
+Output format:
+Task: <one clear sentence>.
 `;
     } else {
       prompt = `
-You are an adaptive coding tutor.
+Generate ONE challenging Python coding task for an ADVANCED student.
 
-Student profile:
-- Level: Advanced
-- Confidence: ${confidence}%
-- Weak area: ${weakestArea}
+Rules:
+- Describe the task in plain English
+- Do NOT include code
+- Do NOT include function definitions
+- The task must involve algorithms, recursion, or data structures
 
-Generate ONE challenging Python task that targets this weak area.
-Algorithms or data structures allowed.
-
-Return ONLY one line starting with "Task:".
+Output format:
+Task: <one clear sentence>.
 `;
     }
 
     const HF_API_URL =
       "https://ashani-shashikala-qwen-lora-task-generator-own.hf.space/generate";
 
-    const response = await fetch(HF_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
+    // ---------- MULTI-SAMPLE GENERATION ----------
+    const NUM_TRIES = 3;
+    let finalTask = null;
 
-    if (!response.ok) {
-      throw new Error(`HF API error ${response.status}`);
-    }
+    const forbidden = [
+      "generate one",
+      "adaptive coding tutor",
+      "student profile",
+      "rules:",
+      "output format",
+      "beginner student",
+      "intermediate student",
+      "advanced student",
+      "describe the task"
+    ];
 
-    const data = await response.json();
-    const fullText = data.response || "";
+    for (let i = 0; i < NUM_TRIES; i++) {
+      const response = await fetch(HF_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
 
-    //  Extract task safely
-    let taskLine = null;
+      if (!response.ok) continue;
 
-    const inlineMatch = fullText.match(/Task:\s*(.+)/i);
-    if (inlineMatch && inlineMatch[1].trim().length > 3) {
-      taskLine = "Task: " + inlineMatch[1].trim();
-    }
+      const data = await response.json();
+      const raw = (data.response || "")
+        .replace(/\n+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-    if (!taskLine) {
-      const lines = fullText
-        .split("\n")
-        .map(l => l.trim())
-        .filter(Boolean);
+      // Extract first meaningful sentence
+      const match =
+        raw.match(/Task:\s*([A-Z][^.]{20,}\.)/) ||
+        raw.match(/([A-Z][^.]{20,}\.)/);
 
-      const taskIndex = lines.findIndex(l => l.toLowerCase() === "task:");
-      if (taskIndex !== -1 && lines[taskIndex + 1]) {
-        taskLine = "Task: " + lines[taskIndex + 1];
+      if (!match) continue;
+
+      const candidate = match[0].startsWith("Task:")
+        ? match[0]
+        : "Task: " + match[0];
+
+      if (!forbidden.some(f => candidate.toLowerCase().includes(f))) {
+        finalTask = candidate;
+        break; // ✅ stop at first valid task
       }
     }
 
-    if (!taskLine) {
-      taskLine = "Task: Write a simple Python program related to this skill level.";
+    // ---------- LAST-RESORT FALLBACK (VERY RARE) ----------
+    if (!finalTask) {
+      finalTask =
+        "Task: Write a Python program suitable for your current skill level that solves a real-world problem.";
     }
 
-    res.json({ generated_task: taskLine });
+    res.json({ generated_task: finalTask });
 
   } catch (error) {
     console.error("Task generation failed:", error);
