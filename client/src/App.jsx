@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import './App.css';
-import AssessmentUI from "./components/IT22604194/AssessmentUI";
+import AssessmentUI from "./component/IT22604194/AssessmentUI";
 import Form from "./Login_signup/Form";
-import TaskEditor from "./components/IT22604194/TaskEditor";
+import TaskEditor from "./component/IT22604194/TaskEditor";
 import Chatbot from './AI Interview/Chatbot';
 import LiveInterview from './component/IT22639226/LiveKitRoom';
 import Face from './modules/AI Interview/Face';
