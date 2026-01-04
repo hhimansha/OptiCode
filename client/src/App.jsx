@@ -4,6 +4,9 @@ import './App.css';
 import AssessmentUI from "./components/IT22604194/AssessmentUI";
 import Form from "./Login_signup/Form";
 import TaskEditor from "./components/IT22604194/TaskEditor";
+import Chatbot from './AI Interview/Chatbot';
+import LiveInterview from './component/IT22639226/LiveKitRoom';
+import Face from './modules/AI Interview/Face';
 
 function AssessmentPage() {
   const [result, setResult] = useState(null);
@@ -12,7 +15,7 @@ function AssessmentPage() {
   const handlePredict = async (quizAnswers) => {
     try {
       console.log('Sending quiz answers to proxy:', quizAnswers);
-      
+
       //  USING PROXY ROUTE (not direct Flask)
       const response = await fetch("http://localhost:5000/api/predict-skill", {
         method: "POST",
@@ -58,8 +61,8 @@ function AssessmentPage() {
       console.log(" Generated Task:", taskData);
 
       sessionStorage.setItem(
-      "generatedTask",
-      taskData.generated_task
+        "generatedTask",
+        taskData.generated_task
       );
 
       navigate("/exercise", {
@@ -93,24 +96,24 @@ function AssessmentPage() {
 
           <h4>Category Scores:</h4>
           <ul>
-          {Object.entries(result.category_scores).map(([key, value]) => (
-          <li key={key}>{key}: {value}</li>
-           ))}
+            {Object.entries(result.category_scores).map(([key, value]) => (
+              <li key={key}>{key}: {value}</li>
+            ))}
           </ul>
 
           <h4>Probabilities:</h4>
           <ul>
-          {Object.entries(result.probabilities).map(([key, value]) => (
-          <li key={key}>{key}: {value}</li>
-           ))}
+            {Object.entries(result.probabilities).map(([key, value]) => (
+              <li key={key}>{key}: {value}</li>
+            ))}
           </ul>
 
           <h4>Research Recommendations:</h4>
           <ul>
-          {result.research_analysis.research_recommendations.map((rec, index) => (
-          <li key={index}>{rec}</li>
-           ))}
-           </ul>
+            {result.research_analysis.research_recommendations.map((rec, index) => (
+              <li key={index}>{rec}</li>
+            ))}
+          </ul>
 
 
           <button onClick={handleStartExercise}>
@@ -132,7 +135,9 @@ export default function App() {
         <Route path="/" element={<Form />} />
         <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/exercise" element={<TaskEditor />} />
-        <Route path="/face" element={<AssessmentPage />} />
+        <Route path="/face" element={<Face />} />
+        <Route path="/chat" element={<Chatbot />} />
+        <Route path="/livekit" element={<LiveInterview />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,6 @@
 import validator from "validator";
-import User from "../model/UserModel.js";
+
+import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -10,9 +11,9 @@ export const register = async (req, res) => {
 
   if (!name || !email || !password) {
     console.log('🔴 Missing fields');
-    return res.status(400).json({ 
-      success: false, 
-      message: "Please enter all fields" 
+    return res.status(400).json({
+      success: false,
+      message: "Please enter all fields"
     });
   }
 
@@ -20,30 +21,30 @@ export const register = async (req, res) => {
     console.log('🟡 Checking email validity...');
     if (!validator.isEmail(email)) {
       console.log('🔴 Invalid email format');
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please enter a valid email" 
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email"
       });
     }
 
     console.log('🟡 Checking password length...');
     if (password.length < 8) {
       console.log('🔴 Password too short');
-      return res.status(400).json({ 
-        success: false, 
-        message: "Password must be at least 8 characters long" 
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long"
       });
     }
 
     console.log('🟡 Checking if user exists...');
     const existingUser = await User.findOne({ email });
     console.log('🟡 Existing user result:', existingUser);
-    
+
     if (existingUser) {
       console.log('🔴 User already exists');
-      return res.status(400).json({ 
-        success: false, 
-        message: "User already exists" 
+      return res.status(400).json({
+        success: false,
+        message: "User already exists"
       });
     }
 
@@ -61,18 +62,18 @@ export const register = async (req, res) => {
     console.log('🟡 Saving user to database...');
     await newUser.save();
     console.log('🟢 User registered successfully:', newUser.email);
-    
-    return res.status(201).json({ 
-      success: true, 
+
+    return res.status(201).json({
+      success: true,
       message: "User registered successfully",
       user: { id: newUser._id, name: newUser.name, email: newUser.email }
     });
 
   } catch (error) {
     console.error('🔴 REGISTER ERROR:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Internal server error: " + error.message 
+    res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message
     });
   }
 };
@@ -84,9 +85,9 @@ export const login = async (req, res) => {
 
   if (!email || !password) {
     console.log('🔴 Missing fields');
-    return res.status(400).json({ 
-      success: false, 
-      message: "Please enter all fields" 
+    return res.status(400).json({
+      success: false,
+      message: "Please enter all fields"
     });
   }
 
@@ -94,24 +95,24 @@ export const login = async (req, res) => {
     console.log('🟡 Finding user...');
     const user = await User.findOne({ email });
     console.log('🟡 User found:', user ? 'Yes' : 'No');
-    
+
     if (!user) {
       console.log('🔴 User not found');
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid credentials" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials"
       });
     }
 
     console.log('🟡 Comparing passwords...');
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('🟡 Password match:', isMatch);
-    
+
     if (!isMatch) {
       console.log('🔴 Password mismatch');
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid credentials" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials"
       });
     }
 
@@ -139,9 +140,9 @@ export const login = async (req, res) => {
 
   } catch (error) {
     console.error('🔴 LOGIN ERROR:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Internal server error: " + error.message 
+    res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message
     });
   }
 };
