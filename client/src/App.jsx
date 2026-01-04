@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import './App.css';
-import AssessmentUI from "./components/AssessmentUI";
-import CodingExerciseRealtime from "./components/CodingExerciseRealtime";
+import AssessmentUI from "./components/IT22604194/AssessmentUI";
 import Form from "./Login_signup/Form";
-import TaskEditor from "./components/TaskEditor";
+import TaskEditor from "./components/IT22604194/TaskEditor";
 
 function AssessmentPage() {
   const [result, setResult] = useState(null);

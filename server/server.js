@@ -5,8 +5,8 @@ import fetch from 'node-fetch';
 import bodyParser from 'body-parser';
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Userrouter from './routes/Userrouter.js';
-import taskRoutes from "./routes/taskRoutes.js";
+import Userrouter from './routers/Userrouter.js';
+import taskRoutes from "./routers/IT22604194/taskRoutes.js";
 
 
 // 🔥 Keep HF Space awake (prevents cold start)
