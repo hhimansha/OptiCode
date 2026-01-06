@@ -73,7 +73,11 @@ app.use('/api/IT22606860/risks', riskRoutes);
 app.use('/api/IT22606860/best-practices', bestPracticesRoutes);
 app.use('/api/IT22606860/analytics', analyticsRoutes);
 
-// 404 handler for undefined routes
+// LiveKit and Question routes
+app.use('/api/livekit', livekitRouter);
+app.use('/api/question', Questionrouter);
+
+// 404 handler for undefined routes (must be after all other routes)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -86,10 +90,7 @@ app.use(errorHandler);
 
 // =============================
 //       START SERVER
-// =============================
-
-app.use('/api/livekit', livekitRouter);
-app.use('/api/question', Questionrouter);
+// ============================= 
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);

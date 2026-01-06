@@ -49,7 +49,7 @@ export default function VoiceAssistantPage() {
 
   return (
     <div className="min-h-screen bg-[#05080f] flex items-center justify-center overflow-hidden">
-      <style jsx global>{`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         
         * {

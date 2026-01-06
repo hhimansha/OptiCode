@@ -1,5 +1,5 @@
 // ============================================
-// client/src/pages/IT22606860/RefactorPage.jsx (COMPLETE)
+// client/src/pages/IT22606860/RefactorPage.jsx (FIXED)
 // ============================================
 import React, { useState } from 'react';
 import { 
@@ -45,6 +45,7 @@ const RefactorPage = () => {
     const [loading, setLoading] = useState(false);
     const [processingTime, setProcessingTime] = useState(null);
     const [historyId, setHistoryId] = useState(null);
+    const [refactorMethod, setRefactorMethod] = useState('');
 
     // Execution states
     const [executingInput, setExecutingInput] = useState(false);
@@ -98,20 +99,51 @@ const RefactorPage = () => {
             return;
         }
 
+        console.log('[REFACTOR] Starting refactoring process...');
+        console.log('[REFACTOR] Input code length:', inputCode.length);
+        
         setLoading(true);
         setRefactoredCode('');
         setProcessingTime(null);
         setRefactoredOutput('');
         setRefactoredError('');
+        setRefactorMethod('');
 
         try {
+            console.log('[REFACTOR] Calling refactorCode API...');
             const response = await refactorCode(inputCode, instruction, language);
+            
+            console.log('[REFACTOR] Full API response:', response);
+            console.log('[REFACTOR] Response success:', response.success);
+            console.log('[REFACTOR] Response refactored_code:', response.refactored_code);
+            console.log('[REFACTOR] Response method:', response.method);
 
             if (response.success) {
-                setRefactoredCode(response.refactored_code);
+                const refactored = response.refactored_code || '';
+                
+                console.log('[REFACTOR] Setting refactored code, length:', refactored.length);
+                
+                if (!refactored || refactored.trim() === '') {
+                    console.error('[REFACTOR] ERROR: Refactored code is empty!');
+                    toast.error('Refactoring returned empty code');
+                    return;
+                }
+
+                setRefactoredCode(refactored);
                 setProcessingTime(response.processing_time);
                 setHistoryId(response.historyId);
-                toast.success('Code refactored successfully!');
+                setRefactorMethod(response.method || 'unknown');
+                
+                // Show success message with method
+                const methodText = response.method === 'trained_model + deepseek' 
+                    ? ' (Enhanced with AI)' 
+                    : response.method === 'trained_model_only'
+                    ? ' (Pattern-based)'
+                    : '';
+                
+                toast.success(`Code refactored successfully${methodText}!`);
+
+                console.log('[REFACTOR] Refactoring complete!');
 
                 // Auto-analyze after refactoring
                 if (showRisks) {
@@ -121,10 +153,13 @@ const RefactorPage = () => {
                     analyzeCodeMetrics();
                 }
             } else {
+                console.error('[REFACTOR] Response success is false');
                 toast.error(response.message || 'Failed to refactor code');
             }
         } catch (error) {
-            console.error('Refactor error:', error);
+            console.error('[REFACTOR] Error caught:', error);
+            console.error('[REFACTOR] Error message:', error.message);
+            console.error('[REFACTOR] Error stack:', error.stack);
             toast.error(error.message || 'An error occurred during refactoring');
         } finally {
             setLoading(false);
@@ -355,6 +390,7 @@ const RefactorPage = () => {
         setMetricsComparison(null);
         setExplanation(null);
         setGeneratedTests('');
+        setRefactorMethod('');
         setInstruction('Refactor this code to improve readability and efficiency');
         toast.success('Cleared!');
     };
@@ -368,7 +404,7 @@ const RefactorPage = () => {
                         AI-Powered Code Refactoring
                     </h1>
                     <p className="text-white text-lg">
-                        Advanced Python code analysis, refactoring, and optimization
+                        Advanced Python code analysis, refactoring, and optimization with DeepSeek AI
                     </p>
                 </div>
 
@@ -400,7 +436,7 @@ const RefactorPage = () => {
                                 <option value="python">Python</option>
                             </select>
                             <p className="text-xs text-white mt-1">
-                                Currently supports Python only
+                                Enhanced with DeepSeek AI
                             </p>
                         </div>
                     </div>
@@ -559,6 +595,11 @@ const RefactorPage = () => {
                                                 {(processingTime / 1000).toFixed(2)}s
                                             </span>
                                         )}
+                                        {refactorMethod && (
+                                            <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
+                                                {refactorMethod === 'trained_model + deepseek' ? '🤖 AI Enhanced' : '📝 Pattern-based'}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex gap-2">
                                         <button
@@ -590,7 +631,7 @@ const RefactorPage = () => {
                                     </div>
                                 </div>
                                 {loading ? (
-                                    <LoadingSpinner message="Refactoring your code..." />
+                                    <LoadingSpinner message="Refactoring with AI... This may take 10-30 seconds" />
                                 ) : (
                                     <>
                                         <CodeEditor
@@ -638,7 +679,7 @@ const RefactorPage = () => {
                                 disabled={loading || !inputCode}
                             >
                                 <FaMagic className="text-xl text-white" />
-                                <span className="text-white">{loading ? 'Refactoring...' : 'Refactor Code'}</span>
+                                <span className="text-white">{loading ? 'Refactoring with AI...' : 'Refactor with AI'}</span>
                             </button>
 
                             <button
@@ -729,3 +770,4 @@ const RefactorPage = () => {
 };
 
 export default RefactorPage;
+
