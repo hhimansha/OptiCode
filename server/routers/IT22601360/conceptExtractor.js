@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
-const conceptExtractorController = require('../controllers/conceptExtractor.controller');
+const conceptExtractorController = require('../controllers/IT22601360/conceptExtractor');
 
 // Health check
 router.get('/health', conceptExtractorController.healthCheck);
