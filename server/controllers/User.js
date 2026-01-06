@@ -1,96 +1,129 @@
 import validator from "validator";
-import User from "../models/UserModel.js";
 
+import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
-  // 1️⃣ Basic field validation
+  console.log('🔵 REGISTER ATTEMPT:', { name, email, password: password ? '***' : 'missing' });
+
   if (!name || !email || !password) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please enter all fields" });
+    console.log('🔴 Missing fields');
+    return res.status(400).json({
+      success: false,
+      message: "Please enter all fields"
+    });
   }
 
   try {
-    // 2️⃣ Email validation logic was reversed in your version
+    console.log('🟡 Checking email validity...');
     if (!validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please enter a valid email" });
+      console.log('🔴 Invalid email format');
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email"
+      });
     }
 
-    // 3️⃣ Password length check
+    console.log('🟡 Checking password length...');
     if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Password must be at least 8 characters long" });
+      console.log('🔴 Password too short');
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long"
+      });
     }
 
-    // 4️⃣ Corrected method name: findOne (not findone)
+    console.log('🟡 Checking if user exists...');
     const existingUser = await User.findOne({ email });
+    console.log('🟡 Existing user result:', existingUser);
+
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+      console.log('🔴 User already exists');
+      return res.status(400).json({
+        success: false,
+        message: "User already exists"
+      });
     }
 
-    // 5️⃣ Hash password and save user
+    console.log('🟡 Hashing password...');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    console.log('🟡 Creating user...');
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
     });
 
+    console.log('🟡 Saving user to database...');
     await newUser.save();
+    console.log('🟢 User registered successfully:', newUser.email);
 
-    // 6️⃣ Return success response
-    return res
-      .status(201)
-      .json({ success: true, message: "User registered successfully" });
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      user: { id: newUser._id, name: newUser.name, email: newUser.email }
+    });
+
   } catch (error) {
-    console.error("Error in register controller:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    console.error('🔴 REGISTER ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message
+    });
   }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
+  console.log('🔵 LOGIN ATTEMPT:', { email, password: password ? '***' : 'missing' });
+
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please enter all fields" });
+    console.log('🔴 Missing fields');
+    return res.status(400).json({
+      success: false,
+      message: "Please enter all fields"
+    });
   }
 
   try {
+    console.log('🟡 Finding user...');
     const user = await User.findOne({ email });
+    console.log('🟡 User found:', user ? 'Yes' : 'No');
+
     if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+      console.log('🔴 User not found');
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
+    console.log('🟡 Comparing passwords...');
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('🟡 Password match:', isMatch);
+
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+      console.log('🔴 Password mismatch');
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
+    console.log('🟡 Generating token...');
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    console.log('🟡 Setting cookie...');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -98,7 +131,7 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    // ✅ Add success response here
+    console.log('🟢 Login successful');
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -106,10 +139,10 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in login controller:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    console.error('🔴 LOGIN ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message
+    });
   }
 };
-
