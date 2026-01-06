@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { connectDB } from './Config/db.js';
-import userRoutes from './routers/IT22606860/Userrouter.js';
+//import userRoutes from './routers/IT22606860/Userrouter.js';
 
 // IT22606860 Routes
 import refactorRoutes from './routers/IT22606860/refactorRoutes.js';
@@ -14,6 +14,10 @@ import bestPracticesRoutes from './routers/IT22606860/bestPracticesRoutes.js';
 import analyticsRoutes from './routers/IT22606860/analyticsRoutes.js';
 
 import errorHandler from './middlewares/errorHandler.js';
+import userRoutes from './routers/Userrouter.js';
+import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
+import livekitRouter from './routers/livekitRouter.js';
+import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
 dotenv.config();
 
@@ -56,6 +60,7 @@ app.get('/health', (req, res) => {
 
 // Existing user routes
 app.use('/api/users', userRoutes);
+app.use('/api/ai-interview', Ai_interviewrouter);
 
 // IT22606860 Routes - Primary endpoints
 app.use('/api/refactor', refactorRoutes);
@@ -82,6 +87,10 @@ app.use(errorHandler);
 // =============================
 //       START SERVER
 // =============================
+
+app.use('/api/livekit', livekitRouter);
+app.use('/api/question', Questionrouter);
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);

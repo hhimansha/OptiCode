@@ -1,12 +1,16 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 
+//import AIInterview from './component/AIInterview'
+import LiveInterview from './component/IT22639226/LiveKitRoom'
+import Face from './modules/AI Interview/Face'
+
 // Pages
 import Home from './pages/IT22606860/Home'
 import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
-import Face from './modules/AI Interview/Face.jsx'
 import Form from './pages/Login_signup/Form'
+import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 // Components
 import Header from './components/IT22606860/Header'
@@ -23,6 +27,9 @@ const App = () => {
           <Route path="/history" element={<History />} />
           <Route path="/face" element={<Face />} />
           <Route path="/login" element={<Form />} />
+          <Route path="/livekit"element={<LiveInterview/>}/>  
+        <Route path="/interview" element={<Interviewquestion/>} />
+          
         </Routes>
       </main>
       <Footer />
