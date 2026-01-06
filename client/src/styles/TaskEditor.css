@@ -22,7 +22,7 @@ body {
   margin-top: 0;
   margin-bottom: 6px;
   background: linear-gradient(90deg, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
+  
   -webkit-text-fill-color: transparent;
 }
 
