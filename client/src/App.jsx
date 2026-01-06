@@ -7,6 +7,7 @@ import LiveInterview from './component/IT22639226/LiveKitRoom'
 import Face from './modules/AI Interview/Face'
 
 import Form from './pages/Login_signup/Form'
+import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/chat" element={<Chatbot />} />
         <Route path="/code" element={<CodeConceptExtractor />} />
         <Route path="/livekit"element={<LiveInterview/>}/>  
+        <Route path="/interview" element={<Interviewquestion/>} />
       </Routes>
     </>
   )

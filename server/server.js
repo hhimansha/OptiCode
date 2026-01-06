@@ -6,6 +6,7 @@ import { connectDB } from './Config/db.js';
 import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 import livekitRouter from './routers/livekitRouter.js';
+import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
 dotenv.config();
 
@@ -35,7 +36,7 @@ app.use('/api/ai-interview', Ai_interviewrouter);
 
 
 app.use('/api/livekit', livekitRouter);
-
+app.use('/api/question', Questionrouter);
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
