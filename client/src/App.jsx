@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
-import CodeConceptExtractor from './components/IT22601360/CodeConceptExtractor'
+import CodeConceptExtractor from './component/IT22601360/CodeConceptExtractor'
 import Chatbot from './AI Interview/Chatbot'
 //import AIInterview from './component/AIInterview'
 import LiveInterview from './component/IT22639226/LiveKitRoom'
