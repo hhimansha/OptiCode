@@ -10,8 +10,7 @@ import AssessmentPage from "./component/IT22604194/AssessmentPage";
 import AssessmentResultPage from "./component/IT22604194/AssessmentResultPage";
 
 
-import Form from './pages/Login_signup/Form'
-import Interviewquestion from './component/IT22639226/Interviewquestion'
+import Interviewquestion from './component/IT22639226/Interviewquestion';
 
 const App = () => {
   return (

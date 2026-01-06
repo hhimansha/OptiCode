@@ -1,8 +1,6 @@
 
 import fetch from "node-fetch";
 
-
-import { connectDB } from "./Config/db.js";
 import Userrouter from "./routers/Userrouter.js";
 import taskRoutes from "./routers/IT22604194/taskRoutes.js";
 import livekitRouter from "./routers/livekitRouter.js";
@@ -11,13 +9,27 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectDB } from './Config/db.js';
-import userRoutes from './routers/Userrouter.js';
+
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
-import livekitRouter from './routers/livekitRouter.js';
 import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const result = dotenv.config({ path: path.join(__dirname, '.env') });
+
+if (result.error) {
+    console.warn('⚠️ .env file not found, using system environment variables');
+} else {
+    console.log('✅ .env file loaded successfully');
+}
+
+// Debug: Log LiveKit config status
+console.log('🔍 LiveKit Config Check:');
+console.log('LIVEKIT_URL:', process.env.LIVEKIT_URL ? '✅ Set' : '❌ Missing');
+console.log('LIVEKIT_API_KEY:', process.env.LIVEKIT_API_KEY ? '✅ Set' : '❌ Missing');
+console.log('LIVEKIT_API_SECRET:', process.env.LIVEKIT_API_SECRET ? '✅ Set' : '❌ Missing');
 
 // Connect to Database
 connectDB();

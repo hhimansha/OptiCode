@@ -1,9 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-5211f88a20da6b9f3c7ae697025092ad0cd45b96 refs/heads/Adaptive_learning_model
-383f164a63ca0f80bbb559ba867568284341a43a refs/heads/Development
-0f85a369c2e0145fea24ba49ce61ad92434b7d60 refs/heads/ai_interview
-2f27785beb8cef3f62dac1c11222d65cdc5fff92 refs/heads/main
-4a1e82fadec04866474e1949f6476686b2a8778b refs/heads/skill_level_detction_model
-84ffb16514d07a3805a68be73193cfffb2e0d758 refs/pull/1/head
-0f85a369c2e0145fea24ba49ce61ad92434b7d60 refs/pull/2/head
-383f164a63ca0f80bbb559ba867568284341a43a refs/pull/3/head
