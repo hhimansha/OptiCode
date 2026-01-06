@@ -1,0 +1,41 @@
+/* ===== Assessment Page ===== */
+
+.assessment-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+  color: #e5e7eb; /* light text */
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Titles */
+.assessment-container h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 6px;
+  color: #e0e7ff;
+}
+.title {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  
+  -webkit-text-fill-color: transparent;
+}
+
+
+.assessment-container h4 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #94a3b8;
+}
+
+/* Questions */
+.assessment-container p {
+  font-size: 16px;
+  margin-bottom:12px;
+
+}

@@ -1,0 +1,93 @@
+/**
+ * Code Editor Styles
+ * Student: IT22601360
+ */
+
+.code-editor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    background-color: #1e1e1e;
+    border-radius: 0;
+}
+
+/* Line Numbers */
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+    background-color: #252526;
+    color: #858585;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    user-select: none;
+    min-width: 50px;
+    text-align: right;
+}
+
+.line-number {
+    padding: 0 12px;
+    height: 21px;
+}
+
+/* Code Textarea */
+.code-textarea {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.code-textarea::placeholder {
+    color: #5a5a5a;
+}
+
+.code-textarea:focus {
+    outline: none;
+}
+
+/* Scrollbar Styling */
+.code-editor-container::-webkit-scrollbar,
+.code-textarea::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.code-editor-container::-webkit-scrollbar-track,
+.code-textarea::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.code-editor-container::-webkit-scrollbar-thumb,
+.code-textarea::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: 5px;
+}
+
+.code-editor-container::-webkit-scrollbar-thumb:hover,
+.code-textarea::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Language-specific styling hints */
+.language-python {
+    /* Python syntax hint */
+}
+
+.language-javascript {
+    /* JavaScript syntax hint */
+}
+
+.language-java {
+    /* Java syntax hint */
+}

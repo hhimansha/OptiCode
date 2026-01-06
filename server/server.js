@@ -1,8 +1,16 @@
-// server/server.js
+
+import fetch from "node-fetch";
+
+import Userrouter from "./routers/Userrouter.js";
+import taskRoutes from "./routers/IT22604194/taskRoutes.js";
+import livekitRouter from "./routers/livekitRouter.js";
+// import AiInterviewRouter from "./routers/Ai_interviewrouter.js"; // Uncomment if needed and export matches
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectDB } from './Config/db.js';
 //import userRoutes from './routers/IT22606860/Userrouter.js';
 
@@ -16,55 +24,62 @@ import analyticsRoutes from './routers/IT22606860/analyticsRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
-import livekitRouter from './routers/livekitRouter.js';
 import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const result = dotenv.config({ path: path.join(__dirname, '.env') });
 
-// ✅ Connect to MongoDB
-await connectDB();
+if (result.error) {
+    console.warn('⚠️ .env file not found, using system environment variables');
+} else {
+    console.log('✅ .env file loaded successfully');
+}
+
+// Debug: Log LiveKit config status
+console.log('🔍 LiveKit Config Check:');
+console.log('LIVEKIT_URL:', process.env.LIVEKIT_URL ? '✅ Set' : '❌ Missing');
+console.log('LIVEKIT_API_KEY:', process.env.LIVEKIT_API_KEY ? '✅ Set' : '❌ Missing');
+console.log('LIVEKIT_API_SECRET:', process.env.LIVEKIT_API_SECRET ? '✅ Set' : '❌ Missing');
+
+// Connect to Database
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// ✅ Allowed frontend origins
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
-
-// ✅ Middleware
-app.use(express.json({ limit: '50mb' }));  
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Middleware
+app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"], // Allow frontend
+    credentials: true
+}));
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+// Routes
+app.use("/api/users", Userrouter);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/livekit", livekitRouter);
 
-// =============================
-//          ROUTES
-// =============================
-app.get('/', (req, res) => {
-  res.send('OptiCode Server is running');
+// Mock route for predict-skill (Missing in conflict resolution)
+app.post("/api/predict-skill", async (req, res) => {
+    try {
+        console.log("Proxying skill prediction to Flask...");
+        
+        const response = await fetch("http://127.0.0.1:8001/api/predict-skill", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req.body),
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error("Skill model proxy error:", err);
+        res.status(500).json({ error: "Skill model unavailable" });
+    }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Server is healthy',
-    timestamp: new Date().toISOString()
-  });
-});
 
-// Existing user routes
-app.use('/api/users', userRoutes);
-app.use('/api/ai-interview', Ai_interviewrouter);
-
-// IT22606860 Routes - Primary endpoints
-app.use('/api/refactor', refactorRoutes);
-app.use('/api/history', historyRoutes);
+const PORT = process.env.PORT || 5000;
 
 // IT22606860 Routes - Additional feature endpoints
 app.use('/api/IT22606860/refactor', refactorRoutes);
@@ -93,10 +108,7 @@ app.use(errorHandler);
 // ============================= 
 // ✅ Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}`);
-  console.log(`🤖 ML Service: ${process.env.ML_API_URL || 'http://localhost:8000'}`);
+    console.log(`✅ Server running on port ${PORT}`);
 });
 
 // Graceful shutdown
