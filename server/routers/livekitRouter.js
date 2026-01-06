@@ -4,11 +4,11 @@ import { v4 as uuid } from 'uuid';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 
 const router = express.Router();
-const LiveKITHost = process.env.LIVEKIT_URL;
-const LivekitSecret = process.env.LIVEKIT_API_SECRET;
-const LiveKitAPi = process.env.LIVEKIT_API_KEY;
 
 const createAccessToken = async (userInfo, grant) => {
+  const LiveKitAPi = process.env.LIVEKIT_API_KEY;
+  const LivekitSecret = process.env.LIVEKIT_API_SECRET;
+  
   const accessToken = new AccessToken(LiveKitAPi, LivekitSecret, {
     identity: userInfo.identity,
     name: userInfo.name
@@ -30,8 +30,16 @@ router.get('/', async (req, res) => {
     
     const roomName = uuid();
     
+    const LiveKITHost = process.env.LIVEKIT_URL;
+    const LivekitSecret = process.env.LIVEKIT_API_SECRET;
+    const LiveKitAPi = process.env.LIVEKIT_API_KEY;
+    
     if (!LiveKITHost || !LivekitSecret || !LiveKitAPi) {
-      throw new Error('LiveKit configuration is missing');
+      const missing = [];
+      if (!LiveKITHost) missing.push('LIVEKIT_URL');
+      if (!LivekitSecret) missing.push('LIVEKIT_API_SECRET');
+      if (!LiveKitAPi) missing.push('LIVEKIT_API_KEY');
+      throw new Error(`LiveKit configuration is missing: ${missing.join(', ')}`);
     }
     
     const roomClient = new RoomServiceClient(LiveKITHost, LiveKitAPi, LivekitSecret);

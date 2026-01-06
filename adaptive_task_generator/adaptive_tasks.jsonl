@@ -1,0 +1,297 @@
+{"skill":1,"concept":"print","task":"Print the message Hello World.","starter_code":"print('Hello World')","expected_output":["Hello World"],"type":"practice"}
+{"skill":1,"concept":"print","task":"Print your name.","starter_code":"print('Ashani')","expected_output":["Ashani"],"type":"practice"}
+{"skill":1,"concept":"variables","task":"Store the number 10 in a variable and print it.","starter_code":"x=10\nprint(x)","expected_output":["10"],"type":"practice"}
+{"skill":1,"concept":"variables","task":"Store your age in a variable and print it.","starter_code":"age=22\nprint(age)","expected_output":["22"],"type":"practice"}
+{"skill":1,"concept":"loops","task":"Print the numbers 1 through 5 using a loop.","starter_code":"for i in range(1,6):\n    print(i)","expected_output":["1","2","3","4","5"],"type":"practice"}
+{"skill":1,"concept":"loops","task":"Print the word 'Hi' three times.","starter_code":"for i in range(3):\n    print('Hi')","expected_output":["Hi","Hi","Hi"],"type":"practice"}
+{"skill":1,"concept":"lists","task":"Print each item in the list [3, 5, 7].","starter_code":"nums=[3,5,7]\nfor n in nums:\n    print(n)","expected_output":["3","5","7"],"type":"practice"}
+{"skill":1,"concept":"lists","task":"Create a list of three fruits and print them.","starter_code":"fruits=['apple','banana','mango']\nfor f in fruits:\n    print(f)","expected_output":["apple","banana","mango"],"type":"practice"}
+{"skill":1,"concept":"strings","task":"Print the length of the string Python.","starter_code":"text='Python'\nprint(len(text))","expected_output":["6"],"type":"practice"}
+{"skill":1,"concept":"strings","task":"Print the first character of the string Hello.","starter_code":"s='Hello'\nprint(s[0])","expected_output":["H"],"type":"practice"}
+{"skill":1,"concept":"input","task":"Ask the user for their name and print it.","starter_code":"name=input()\nprint(name)","expected_output":[],"type":"practice"}
+{"skill":1,"concept":"input","task":"Ask the user for a number and print it.","starter_code":"num=input()\nprint(num)","expected_output":[],"type":"practice"}
+{"skill":1,"concept":"conditionals","task":"Check if 4 is even and print Even.","starter_code":"num=4\nif num%2==0:\n    print('Even')","expected_output":["Even"],"type":"practice"}
+{"skill":1,"concept":"conditionals","task":"Check if 7 is odd and print Odd.","starter_code":"num=7\nif num%2!=0:\n    print('Odd')","expected_output":["Odd"],"type":"practice"}
+{"skill":1,"concept":"boolean","task":"Print True if 5 is greater than 3.","starter_code":"print(5>3)","expected_output":["True"],"type":"practice"}
+{"skill":1,"concept":"boolean","task":"Print False if 2 equals 3.","starter_code":"print(2==3)","expected_output":["False"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the result of 3 + 5.","starter_code":"print(3+5)","expected_output":["8"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the result of 10 - 4.","starter_code":"print(10-4)","expected_output":["6"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the result of 6 * 3.","starter_code":"print(6*3)","expected_output":["18"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the result of 9 / 3.","starter_code":"print(9/3)","expected_output":["3.0"],"type":"practice"}
+{"skill":1,"concept":"loops","task":"Print numbers from 10 down to 1.","starter_code":"for i in range(10,0, -1):\n    print(i)","expected_output":["10","9","8","7","6","5","4","3","2","1"],"type":"practice"}
+{"skill":1,"concept":"loops","task":"Print only even numbers from 1 to 10.","starter_code":"for i in range(1,11):\n    if i%2==0:\n        print(i)","expected_output":["2","4","6","8","10"],"type":"practice"}
+{"skill":1,"concept":"loops","task":"Print only odd numbers from 1 to 10.","starter_code":"for i in range(1,11):\n    if i%2!=0:\n        print(i)","expected_output":["1","3","5","7","9"],"type":"practice"}
+{"skill":1,"concept":"lists","task":"Create a list of numbers and print the second item.","starter_code":"nums=[4,8,2]\nprint(nums[1])","expected_output":["8"],"type":"practice"}
+{"skill":1,"concept":"lists","task":"Print the length of the list [1,2,3,4].","starter_code":"nums=[1,2,3,4]\nprint(len(nums))","expected_output":["4"],"type":"practice"}
+{"skill":1,"concept":"lists","task":"Add 'orange' to a list of fruits and print the list.","starter_code":"fruits=['apple','banana']\nfruits.append('orange')\nprint(fruits)","expected_output":["['apple', 'banana', 'orange']"],"type":"practice"}
+{"skill":1,"concept":"strings","task":"Convert the string 'hello' to uppercase and print it.","starter_code":"s='hello'\nprint(s.upper())","expected_output":["HELLO"],"type":"practice"}
+{"skill":1,"concept":"strings","task":"Print the last character of the string 'Python'.","starter_code":"s='Python'\nprint(s[-1])","expected_output":["n"],"type":"practice"}
+{"skill":1,"concept":"strings","task":"Print 'Hello' and 'World' on the same line.","starter_code":"print('Hello','World')","expected_output":["Hello World"],"type":"practice"}
+{"skill":1,"concept":"variables","task":"Swap two variables and print them.","starter_code":"a=3\nb=5\na,b=b,a\nprint(a,b)","expected_output":["5 3"],"type":"practice"}
+{"skill":1,"concept":"variables","task":"Store two numbers and print their sum.","starter_code":"x=4\ny=7\nprint(x+y)","expected_output":["11"],"type":"practice"}
+{"skill":1,"concept":"conditionals","task":"If a number is greater than 10 print 'Big'.","starter_code":"num=12\nif num>10:\n    print('Big')","expected_output":["Big"],"type":"practice"}
+{"skill":1,"concept":"conditionals","task":"If a number is less than 5 print 'Small'.","starter_code":"num=3\nif num<5:\n    print('Small')","expected_output":["Small"],"type":"practice"}
+{"skill":1,"concept":"boolean","task":"Print the result of 7 > 10.","starter_code":"print(7>10)","expected_output":["False"],"type":"practice"}
+{"skill":1,"concept":"boolean","task":"Print the result of 2 < 9.","starter_code":"print(2<9)","expected_output":["True"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the result of 2 * 8.","starter_code":"print(2*8)","expected_output":["16"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print the remainder when 10 is divided by 3.","starter_code":"print(10%3)","expected_output":["1"],"type":"practice"}
+{"skill":1,"concept":"math","task":"Print 2 to the power of 3.","starter_code":"print(2**3)","expected_output":["8"],"type":"practice"}
+{"skill":1,"concept":"casting","task":"Convert the number 5 to a string and print it.","starter_code":"x=5\nprint(str(x))","expected_output":["5"],"type":"practice"}
+{"skill":1,"concept":"casting","task":"Convert the string '7' to an integer and print it.","starter_code":"x='7'\nprint(int(x))","expected_output":["7"],"type":"practice"}
+{"skill":2,"concept":"functions","task":"Write a function that returns the square of a number.","starter_code":"def square(x):\n    return x*x","expected_output":["square(4)=16"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that returns the sum of three numbers.","starter_code":"def add(a,b,c):\n    return a+b+c","expected_output":["add(1,2,3)=6"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that doubles a number and prints it.","starter_code":"def double(x):\n    print(x*2)","expected_output":["double(4)=8"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that returns True if a number is positive.","starter_code":"def is_positive(n):\n    return n>0","expected_output":["is_positive(5)=True"],"type":"function"}
+
+{"skill":2,"concept":"conditionals","task":"Write a function that checks if a number is even.","starter_code":"def is_even(n):\n    if n%2==0:\n        return True\n    return False","expected_output":["is_even(4)=True"],"type":"function"}
+{"skill":2,"concept":"conditionals","task":"Write a function that checks if a number is negative.","starter_code":"def is_negative(n):\n    if n<0:\n        return True\n    return False","expected_output":["is_negative(-3)=True"],"type":"function"}
+
+{"skill":2,"concept":"strings","task":"Write a function that returns the first character of a string.","starter_code":"def first_char(s):\n    return s[0]","expected_output":["first_char('Hello')='H'"],"type":"function"}
+{"skill":2,"concept":"strings","task":"Write a function that counts spaces in a string.","starter_code":"def count_spaces(s):\n    return s.count(' ')","expected_output":["count_spaces('a b c')=2"],"type":"function"}
+{"skill":2,"concept":"strings","task":"Write a function that converts a string to lowercase.","starter_code":"def to_lower(s):\n    return s.lower()","expected_output":["to_lower('HELLO')='hello'"],"type":"function"}
+
+{"skill":2,"concept":"lists","task":"Write a function that returns the smallest number in a list.","starter_code":"def smallest(nums):\n    return min(nums)","expected_output":["smallest([3,1,5])=1"],"type":"function"}
+{"skill":2,"concept":"lists","task":"Write a function that returns the sum of a list.","starter_code":"def total(nums):\n    return sum(nums)","expected_output":["total([1,2,3])=6"],"type":"function"}
+{"skill":2,"concept":"lists","task":"Write a function that prints each item in a list with its index.","starter_code":"def show_items(lst):\n    for i,v in enumerate(lst):\n        print(i,v)","expected_output":["0 a","1 b"],"type":"function"}
+
+{"skill":2,"concept":"loops","task":"Write a function that prints numbers 1 through 5.","starter_code":"def print_nums():\n    for i in range(1,6):\n        print(i)","expected_output":["1","2","3","4","5"],"type":"function"}
+{"skill":2,"concept":"loops","task":"Write a function that prints every second number from 1 to 10.","starter_code":"def print_step():\n    for i in range(1,11,2):\n        print(i)","expected_output":["1","3","5","7","9"],"type":"function"}
+
+{"skill":2,"concept":"boolean","task":"Write a function that returns True if two numbers are equal.","starter_code":"def is_equal(a,b):\n    return a==b","expected_output":["is_equal(3,3)=True"],"type":"function"}
+{"skill":2,"concept":"boolean","task":"Write a function that returns False if a string is empty.","starter_code":"def not_empty(s):\n    return s!=''","expected_output":["not_empty('hi')=True"],"type":"function"}
+
+{"skill":2,"concept":"math","task":"Write a function that returns the area of a rectangle.","starter_code":"def area(w,h):\n    return w*h","expected_output":["area(3,4)=12"],"type":"function"}
+{"skill":2,"concept":"math","task":"Write a function that returns the remainder when dividing two numbers.","starter_code":"def remainder(a,b):\n    return a%b","expected_output":["remainder(10,3)=1"],"type":"function"}
+{"skill":2,"concept":"math","task":"Write a function that returns the square root of a number using exponent.","starter_code":"def sqrt(n):\n    return n**0.5","expected_output":["sqrt(9)=3.0"],"type":"function"}
+
+{"skill":2,"concept":"casting","task":"Write a function that converts an integer to a float.","starter_code":"def to_float(n):\n    return float(n)","expected_output":["to_float(5)=5.0"],"type":"function"}
+{"skill":2,"concept":"casting","task":"Write a function that converts a float to an integer.","starter_code":"def to_int(n):\n    return int(n)","expected_output":["to_int(5.7)=5"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that returns the last character of a string.","starter_code":"def last_char(s):\n    return s[-1]","expected_output":["last_char('Hello')='o'"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that returns the length of a list.","starter_code":"def list_length(lst):\n    return len(lst)","expected_output":["list_length([1,2,3])=3"],"type":"function"}
+{"skill":2,"concept":"functions","task":"Write a function that returns the average of three numbers.","starter_code":"def avg(a,b,c):\n    return (a+b+c)/3","expected_output":["avg(3,6,9)=6.0"],"type":"function"}
+
+{"skill":2,"concept":"conditionals","task":"Write a function that checks if a number is zero.","starter_code":"def is_zero(n):\n    if n==0:\n        return True\n    return False","expected_output":["is_zero(0)=True"],"type":"function"}
+{"skill":2,"concept":"conditionals","task":"Write a function that checks if a number is between 1 and 10.","starter_code":"def in_range(n):\n    return 1<=n<=10","expected_output":["in_range(5)=True"],"type":"function"}
+{"skill":2,"concept":"conditionals","task":"Write a function that prints 'Adult' if age is 18 or above.","starter_code":"def check_age(age):\n    if age>=18:\n        print('Adult')","expected_output":["Adult"],"type":"function"}
+
+{"skill":2,"concept":"strings","task":"Write a function that returns a string in reverse.","starter_code":"def reverse(s):\n    return s[::-1]","expected_output":["reverse('abc')='cba'"],"type":"function"}
+{"skill":2,"concept":"strings","task":"Write a function that counts vowels in a string.","starter_code":"def count_vowels(s):\n    count=0\n    for ch in s:\n        if ch in 'aeiouAEIOU':\n            count+=1\n    return count","expected_output":["count_vowels('apple')=2"],"type":"function"}
+{"skill":2,"concept":"strings","task":"Write a function that replaces spaces with hyphens.","starter_code":"def hyphens(s):\n    return s.replace(' ','-')","expected_output":["hyphens('a b c')='a-b-c'"],"type":"function"}
+
+{"skill":2,"concept":"lists","task":"Write a function that returns the first item in a list.","starter_code":"def first(lst):\n    return lst[0]","expected_output":["first([4,7,9])=4"],"type":"function"}
+{"skill":2,"concept":"lists","task":"Write a function that removes the last item from a list.","starter_code":"def remove_last(lst):\n    lst.pop()\n    return lst","expected_output":["remove_last([1,2,3])=[1,2]"],"type":"function"}
+{"skill":2,"concept":"lists","task":"Write a function that counts how many times 'a' appears in a list.","starter_code":"def count_a(lst):\n    return lst.count('a')","expected_output":["count_a(['a','b','a'])=2"],"type":"function"}
+
+{"skill":2,"concept":"loops","task":"Write a function that prints numbers from 5 down to 1.","starter_code":"def down():\n    for i in range(5,0,-1):\n        print(i)","expected_output":["5","4","3","2","1"],"type":"function"}
+{"skill":2,"concept":"loops","task":"Write a function that prints the squares of numbers 1–5.","starter_code":"def squares():\n    for i in range(1,6):\n        print(i*i)","expected_output":["1","4","9","16","25"],"type":"function"}
+{"skill":2,"concept":"loops","task":"Write a function that prints characters of a string one per line.","starter_code":"def show_chars(s):\n    for ch in s:\n        print(ch)","expected_output":["H","i"],"type":"function"}
+
+{"skill":2,"concept":"boolean","task":"Write a function that checks if a list is empty.","starter_code":"def is_empty(lst):\n    return len(lst)==0","expected_output":["is_empty([])=True"],"type":"function"}
+{"skill":2,"concept":"boolean","task":"Write a function that returns True if a string contains 'a'.","starter_code":"def has_a(s):\n    return 'a' in s","expected_output":["has_a('cat')=True"],"type":"function"}
+
+{"skill":2,"concept":"math","task":"Write a function that returns the perimeter of a rectangle.","starter_code":"def perimeter(w,h):\n    return 2*(w+h)","expected_output":["perimeter(3,4)=14"],"type":"function"}
+{"skill":2,"concept":"math","task":"Write a function that returns the cube of a number.","starter_code":"def cube(n):\n    return n**3","expected_output":["cube(3)=27"],"type":"function"}
+{"skill":2,"concept":"math","task":"Write a function that returns the absolute value of a number.","starter_code":"def absolute(n):\n    return abs(n)","expected_output":["absolute(-5)=5"],"type":"function"}
+{"skill":3,"concept":"dictionary","task":"Create a dictionary of three fruits and their prices and print each key.","starter_code":"fruits={'apple':100,'banana':80,'mango':120}\nfor k in fruits:\n    print(k)","expected_output":["apple","banana","mango"],"type":"data"}
+{"skill":3,"concept":"dictionary","task":"Print both key and value from a dictionary of colors.","starter_code":"colors={'red':1,'blue':2}\nfor k,v in colors.items():\n    print(k,v)","expected_output":["red 1","blue 2"],"type":"data"}
+{"skill":3,"concept":"dictionary","task":"Add a new item to a dictionary and print it.","starter_code":"ages={'Tom':20}\nages['Sara']=22\nprint(ages)","expected_output":["{'Tom': 20, 'Sara': 22}"],"type":"data"}
+
+{"skill":3,"concept":"dictionary","task":"Count how many times each item appears in a list using a dictionary.","starter_code":"items=['a','b','a']\ncounts={}\nfor i in items:\n    counts[i]=counts.get(i,0)+1\nprint(counts)","expected_output":["{'a': 2, 'b': 1}"],"type":"data"}
+
+{"skill":3,"concept":"file","task":"Read a file named 'data.txt' and print each line.","starter_code":"with open('data.txt') as f:\n    for line in f:\n        print(line.strip())","expected_output":[],"type":"file"}
+{"skill":3,"concept":"file","task":"Write 'Hello' into a file named output.txt.","starter_code":"with open('output.txt','w') as f:\n    f.write('Hello')","expected_output":[],"type":"file"}
+{"skill":3,"concept":"file","task":"Append 'World' to a file named output.txt.","starter_code":"with open('output.txt','a') as f:\n    f.write('World')","expected_output":[],"type":"file"}
+
+{"skill":3,"concept":"exceptions","task":"Handle an exception when opening a missing file.","starter_code":"try:\n    open('missing.txt')\nexcept:\n    print('File not found')","expected_output":["File not found"],"type":"error"}
+{"skill":3,"concept":"exceptions","task":"Handle division by zero and print 'Error'.","starter_code":"try:\n    print(5/0)\nexcept:\n    print('Error')","expected_output":["Error"],"type":"error"}
+{"skill":3,"concept":"exceptions","task":"Convert input to integer and print 'Invalid' if conversion fails.","starter_code":"try:\n    n=int('abc')\nexcept:\n    print('Invalid')","expected_output":["Invalid"],"type":"error"}
+
+{"skill":3,"concept":"lists","task":"Remove duplicates from a list and print the result.","starter_code":"lst=[1,2,2,3]\nprint(list(set(lst)))","expected_output":["[1, 2, 3]"],"type":"data"}
+{"skill":3,"concept":"lists","task":"Sort a list and print it.","starter_code":"lst=[3,1,2]\nlst.sort()\nprint(lst)","expected_output":["[1, 2, 3]"],"type":"data"}
+{"skill":3,"concept":"lists","task":"Filter even numbers from a list and print them.","starter_code":"lst=[1,2,3,4,5]\nfor n in lst:\n    if n%2==0:\n        print(n)","expected_output":["2","4"],"type":"data"}
+
+{"skill":3,"concept":"strings","task":"Count how many digits appear in a string.","starter_code":"s='a1b2c3'\ncount=0\nfor ch in s:\n    if ch.isdigit():\n        count+=1\nprint(count)","expected_output":["3"],"type":"data"}
+{"skill":3,"concept":"strings","task":"Split a sentence into words and print them.","starter_code":"s='hello world python'\nfor w in s.split():\n    print(w)","expected_output":["hello","world","python"],"type":"data"}
+
+{"skill":3,"concept":"tuples","task":"Create a tuple and print the second item.","starter_code":"t=(5,10,15)\nprint(t[1])","expected_output":["10"],"type":"data"}
+{"skill":3,"concept":"tuples","task":"Convert a list to a tuple and print it.","starter_code":"lst=[1,2,3]\nprint(tuple(lst))","expected_output":["(1, 2, 3)"],"type":"data"}
+
+{"skill":3,"concept":"sets","task":"Create a set and print its length.","starter_code":"s={1,2,3,3}\nprint(len(s))","expected_output":["3"],"type":"data"}
+{"skill":3,"concept":"sets","task":"Check if 5 is in a set and print the result.","starter_code":"s={1,2,3,5}\nprint(5 in s)","expected_output":["True"],"type":"data"}
+
+{"skill":3,"concept":"data","task":"Sum the values in a dictionary.","starter_code":"d={'a':1,'b':2,'c':3}\nprint(sum(d.values()))","expected_output":["6"],"type":"data"}
+{"skill":3,"concept":"dictionary","task":"Remove a key from a dictionary and print the result.","starter_code":"d={'a':1,'b':2,'c':3}\nd.pop('b')\nprint(d)","expected_output":["{'a': 1, 'c': 3}"],"type":"data"}
+{"skill":3,"concept":"dictionary","task":"Get a value from a dictionary safely using get().","starter_code":"d={'a':1}\nprint(d.get('b','Not found'))","expected_output":["Not found"],"type":"data"}
+{"skill":3,"concept":"dictionary","task":"Merge two dictionaries and print the result.","starter_code":"d1={'a':1}\nd2={'b':2}\nd1.update(d2)\nprint(d1)","expected_output":["{'a': 1, 'b': 2}"],"type":"data"}
+
+{"skill":3,"concept":"file","task":"Count lines in a file named data.txt.","starter_code":"count=0\nwith open('data.txt') as f:\n    for _ in f:\n        count+=1\nprint(count)","expected_output":[],"type":"file"}
+{"skill":3,"concept":"file","task":"Read the first line of a file.","starter_code":"with open('data.txt') as f:\n    print(f.readline().strip())","expected_output":[],"type":"file"}
+{"skill":3,"concept":"file","task":"Write three lines into a file.","starter_code":"with open('output.txt','w') as f:\n    f.write('a\\n')\n    f.write('b\\n')\n    f.write('c\\n')","expected_output":[],"type":"file"}
+
+{"skill":3,"concept":"exceptions","task":"Handle list index out of range error.","starter_code":"lst=[1]\ntry:\n    print(lst[2])\nexcept:\n    print('Index error')","expected_output":["Index error"],"type":"error"}
+{"skill":3,"concept":"exceptions","task":"Handle invalid integer conversion and print 'Error'.","starter_code":"try:\n    n=int('xyz')\nexcept:\n    print('Error')","expected_output":["Error"],"type":"error"}
+{"skill":3,"concept":"exceptions","task":"Handle ZeroDivisionError and print 'Cannot divide'.","starter_code":"try:\n    print(10/0)\nexcept:\n    print('Cannot divide')","expected_output":["Cannot divide"],"type":"error"}
+
+{"skill":3,"concept":"lists","task":"Reverse a list and print it.","starter_code":"lst=[1,2,3]\nlst.reverse()\nprint(lst)","expected_output":["[3, 2, 1]"],"type":"data"}
+{"skill":3,"concept":"lists","task":"Count how many even numbers are in a list.","starter_code":"lst=[1,2,3,4]\ncount=0\nfor n in lst:\n    if n%2==0:\n        count+=1\nprint(count)","expected_output":["2"],"type":"data"}
+{"skill":3,"concept":"lists","task":"Join list items into a string separated by commas.","starter_code":"lst=['a','b','c']\nprint(','.join(lst))","expected_output":["a,b,c"],"type":"data"}
+
+{"skill":3,"concept":"strings","task":"Replace digits in a string with '*'.","starter_code":"s='a1b2c3'\nfor d in '0123456789':\n    s=s.replace(d,'*')\nprint(s)","expected_output":["a*b*c*"],"type":"data"}
+{"skill":3,"concept":"strings","task":"Check if a string starts with 'Hello'.","starter_code":"s='Hello world'\nprint(s.startswith('Hello'))","expected_output":["True"],"type":"data"}
+{"skill":3,"concept":"strings","task":"Count uppercase letters in a string.","starter_code":"s='PyThOn'\ncount=0\nfor ch in s:\n    if ch.isupper():\n        count+=1\nprint(count)","expected_output":["3"],"type":"data"}
+
+{"skill":3,"concept":"tuples","task":"Unpack a tuple into variables and print them.","starter_code":"t=(1,2)\na,b=t\nprint(a,b)","expected_output":["1 2"],"type":"data"}
+{"skill":3,"concept":"tuples","task":"Check if a value exists in a tuple.","starter_code":"t=(1,2,3)\nprint(2 in t)","expected_output":["True"],"type":"data"}
+
+{"skill":3,"concept":"sets","task":"Find the union of two sets.","starter_code":"a={1,2}\nb={2,3}\nprint(a|b)","expected_output":["{1, 2, 3}"],"type":"data"}
+{"skill":3,"concept":"sets","task":"Find the intersection of two sets.","starter_code":"a={1,2}\nb={2,3}\nprint(a&b)","expected_output":["{2}"],"type":"data"}
+
+{"skill":3,"concept":"data","task":"Calculate the average of dictionary values.","starter_code":"d={'a':2,'b':4,'c':6}\nprint(sum(d.values())/len(d))","expected_output":["4.0"],"type":"data"}
+{"skill":4,"concept":"class","task":"Create a class Car with brand and print the brand.","starter_code":"class Car:\n    def __init__(self,brand):\n        self.brand=brand\nc=Car('Toyota')\nprint(c.brand)","expected_output":["Toyota"],"type":"oop"}
+{"skill":4,"concept":"class","task":"Create a class Person with name and age and print name.","starter_code":"class Person:\n    def __init__(self,name,age):\n        self.name=name\n        self.age=age\np=Person('Sara',22)\nprint(p.name)","expected_output":["Sara"],"type":"oop"}
+{"skill":4,"concept":"class","task":"Create a class Student with marks and a method to print them.","starter_code":"class Student:\n    def __init__(self,marks):\n        self.marks=marks\n    def show(self):\n        print(self.marks)\ns=Student(90)\ns.show()","expected_output":["90"],"type":"oop"}
+
+{"skill":4,"concept":"methods","task":"Create a class with a method that returns double a number.","starter_code":"class Math:\n    def double(self,n):\n        return n*2\nm=Math()\nprint(m.double(4))","expected_output":["8"],"type":"oop"}
+{"skill":4,"concept":"methods","task":"Create a class with a method to greet a user.","starter_code":"class Greeter:\n    def greet(self,name):\n        print('Hello',name)\ng=Greeter()\ng.greet('Ashani')","expected_output":["Hello Ashani"],"type":"oop"}
+
+{"skill":4,"concept":"list_comprehension","task":"Create a list of squares from 1 to 5 using list comprehension.","starter_code":"squares=[i*i for i in range(1,6)]\nprint(squares)","expected_output":["[1, 4, 9, 16, 25]"],"type":"practice"}
+{"skill":4,"concept":"list_comprehension","task":"Filter even numbers using list comprehension.","starter_code":"evens=[n for n in [1,2,3,4,5] if n%2==0]\nprint(evens)","expected_output":["[2, 4]"],"type":"practice"}
+{"skill":4,"concept":"list_comprehension","task":"Convert all strings in a list to uppercase using list comprehension.","starter_code":"res=[s.upper() for s in ['a','b','c']]\nprint(res)","expected_output":["['A', 'B', 'C']"],"type":"practice"}
+
+{"skill":4,"concept":"modules","task":"Import math and print the value of pi.","starter_code":"import math\nprint(math.pi)","expected_output":["3.141592653589793"],"type":"practice"}
+{"skill":4,"concept":"modules","task":"Import random and print a random number between 1 and 5.","starter_code":"import random\nprint(random.randint(1,5))","expected_output":[],"type":"practice"}
+
+{"skill":4,"concept":"oop","task":"Create a class Animal with a method speak that prints 'Sound'.","starter_code":"class Animal:\n    def speak(self):\n        print('Sound')\na=Animal()\na.speak()","expected_output":["Sound"],"type":"oop"}
+{"skill":4,"concept":"oop","task":"Create a class Rectangle with width and height and print the area.","starter_code":"class Rectangle:\n    def __init__(self,w,h):\n        self.w=w\n        self.h=h\n    def area(self):\n        return self.w*self.h\nr=Rectangle(3,4)\nprint(r.area())","expected_output":["12"],"type":"oop"}
+
+{"skill":4,"concept":"oop","task":"Create a class Counter that increases a count when increment() is called.","starter_code":"class Counter:\n    def __init__(self):\n        self.count=0\n    def increment(self):\n        self.count+=1\nc=Counter()\nc.increment()\nprint(c.count)","expected_output":["1"],"type":"oop"}
+
+{"skill":4,"concept":"properties","task":"Create a class with a property that returns name in uppercase.","starter_code":"class Person:\n    def __init__(self,name):\n        self.name=name\n    @property\n    def upper_name(self):\n        return self.name.upper()\np=Person('ashani')\nprint(p.upper_name)","expected_output":["ASHANI"],"type":"oop"}
+
+{"skill":4,"concept":"loops","task":"Print attributes of an object using a loop.","starter_code":"class A:\n    def __init__(self):\n        self.x=1\n        self.y=2\na=A()\nfor v in a.__dict__.values():\n    print(v)","expected_output":["1","2"],"type":"oop"}
+
+{"skill":4,"concept":"dict_comprehension","task":"Create a dictionary mapping numbers to their squares using comprehension.","starter_code":"d={n:n*n for n in range(1,4)}\nprint(d)","expected_output":["{1: 1, 2: 4, 3: 9}"],"type":"data"}
+
+{"skill":4,"concept":"tuples","task":"Store objects in a tuple and print the second one.","starter_code":"t=('a','b','c')\nprint(t[1])","expected_output":["b"],"type":"data"}
+
+{"skill":4,"concept":"sets","task":"Create a set from a list and print it.","starter_code":"s=set([1,2,2,3])\nprint(s)","expected_output":["{1, 2, 3}"],"type":"data"}
+
+{"skill":4,"concept":"sorting","task":"Sort a list of tuples by second value.","starter_code":"lst=[('a',3),('b',1)]\nlst.sort(key=lambda x:x[1])\nprint(lst)","expected_output":["[('b', 1), ('a', 3)]"],"type":"data"}
+
+{"skill":4,"concept":"file","task":"Write object data to a file.","starter_code":"class User:\n    def __init__(self,name):\n        self.name=name\nu=User('Luna')\nwith open('user.txt','w') as f:\n    f.write(u.name)","expected_output":[],"type":"file"}
+{"skill":4,"concept":"class","task":"Create a class Employee with name and salary and print salary.","starter_code":"class Employee:\n    def __init__(self,name,salary):\n        self.name=name\n        self.salary=salary\ne=Employee('Ravi',50000)\nprint(e.salary)","expected_output":["50000"],"type":"oop"}
+{"skill":4,"concept":"class","task":"Create a class Point with x and y and print x+y.","starter_code":"class Point:\n    def __init__(self,x,y):\n        self.x=x\n        self.y=y\np=Point(3,4)\nprint(p.x+p.y)","expected_output":["7"],"type":"oop"}
+
+{"skill":4,"concept":"methods","task":"Create a class with a method that returns the length of a string attribute.","starter_code":"class Text:\n    def __init__(self,s):\n        self.s=s\n    def length(self):\n        return len(self.s)\nt=Text('Hello')\nprint(t.length())","expected_output":["5"],"type":"oop"}
+
+{"skill":4,"concept":"methods","task":"Create a class with a method that increases a number attribute by 5.","starter_code":"class Number:\n    def __init__(self,n):\n        self.n=n\n    def inc(self):\n        self.n+=5\nnum=Number(10)\nnum.inc()\nprint(num.n)","expected_output":["15"],"type":"oop"}
+
+{"skill":4,"concept":"__str__","task":"Create a class with __str__ that returns formatted text.","starter_code":"class Person:\n    def __init__(self,name):\n        self.name=name\n    def __str__(self):\n        return f'Person: {self.name}'\np=Person('Nimal')\nprint(p)","expected_output":["Person: Nimal"],"type":"oop"}
+
+{"skill":4,"concept":"relationship","task":"Create two classes where one stores an object of the other.","starter_code":"class Address:\n    def __init__(self,city):\n        self.city=city\nclass User:\n    def __init__(self,addr):\n        self.addr=addr\nu=User(Address('Colombo'))\nprint(u.addr.city)","expected_output":["Colombo"],"type":"oop"}
+
+{"skill":4,"concept":"list_comprehension","task":"Create a list of lengths of words using comprehension.","starter_code":"words=['hi','hello','hey']\nres=[len(w) for w in words]\nprint(res)","expected_output":["[2, 5, 3]"],"type":"practice"}
+
+{"skill":4,"concept":"list_comprehension","task":"Create a list of even squares from 1 to 10.","starter_code":"res=[n*n for n in range(1,11) if n%2==0]\nprint(res)","expected_output":["[4, 16, 36, 64, 100]"],"type":"practice"}
+
+{"skill":4,"concept":"dict_comprehension","task":"Create a dictionary mapping words to their lengths.","starter_code":"words=['hi','hello']\nd={w:len(w) for w in words}\nprint(d)","expected_output":["{'hi': 2, 'hello': 5}"],"type":"data"}
+
+{"skill":4,"concept":"modules","task":"Import datetime and print the current year.","starter_code":"import datetime\nprint(datetime.datetime.now().year)","expected_output":[],"type":"practice"}
+
+{"skill":4,"concept":"modules","task":"Import statistics and print the mean of a list.","starter_code":"import statistics\nprint(statistics.mean([1,2,3]))","expected_output":["2"],"type":"practice"}
+
+{"skill":4,"concept":"oop","task":"Create a class BankAccount with balance and deposit method.","starter_code":"class BankAccount:\n    def __init__(self,balance):\n        self.balance=balance\n    def deposit(self,amount):\n        self.balance+=amount\nacc=BankAccount(100)\nacc.deposit(50)\nprint(acc.balance)","expected_output":["150"],"type":"oop"}
+
+{"skill":4,"concept":"oop","task":"Create a class Counter that resets when reset() is called.","starter_code":"class Counter:\n    def __init__(self):\n        self.c=0\n    def reset(self):\n        self.c=0\nc=Counter()\nc.c=5\nc.reset()\nprint(c.c)","expected_output":["0"],"type":"oop"}
+
+{"skill":4,"concept":"sorting","task":"Sort a list of dictionaries by 'age'.","starter_code":"people=[{'age':30},{'age':20}]\npeople.sort(key=lambda x:x['age'])\nprint(people)","expected_output":["[{'age': 20}, {'age': 30}]"],"type":"data"}
+
+{"skill":4,"concept":"file","task":"Write class data to a file using __str__.","starter_code":"class Item:\n    def __init__(self,name):\n        self.name=name\n    def __str__(self):\n        return self.name\ni=Item('Book')\nwith open('item.txt','w') as f:\n    f.write(str(i))","expected_output":[],"type":"file"}
+
+{"skill":4,"concept":"sets","task":"Convert list of words into a set and print its length.","starter_code":"words=['a','b','a']\nprint(len(set(words)))","expected_output":["2"],"type":"data"}
+
+{"skill":4,"concept":"tuples","task":"Store objects in a tuple and access their attributes.","starter_code":"class A:\n    def __init__(self,x):\n        self.x=x\nt=(A(5),A(7))\nprint(t[1].x)","expected_output":["7"],"type":"data"}
+
+{"skill":4,"concept":"comprehension","task":"Create a list of characters from a string except vowels.","starter_code":"s='hello'\nres=[c for c in s if c not in 'aeiou']\nprint(res)","expected_output":["['h', 'l', 'l']"],"type":"practice"}
+
+{"skill":4,"concept":"relationship","task":"Create a class Team containing a list of Player objects.","starter_code":"class Player:\n    def __init__(self,name):\n        self.name=name\nclass Team:\n    def __init__(self,players):\n        self.players=players\nt=Team([Player('A'),Player('B')])\nprint(t.players[0].name)","expected_output":["A"],"type":"oop"}
+
+{"skill":4,"concept":"__str__","task":"Add __str__ to a class to return formatted age.","starter_code":"class Person:\n    def __init__(self,age):\n        self.age=age\n    def __str__(self):\n        return f'Age: {self.age}'\np=Person(25)\nprint(p)","expected_output":["Age: 25"],"type":"oop"}
+{"skill":5,"concept":"inheritance","task":"Create a class Dog that inherits from Animal and overrides speak.","starter_code":"class Animal:\n    def speak(self):\n        print('Sound')\nclass Dog(Animal):\n    def speak(self):\n        print('Bark')\nd=Dog()\nd.speak()","expected_output":["Bark"],"type":"oop"}
+
+{"skill":5,"concept":"inheritance","task":"Create a class Cat that inherits from Animal and prints 'Meow'.","starter_code":"class Animal:\n    def speak(self):\n        print('Sound')\nclass Cat(Animal):\n    def speak(self):\n        print('Meow')\nc=Cat()\nc.speak()","expected_output":["Meow"],"type":"oop"}
+
+{"skill":5,"concept":"inheritance","task":"Call parent method using super().","starter_code":"class A:\n    def show(self):\n        print('A')\nclass B(A):\n    def show(self):\n        super().show()\n        print('B')\nb=B()\nb.show()","expected_output":["A","B"],"type":"oop"}
+
+{"skill":5,"concept":"decorator","task":"Create a decorator that prints 'Start' before a function runs.","starter_code":"def deco(fn):\n    def wrapper():\n        print('Start')\n        fn()\n    return wrapper\n@deco\ndef hello():\n    print('Hi')\nhello()","expected_output":["Start","Hi"],"type":"advanced"}
+
+{"skill":5,"concept":"decorator","task":"Create a decorator that prints the function name.","starter_code":"def log(fn):\n    def wrapper():\n        print(fn.__name__)\n        fn()\n    return wrapper\n@log\ndef test():\n    print('Running')\ntest()","expected_output":["test","Running"],"type":"advanced"}
+
+{"skill":5,"concept":"generator","task":"Create a generator that yields 1 to 3.","starter_code":"def gen():\n    for i in range(1,4):\n        yield i\nfor n in gen():\n    print(n)","expected_output":["1","2","3"],"type":"advanced"}
+
+{"skill":5,"concept":"generator","task":"Create a generator that yields even numbers up to 6.","starter_code":"def evens():\n    for i in range(1,7):\n        if i%2==0:\n            yield i\nfor n in evens():\n    print(n)","expected_output":["2","4","6"],"type":"advanced"}
+
+{"skill":5,"concept":"context_manager","task":"Create a context manager that prints 'Open' and 'Close'.","starter_code":"class M:\n    def __enter__(self):\n        print('Open')\n    def __exit__(self,a,b,c):\n        print('Close')\nwith M():\n    pass","expected_output":["Open","Close"],"type":"advanced"}
+
+{"skill":5,"concept":"context_manager","task":"Create a context manager that opens and closes a file.","starter_code":"class F:\n    def __enter__(self):\n        self.f=open('data.txt','w')\n        return self.f\n    def __exit__(self,a,b,c):\n        self.f.close()\nwith F() as f:\n    f.write('Hi')","expected_output":[],"type":"advanced"}
+
+{"skill":5,"concept":"composition","task":"Create a class Engine used inside a Car class.","starter_code":"class Engine:\n    def start(self):\n        print('Engine on')\nclass Car:\n    def __init__(self):\n        self.engine=Engine()\nc=Car()\nc.engine.start()","expected_output":["Engine on"],"type":"oop"}
+
+{"skill":5,"concept":"polymorphism","task":"Call speak() on different subclasses.","starter_code":"class Animal:\n    def speak(self):\n        pass\nclass Dog(Animal):\n    def speak(self):\n        print('Bark')\nclass Cat(Animal):\n    def speak(self):\n        print('Meow')\nfor a in [Dog(),Cat()]:\n    a.speak()","expected_output":["Bark","Meow"],"type":"oop"}
+
+{"skill":5,"concept":"abstract","task":"Create a base class with a method that must be overridden.","starter_code":"class Shape:\n    def area(self):\n        raise NotImplementedError\nclass Square(Shape):\n    def area(self):\n        return 4*4\nprint(Square().area())","expected_output":["16"],"type":"oop"}
+
+{"skill":5,"concept":"property","task":"Create a property that returns double a value.","starter_code":"class A:\n    def __init__(self,x):\n        self.x=x\n    @property\n    def double(self):\n        return self.x*2\na=A(5)\nprint(a.double)","expected_output":["10"],"type":"oop"}
+
+{"skill":5,"concept":"class_method","task":"Create a class method that prints a message.","starter_code":"class A:\n    @classmethod\n    def msg(cls):\n        print('Hello')\nA.msg()","expected_output":["Hello"],"type":"oop"}
+
+{"skill":5,"concept":"static_method","task":"Create a static method that prints a message.","starter_code":"class A:\n    @staticmethod\n    def msg():\n        print('Hi')\nA.msg()","expected_output":["Hi"],"type":"oop"}
+
+{"skill":5,"concept":"sorting","task":"Sort objects by attribute.","starter_code":"class P:\n    def __init__(self,a):\n        self.a=a\nlst=[P(3),P(1)]\nlst.sort(key=lambda x:x.a)\nprint(lst[0].a)","expected_output":["1"],"type":"data"}
+
+{"skill":5,"concept":"filter","task":"Filter objects based on attribute.","starter_code":"class P:\n    def __init__(self,a):\n        self.a=a\nlst=[P(1),P(3)]\nres=[p for p in lst if p.a>1]\nprint(len(res))","expected_output":["1"],"type":"data"}
+
+{"skill":5,"concept":"mapping","task":"Map object attributes into a list.","starter_code":"class P:\n    def __init__(self,a):\n        self.a=a\nlst=[P(1),P(2)]\nres=[p.a for p in lst]\nprint(res)","expected_output":["[1, 2]"],"type":"data"}
+
+{"skill":5,"concept":"file","task":"Write multiple object names to a file.","starter_code":"class User:\n    def __init__(self,name):\n        self.name=name\nusers=[User('A'),User('B')]\nwith open('users.txt','w') as f:\n    for u in users:\n        f.write(u.name+'\\n')","expected_output":[],"type":"file"}
+
+{"skill":5,"concept":"iterator","task":"Create an iterator class that returns numbers 1 to 3.","starter_code":"class Num:\n    def __iter__(self):\n        self.n=1\n        return self\n    def __next__(self):\n        if self.n>3:\n            raise StopIteration\n        x=self.n\n        self.n+=1\n        return x\nfor i in Num():\n    print(i)","expected_output":["1","2","3"],"type":"advanced"}
+{"skill":5,"concept":"inheritance","task":"Create a subclass that adds a new attribute and print it.","starter_code":"class Person:\n    def __init__(self,name):\n        self.name=name\nclass Student(Person):\n    def __init__(self,name,grade):\n        super().__init__(name)\n        self.grade=grade\ns=Student('Asha','A')\nprint(s.grade)","expected_output":["A"],"type":"oop"}
+
+{"skill":5,"concept":"multiple_inheritance","task":"Create a class that inherits from two parents.","starter_code":"class A:\n    def a(self):\n        print('A')\nclass B:\n    def b(self):\n        print('B')\nclass C(A,B):\n    pass\nc=C()\nc.a();c.b()","expected_output":["A","B"],"type":"oop"}
+
+{"skill":5,"concept":"decorator","task":"Create a decorator that repeats a function twice.","starter_code":"def repeat(fn):\n    def wrapper():\n        fn();fn()\n    return wrapper\n@repeat\ndef hi():\n    print('Hi')\nhi()","expected_output":["Hi","Hi"],"type":"advanced"}
+
+{"skill":5,"concept":"decorator_args","task":"Create a decorator that prints a custom message.","starter_code":"def msg(text):\n    def deco(fn):\n        def wrapper():\n            print(text)\n            fn()\n        return wrapper\n    return deco\n@msg('Start')\ndef run():\n    print('Go')\nrun()","expected_output":["Start","Go"],"type":"advanced"}
+
+{"skill":5,"concept":"generator","task":"Create a generator that yields squares of numbers.","starter_code":"def squares(n):\n    for i in range(1,n+1):\n        yield i*i\nfor x in squares(3):\n    print(x)","expected_output":["1","4","9"],"type":"advanced"}
+
+{"skill":5,"concept":"generator_yield_from","task":"Use yield from to combine generators.","starter_code":"def g1():\n    yield 1;yield 2\ndef g2():\n    yield 3;yield 4\ndef g():\n    yield from g1()\n    yield from g2()\nfor x in g():\n    print(x)","expected_output":["1","2","3","4"],"type":"advanced"}
+
+{"skill":5,"concept":"context_manager","task":"Create a context manager that measures execution.","starter_code":"import time\nclass Timer:\n    def __enter__(self):\n        self.t=time.time()\n    def __exit__(self,a,b,c):\n        print('Time:',round(time.time()-self.t,3))\nwith Timer():\n    for _ in range(1000000):\n        pass","expected_output":[],"type":"advanced"}
+
+{"skill":5,"concept":"context_manager","task":"Create a context manager that prints errors.","starter_code":"class CM:\n    def __enter__(self):\n        return self\n    def __exit__(self,a,b,c):\n        if b:\n            print('Error')\ntry:\n    with CM():\n        raise ValueError()\nexcept:\n    pass","expected_output":["Error"],"type":"advanced"}
+
+{"skill":5,"concept":"composition","task":"Class Book contains an Author object.","starter_code":"class Author:\n    def __init__(self,name):\n        self.name=name\nclass Book:\n    def __init__(self,title,author):\n        self.title=title\n        self.author=author\nb=Book('X',Author('Leo'))\nprint(b.author.name)","expected_output":["Leo"],"type":"oop"}
+
+{"skill":5,"concept":"polymorphism","task":"Different classes implement the same method.","starter_code":"class A:\n    def show(self):\n        print('A')\nclass B:\n    def show(self):\n        print('B')\nfor obj in [A(),B()]:\n    obj.show()","expected_output":["A","B"],"type":"oop"}
+
+{"skill":5,"concept":"abstract","task":"Override abstract method in subclass.","starter_code":"from abc import ABC,abstractmethod\nclass Shape(ABC):\n    @abstractmethod\n    def area(self):\n        pass\nclass Circle(Shape):\n    def area(self):\n        return 3*3\nprint(Circle().area())","expected_output":["9"],"type":"oop"}
+
+{"skill":5,"concept":"advanced_property","task":"Create a property with setter.","starter_code":"class P:\n    def __init__(self):\n        self._x=0\n    @property\n    def x(self):\n        return self._x\n    @x.setter\n    def x(self,v):\n        self._x=v\np=P();p.x=5\nprint(p.x)","expected_output":["5"],"type":"oop"}
+
+{"skill":5,"concept":"class_method","task":"Use classmethod to create an instance.","starter_code":"class P:\n    def __init__(self,n):\n        self.n=n\n    @classmethod\n    def from_zero(cls):\n        return cls(0)\np=P.from_zero()\nprint(p.n)","expected_output":["0"],"type":"oop"}
+
+{"skill":5,"concept":"static_method","task":"Use staticmethod to validate input.","starter_code":"class V:\n    @staticmethod\n    def valid(n):\n        return n>0\nprint(V.valid(3))","expected_output":["True"],"type":"oop"}
+
+{"skill":5,"concept":"iterator","task":"Create an iterator that returns letters.","starter_code":"class Letters:\n    def __iter__(self):\n        self.c=ord('a')\n        return self\n    def __next__(self):\n        if self.c>ord('c'):\n            raise StopIteration\n        x=chr(self.c)\n        self.c+=1\n        return x\nfor l in Letters():\n    print(l)","expected_output":["a","b","c"],"type":"advanced"}
+
+{"skill":5,"concept":"mapping","task":"Map object names using comprehension.","starter_code":"class P:\n    def __init__(self,name):\n        self.name=name\nlst=[P('A'),P('B')]\nnames=[p.name for p in lst]\nprint(names)","expected_output":["['A','B']"],"type":"data"}
+
+{"skill":5,"concept":"filter","task":"Filter objects whose value is even.","starter_code":"class P:\n    def __init__(self,v):\n        self.v=v\nlst=[P(1),P(2)]\nres=[p for p in lst if p.v%2==0]\nprint(len(res))","expected_output":["1"],"type":"data"}
+
+{"skill":5,"concept":"file","task":"Write object attributes to file separated by commas.","starter_code":"class P:\n    def __init__(self,n):\n        self.n=n\nlst=[P('A'),P('B')]\nwith open('out.txt','w') as f:\n    f.write(','.join([p.n for p in lst]))","expected_output":[],"type":"file"}
+
+{"skill":5,"concept":"multi_class","task":"Two classes interact through methods.","starter_code":"class Teacher:\n    def teach(self):\n        return 'Lesson'\nclass Student:\n    def learn(self,t):\n        print('Learning',t)\ns=Student();t=Teacher()\ns.learn(t.teach())","expected_output":["Learning Lesson"],"type":"oop"}
+
+{"skill":5,"concept":"generator_chaining","task":"Chain two generators together.","starter_code":"def g1():\n    yield 1\n    yield 2\ndef g2():\n    yield 3\nfor x in g1():\n    print(x)\nfor x in g2():\n    print(x)","expected_output":["1","2","3"],"type":"advanced"}
