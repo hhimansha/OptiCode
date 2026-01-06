@@ -1,0 +1,212 @@
+body {
+  background: radial-gradient(circle at top, #0f172a, #020617 60%);
+}
+:root {
+  --content-width: 1000px;
+}
+
+
+.task-container {
+  max-width: 1200px;
+  margin: 8px auto;
+  padding: 32px;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #e5e7eb;
+}
+
+
+.title {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.skill {
+  text-align: center;
+  font-size: 15px;
+  margin-bottom: 32px;
+  color: #c7d2fe;
+}
+
+.skill span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: #fff;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.task-box {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto 34px;
+  background: rgba(2, 6, 23, 0.9);
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid #1e40af;
+  box-shadow: 0 0 22px rgba(96, 165, 250, 0.16);
+  box-sizing: border-box;
+}
+
+
+/* Shared section title style */
+.task-box h3,
+.solution-title {
+  font-size: 18px!important;;          /* same size */
+  font-weight: 600;
+  color: #93c5fd;           /* same blue color */
+  margin-bottom: 12px;
+  text-align: center;       /* optional – matches task title */
+}
+
+
+
+.task-text {
+  margin-top: 10px;
+  font-size: 17px;          /* ↑ increased from ~14–15 */
+  line-height: 1.65;        /* better readability */
+  color: #e5e7eb;           /* brighter text */
+  text-align: center;       /* optional but looks clean */
+}
+
+
+.solution-title {
+  margin-top: 0;
+}
+
+.editor-wrapper {
+  border: 1px solid #1f2933;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.submit-btn {
+  display: block;
+  margin: 0 auto;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: white;
+  border: none;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
+  transform: translateX(-160px);
+}
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 26px rgba(124, 58, 237, 0.65);
+}
+.hints-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: #111827;
+  border-left: 4px solid #38bdf8;
+  border-radius: 8px;
+}
+
+.hints-box h3 {
+  color: #38bdf8;
+  margin-bottom: 10px;
+}
+
+.hints-box ul {
+  padding-left: 20px;
+}
+
+.hints-box li {
+  color: #e5e7eb;
+  margin-bottom: 6px;
+}
+.editor-hint-wrapper {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto 50px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.editor-container {
+  flex: 1;
+  width: 100%;
+  border-radius: 14px;          
+  overflow: hidden;             
+  border: 1px solid #1e40af;
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.25);
+  box-sizing: border-box;
+}
+
+.task-box,
+.hint-panel,
+.editor-container {
+  border-radius: 14px;
+}
+
+.hint-panel {
+  width: 320px;
+  background: #020617;
+  border: 1px solid #7c3aed;
+  border-radius: 16px;
+  padding: 16px;
+  /*box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+  /* 👇 floating effect */
+  box-shadow:
+    0 10px 30px rgba(124, 58, 237, 0.45),
+    0 0 20px rgba(124, 58, 237, 0.25);
+
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hint-panel h4 {
+  color: #a78bfa;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.hint-item {
+  background: rgba(250, 204, 21, 0.08);
+  border-left: 3px solid #facc15;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #fde68a;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.hint-ok {
+  color: #4ade80;
+  font-weight: 500;
+}
+
+.hint-loading {
+  color: #93c5fd;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+/* FORCE Monaco corner clipping */
+.editor-container .monaco-editor,
+.editor-container .monaco-editor-background,
+.editor-container .monaco-editor .overflow-guard {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+
+
+
+

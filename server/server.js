@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import fetch from "node-fetch";
+
 
 import { connectDB } from "./Config/db.js";
 import Userrouter from "./routers/Userrouter.js";
@@ -31,18 +33,24 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/livekit", livekitRouter);
 
 // Mock route for predict-skill (Missing in conflict resolution)
-app.post("/api/predict-skill", (req, res) => {
-    console.log("Mock predict-skill called");
-    res.json({
-        skill_level: "Intermediate",
-        confidence: 0.85,
-        category_scores: { "Syntax": 80, "Logic": 90 },
-        probabilities: { "Beginner": 0.1, "Intermediate": 0.8, "Advanced": 0.1 },
-        research_analysis: {
-            research_recommendations: ["Study recursion", "Practice DP"]
-        }
-    });
+app.post("/api/predict-skill", async (req, res) => {
+    try {
+        console.log("Proxying skill prediction to Flask...");
+        
+        const response = await fetch("http://127.0.0.1:8001/api/predict-skill", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req.body),
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error("Skill model proxy error:", err);
+        res.status(500).json({ error: "Skill model unavailable" });
+    }
 });
+
 
 const PORT = process.env.PORT || 5000;
 

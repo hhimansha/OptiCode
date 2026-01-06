@@ -1,5 +1,8 @@
 import { useState } from "react";
 import questions from "./questions";
+import "../../styles/AssessmentUI.css";
+
+
 
 export default function AssessmentUI({ onSubmit }) {
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
@@ -52,9 +55,21 @@ export default function AssessmentUI({ onSubmit }) {
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "auto" }}>
-      <h2>Coding Skill Assessment</h2>
-      <h4>Page {currentPage} of {totalPages}</h4>
+    <div className="assessment-container">
+      <h2
+       style={{
+       textAlign: "center",
+       fontSize: "34px",
+       fontWeight: "700",
+       marginBottom: "6px",
+       background: "linear-gradient(90deg, #60a5fa, #a78bfa)",
+       WebkitBackgroundClip: "text",
+       WebkitTextFillColor: "transparent",
+       }}
+       >
+     OptiCode Skill Predictor
+     </h2>
+     <h4>Page {currentPage} of {totalPages}</h4>
 
       <form onSubmit={handleSubmit}>
         {currentQuestions.map((q, index) => {
@@ -81,19 +96,59 @@ export default function AssessmentUI({ onSubmit }) {
 
         <div style={{ marginTop: "20px" }}>
           {currentPage > 1 && (
-            <button type="button" onClick={handlePrevious}>
-              ← Previous
-            </button>
+            <button
+              type="button"
+              onClick={handlePrevious}
+              style={{
+                 padding: "10px 22px",
+                 borderRadius: "10px",
+                 border: "1px solid #60a5fa",
+                 background: "transparent",
+                 color: "#60a5fa",
+                 cursor: "pointer",
+                fontWeight: "600",
+ }}
+       >
+          ← Previous
+          </button>
+
           )}
 
           {currentPage < totalPages && (
-            <button type="button" onClick={handleNext} style={{ marginLeft: "10px" }}>
-              Next →
+            <button
+              type="button"
+              onClick={handleNext}
+               style={{
+                  marginLeft: "10px",
+                  padding: "10px 22px",
+                  borderRadius: "10px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  background: "linear-gradient(90deg, #2563eb, #7c3aed)",
+                  boxShadow: "0 0 14px rgba(124, 58, 237, 0.5)",
+                  }}
+            >
+            Next →
             </button>
+
           )}
 
           {currentPage === totalPages && (
-            <button type="submit" disabled={loading} style={{ marginLeft: "10px" }}>
+            <button type="submit" disabled={loading} style={{
+                  marginLeft: "10px",
+                  padding: "10px 22px",
+                  borderRadius: "10px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  background: "linear-gradient(90deg, #2563eb, #7c3aed)",
+                  boxShadow: "0 0 14px rgba(124, 58, 237, 0.5)",
+                  }}>
               {loading ? "Evaluating..." : "Submit Answers"}
             </button>
           )}
