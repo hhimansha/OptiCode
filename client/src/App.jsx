@@ -1,4 +1,7 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from 'react'
+import { Route, Routes, BrowserRouter } from 'react-router-dom'
+import CodeConceptExtractor from './component/IT22601360/CodeConceptExtractor'
+//import AIInterview from './component/AIInterview'
 import './App.css';
 import AssessmentUI from "./component/IT22604194/AssessmentUI";
 import Form from "./Login_signup/Form";
@@ -22,7 +25,7 @@ const App = () => {
         <Route path="/exercise" element={<TaskEditor />} />
         <Route path="/face" element={<Face />} />
         <Route path="/chat" element={<Chatbot />} />
-      
+        <Route path="/code" element={<CodeConceptExtractor />} />
         <Route path="/livekit"element={<LiveInterview/>}/>  
         <Route path="/interview" element={<Interviewquestion/>} />
       </Routes>
