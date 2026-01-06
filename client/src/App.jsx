@@ -10,7 +10,10 @@ import AssessmentPage from "./component/IT22604194/AssessmentPage";
 import AssessmentResultPage from "./component/IT22604194/AssessmentResultPage";
 
 
-export default function App() {
+import Form from './pages/Login_signup/Form'
+import Interviewquestion from './component/IT22639226/Interviewquestion'
+
+const App = () => {
   return (
     <BrowserRouter>
       <Routes>
@@ -20,8 +23,12 @@ export default function App() {
         <Route path="/exercise" element={<TaskEditor />} />
         <Route path="/face" element={<Face />} />
         <Route path="/chat" element={<Chatbot />} />
-        <Route path="/livekit" element={<LiveInterview />} />
+      
+        <Route path="/livekit"element={<LiveInterview/>}/>  
+        <Route path="/interview" element={<Interviewquestion/>} />
       </Routes>
     </BrowserRouter>
   );
 }
+
+export default App;

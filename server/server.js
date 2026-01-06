@@ -1,8 +1,4 @@
-import express from "express";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+
 import fetch from "node-fetch";
 
 
@@ -11,6 +7,15 @@ import Userrouter from "./routers/Userrouter.js";
 import taskRoutes from "./routers/IT22604194/taskRoutes.js";
 import livekitRouter from "./routers/livekitRouter.js";
 // import AiInterviewRouter from "./routers/Ai_interviewrouter.js"; // Uncomment if needed and export matches
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import { connectDB } from './Config/db.js';
+import userRoutes from './routers/Userrouter.js';
+import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
+import livekitRouter from './routers/livekitRouter.js';
+import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
 dotenv.config();
 
@@ -54,6 +59,9 @@ app.post("/api/predict-skill", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+app.use('/api/livekit', livekitRouter);
+app.use('/api/question', Questionrouter);
+// ✅ Start server
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });

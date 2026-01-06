@@ -5,7 +5,6 @@ import {
   LiveKitRoom,
   useVoiceAssistant,
   useChat,
-  BarVisualizer,
   RoomAudioRenderer,
   ConnectionStateToast,
 } from "@livekit/components-react";
@@ -23,7 +22,6 @@ export default function VoiceAssistantPage() {
     setIsLoading(true);
     try {
       setError(null);
-      // Ensure this URL matches your backend
       const response = await fetch(`http://localhost:5000/api/livekit?userId=${userId}`);
       const data = await response.json();
 
@@ -50,31 +48,172 @@ export default function VoiceAssistantPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-8">
-      <div className="w-full max-w-6xl">
+    <div className="min-h-screen bg-[#05080f] flex items-center justify-center overflow-hidden">
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        * {
+          font-family: 'Sora', sans-serif;
+        }
+        
+        .mono {
+          font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+          border-radius: 10px;
+        }
+        
+        /* Animated Background Gradient */
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        
+        .animated-bg {
+          background: linear-gradient(-45deg, #05080f, #0a1628, #0f172a, #05080f);
+          background-size: 400% 400%;
+          animation: gradientShift 15s ease infinite;
+        }
+        
+        /* Glow Pulse Animation */
+        @keyframes glowPulse {
+          0%, 100% { 
+            filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4)) drop-shadow(0 0 40px rgba(6, 182, 212, 0.2));
+            transform: scale(1);
+          }
+          50% { 
+            filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.6)) drop-shadow(0 0 60px rgba(6, 182, 212, 0.3));
+            transform: scale(1.02);
+          }
+        }
+        
+        /* Floating Animation */
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-12px) rotate(1deg); }
+          66% { transform: translateY(-6px) rotate(-1deg); }
+        }
+        
+        /* Audio Wave Animation */
+        @keyframes audioWave {
+          0%, 100% { transform: scaleY(0.3); opacity: 0.5; }
+          50% { transform: scaleY(1); opacity: 1; }
+        }
+        
+        /* Ripple Animation */
+        @keyframes ripple {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(2.5); opacity: 0; }
+        }
+        
+        /* Shimmer Effect */
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        
+        /* Orbit Animation */
+        @keyframes orbit {
+          from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+          to { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+        }
+        
+        /* Particle Float */
+        @keyframes particleFloat {
+          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+          25% { transform: translateY(-20px) translateX(10px); opacity: 0.8; }
+          50% { transform: translateY(-40px) translateX(-5px); opacity: 0.5; }
+          75% { transform: translateY(-20px) translateX(-10px); opacity: 0.7; }
+        }
+        
+        /* Scanning Line */
+        @keyframes scanLine {
+          0% { top: 0%; opacity: 0; }
+          10% { opacity: 0.5; }
+          90% { opacity: 0.5; }
+          100% { top: 100%; opacity: 0; }
+        }
+        
+        /* Type Cursor */
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        
+        .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .audio-wave { animation: audioWave 0.8s ease-in-out infinite; }
+        .ripple { animation: ripple 2s ease-out infinite; }
+        .shimmer {
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+          background-size: 200% 100%;
+          animation: shimmer 2s infinite;
+        }
+        .orbit { animation: orbit 8s linear infinite; }
+        .particle { animation: particleFloat 4s ease-in-out infinite; }
+        
+        /* Glass Effect */
+        .glass {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-dark {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(30px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Neon Border */
+        .neon-border {
+          position: relative;
+        }
+        .neon-border::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: inherit;
+          padding: 2px;
+          background: linear-gradient(135deg, #06b6d4, #8b5cf6, #06b6d4);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          opacity: 0.7;
+        }
+      `}</style>
+      
+      {/* Ambient Background Elements */}
+      <div className="fixed inset-0 animated-bg">
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px'
+        }} />
+        
+        {/* Gradient Orbs */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-violet-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-900/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative w-full h-screen z-10">
         {(!shouldConnect || !roomDetails) ? (
-          <div className="flex flex-col items-center space-y-6">
-            <div className="bg-gradient-to-b from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-3xl shadow-2xl p-12 border border-slate-700/50">
-              <h1 className="text-3xl font-bold text-white mb-4 text-center">AI Interview Assistant</h1>
-              <p className="text-center text-slate-400 mb-8 max-w-md">
-                Connect to start your AI-powered interview session
-              </p>
-
-              <button 
-                onClick={handleConnect} 
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Connecting..." : "Start Interview"}
-              </button>
-
-              {error && (
-                <p className="text-red-400 text-sm text-center mt-4 bg-red-500/10 py-2 px-4 rounded-lg border border-red-500/20">
-                  {error}
-                </p>
-              )}
-            </div>
-          </div>
+          <LandingScreen 
+            isLoading={isLoading} 
+            error={error} 
+            onConnect={handleConnect} 
+          />
         ) : (
           <LiveKitRoom
             token={roomDetails.token}
@@ -84,7 +223,7 @@ export default function VoiceAssistantPage() {
             serverUrl={import.meta.env.VITE_LK_SERVER_URL}
             onMediaDeviceFailure={onDeviceFailure}
             onDisconnected={handleDisconnect}
-            className="w-full space-y-8"
+            className="w-full h-full"
           >
             <InterviewInterface onEndCall={handleDisconnect} userId={userId} />
             <RoomAudioRenderer />
@@ -96,19 +235,184 @@ export default function VoiceAssistantPage() {
   );
 }
 
+// Landing Screen Component
+function LandingScreen({ isLoading, error, onConnect }) {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-4">
+      {/* Floating Particles */}
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-cyan-400 rounded-full particle"
+          style={{
+            left: `${15 + i * 15}%`,
+            top: `${20 + (i % 3) * 25}%`,
+            animationDelay: `${i * 0.5}s`,
+            opacity: 0.4
+          }}
+        />
+      ))}
+      
+      {/* Main Card */}
+      <div className="relative">
+        {/* Glow Behind Card */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-violet-500/20 to-cyan-500/20 blur-[80px] scale-150" />
+        
+        <div className="relative glass rounded-[32px] p-12 max-w-md w-full">
+          {/* Decorative Corner Elements */}
+          <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-cyan-500/30 rounded-tl-lg" />
+          <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-cyan-500/30 rounded-tr-lg" />
+          <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-cyan-500/30 rounded-bl-lg" />
+          <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-cyan-500/30 rounded-br-lg" />
+          
+          {/* AI Avatar */}
+          <div className="flex justify-center mb-10">
+            <div className="relative float-anim">
+              {/* Outer Rings */}
+              <div className="absolute inset-0 scale-[2] opacity-20">
+                <div className="absolute inset-0 border border-cyan-500/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+              </div>
+              <div className="absolute inset-0 scale-[1.6] opacity-30">
+                <div className="absolute inset-0 border border-violet-500/50 rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
+              </div>
+              
+              {/* Main Avatar */}
+              <div className="relative w-28 h-28 glow-pulse">
+                {/* Gradient Ring */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-cyan-500 p-[3px]">
+                  <div className="w-full h-full rounded-full bg-[#0a1628] flex items-center justify-center">
+                    {/* AI Icon */}
+                    <div className="relative">
+                      <svg className="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      {/* Glow Effect on Icon */}
+                      <div className="absolute inset-0 blur-md opacity-50">
+                        <svg className="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Orbiting Dot */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="orbit">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Title */}
+          <div className="text-center mb-3">
+            <h1 className="text-4xl font-semibold text-white tracking-tight mb-2">
+              AI Interview
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-cyan-400/60 text-xs mono">
+              <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+              <span>SYSTEM READY</span>
+            </div>
+          </div>
+          
+          <p className="text-center text-slate-400 mb-10 text-sm leading-relaxed">
+            Experience next-generation AI-powered mock interviews with real-time voice interaction
+          </p>
+
+          {/* Connect Button */}
+          <button 
+            onClick={onConnect} 
+            disabled={isLoading}
+            className="group relative w-full py-4 px-8 rounded-2xl font-medium text-sm tracking-wide transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+          >
+            {/* Button Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-cyan-400 to-cyan-500 transition-all duration-500 group-hover:scale-105" />
+            
+            {/* Shimmer Effect */}
+            <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Button Content */}
+            <span className="relative flex items-center justify-center gap-3 text-slate-900 font-semibold">
+              {isLoading ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span>Initializing...</span>
+                </>
+              ) : (
+                <>
+                  <span>Begin Interview</span>
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              )}
+            </span>
+          </button>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+              <p className="text-red-400 text-xs text-center flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                {error}
+              </p>
+            </div>
+          )}
+          
+          {/* Features */}
+          <div className="mt-10 grid grid-cols-3 gap-4">
+            {[
+              { icon: "🎤", label: "Voice AI" },
+              { icon: "⚡", label: "Real-time" },
+              { icon: "🎯", label: "Adaptive" }
+            ].map((feature, i) => (
+              <div key={i} className="text-center">
+                <div className="text-lg mb-1">{feature.icon}</div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider">{feature.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Bottom Text */}
+      <p className="absolute bottom-8 text-slate-600 text-xs tracking-wider">
+        Powered by Advanced AI Technology
+      </p>
+    </div>
+  );
+}
+
 function InterviewInterface({ onEndCall, userId }) {
-  // 1. ADD agentTranscriptions here to get AI text
   const { state, audioTrack, agentTranscriptions } = useVoiceAssistant();
   const { messages: chatMessages } = useChat();
    
   const [conversation, setConversation] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [partialTranscript, setPartialTranscript] = useState(""); // User partial
-  const [agentPartialTranscript, setAgentPartialTranscript] = useState(""); // AI partial
+  const [partialTranscript, setPartialTranscript] = useState("");
+  const [agentPartialTranscript, setAgentPartialTranscript] = useState("");
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState(null);
+  const [interviewTime, setInterviewTime] = useState(0);
    
   const recognitionRef = useRef(null);
   const videoRef = useRef(null);
@@ -116,8 +420,30 @@ function InterviewInterface({ onEndCall, userId }) {
   const conversationEndRef = useRef(null);
   const lastMessageIdRef = useRef(0);
   const lastAgentTranscriptionIdRef = useRef(null);
+  const timerRef = useRef(null);
 
-  // Initialize camera
+  // Interview timer
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setInterviewTime(prev => prev + 1);
+    }, 1000);
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Initialize camera automatically
+  useEffect(() => {
+    initializeCamera();
+  }, []);
+
   const initializeCamera = async () => {
     if (isCameraOn) return;
     
@@ -127,10 +453,10 @@ function InterviewInterface({ onEndCall, userId }) {
     try {
       const constraints = {
         video: {
-          width: { ideal: 320, max: 640 },
-          height: { ideal: 240, max: 480 },
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
           facingMode: "user",
-          frameRate: { ideal: 24, max: 30 }
+          frameRate: { ideal: 30 }
         },
         audio: false
       };
@@ -141,89 +467,41 @@ function InterviewInterface({ onEndCall, userId }) {
       
     } catch (error) {
       console.error("Camera access error:", error);
-      setCameraError("Failed to access camera.");
+      setCameraError("Camera access denied");
       setIsCameraOn(false);
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-        mediaStreamRef.current = null;
-      }
     } finally {
       setIsCameraLoading(false);
     }
   };
 
-  // Attach stream to video element when camera is turned on
   useEffect(() => {
     if (isCameraOn && mediaStreamRef.current && videoRef.current) {
       const videoElement = videoRef.current;
       videoElement.srcObject = mediaStreamRef.current;
-      
-      videoElement.play().catch(e => {
-        console.warn("Auto-play blocked:", e);
-      });
+      videoElement.play().catch(e => console.warn("Auto-play blocked:", e));
     }
   }, [isCameraOn]);
 
-  const turnOffCamera = () => {
-    if (mediaStreamRef.current) {
-      const tracks = mediaStreamRef.current.getTracks();
-      tracks.forEach(track => track.stop());
-      mediaStreamRef.current = null;
-    }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    
-    setIsCameraOn(false);
-    setCameraError(null);
-  };
-
-  const toggleCamera = async () => {
-    if (isCameraOn) {
-      turnOffCamera();
-    } else {
-      await initializeCamera();
-    }
-  };
-
-  const handleVideoInteraction = async () => {
-    if (videoRef.current && videoRef.current.paused) {
-      try {
-        await videoRef.current.play();
-      } catch (e) {
-        console.error("Manual video play failed:", e);
-      }
-    }
-  };
-
-  // Clean up camera on unmount
   useEffect(() => {
     return () => {
       if (mediaStreamRef.current) {
-        const tracks = mediaStreamRef.current.getTracks();
-        tracks.forEach(track => track.stop());
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
 
-  // Scroll to bottom when conversation updates
   useEffect(() => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation, agentPartialTranscript]);
 
-  // -----------------------------------------------------------
-  // NEW LOGIC: Handle AI Transcriptions (Voice -> Text)
-  // -----------------------------------------------------------
+  // Handle AI Transcriptions
   useEffect(() => {
     if (agentTranscriptions && agentTranscriptions.length > 0) {
       const latest = agentTranscriptions[agentTranscriptions.length - 1];
       
-      // If the AI is still speaking (not final), show it as partial text
       if (!latest.final) {
         setAgentPartialTranscript(latest.text);
       } else {
-        // If it is final and we haven't added it yet
         if (latest.id !== lastAgentTranscriptionIdRef.current) {
           lastAgentTranscriptionIdRef.current = latest.id;
           setConversation(prev => [...prev, {
@@ -231,22 +509,19 @@ function InterviewInterface({ onEndCall, userId }) {
             text: latest.text,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }]);
-          setAgentPartialTranscript(""); // Clear partial
+          setAgentPartialTranscript("");
         }
       }
     }
   }, [agentTranscriptions]);
 
-  // Fallback: Listen to explicit chat messages (if your backend sends them)
+  // Fallback chat messages
   useEffect(() => {
     if (chatMessages && chatMessages.length > 0) {
       const lastMessage = chatMessages[chatMessages.length - 1];
       
       if (lastMessage.timestamp !== lastMessageIdRef.current && !lastMessage.from?.isLocal) {
         lastMessageIdRef.current = lastMessage.timestamp;
-        
-        // Only add if we didn't just add it via transcription (deduplication check usually needed here)
-        // For now, simply adding it.
         setConversation(prev => [...prev, {
           speaker: "ai",
           text: lastMessage.message,
@@ -256,7 +531,7 @@ function InterviewInterface({ onEndCall, userId }) {
     }
   }, [chatMessages]);
 
-  // Speech recognition setup (User's Voice)
+  // Speech recognition setup
   useEffect(() => {
     if (typeof window !== 'undefined' && (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window))) {
       console.error("Speech recognition not supported");
@@ -320,7 +595,6 @@ function InterviewInterface({ onEndCall, userId }) {
     };
   }, []);
 
-  // Control speech recognition logic
   useEffect(() => {
     const recognition = recognitionRef.current;
     if (!recognition) return;
@@ -348,352 +622,340 @@ function InterviewInterface({ onEndCall, userId }) {
     }
   }, [state]);
 
-  const clearTranscript = () => {
-    setConversation([]);
-    setPartialTranscript("");
-    setAgentPartialTranscript("");
-    lastMessageIdRef.current = 0;
-  };
-
   return (
-    <div className="flex flex-col items-center space-y-8">
-      {/* Profile Cards Container */}
-      <div className="grid grid-cols-2 gap-8 w-full max-w-4xl">
-        {/* AI Interviewer Card */}
-        <div className="group">
-          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-purple-500/30">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 p-1 shadow-lg">
-                  <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
-                {isSpeaking && (
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-white">AI Interviewer</h3>
-                <p className="text-sm text-slate-400 mt-1">Technical Recruiter</p>
-                <div className="mt-2">
-                  <span className={`text-xs px-3 py-1 rounded-full ${state === "speaking" ? 'bg-purple-500/20 text-purple-300' : state === "listening" ? 'bg-green-500/20 text-green-300' : 'bg-slate-700/50 text-slate-400'}`}>
-                    {state === "speaking" ? "Speaking..." : state === "listening" ? "Listening..." : state || "Idle"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="w-full pt-4">
-                <BarVisualizer
-                  state={isSpeaking ? "speaking" : "idle"}
-                  options={{ maxHeight: 32, minHeight: 8, barCount: 5 }}
-                  trackRef={audioTrack}
-                  style={{
-                    width: "100%",
-                    height: "60px",
-                    "--lk-bg": "transparent",
-                    "--lk-fg": "#a78bfa",
-                  }}
-                  className="bg-transparent"
-                />
-              </div>
+    <div className="h-screen flex">
+      {/* Left Section - Main Video Area */}
+      <div className="flex-1 flex flex-col relative p-6">
+        
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Session Info */}
+          <div className="flex items-center gap-4">
+            <div className="glass rounded-full px-4 py-2 flex items-center gap-3">
+              <div className={`w-2 h-2 rounded-full ${state === 'listening' ? 'bg-green-400 animate-pulse' : state === 'speaking' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-500'}`} />
+              <span className="text-slate-400 text-xs mono uppercase tracking-wider">
+                {state === 'listening' ? 'Listening' : state === 'speaking' ? 'Speaking' : state === 'thinking' ? 'Processing' : 'Connected'}
+              </span>
             </div>
+          </div>
+          
+          {/* Timer */}
+          <div className="glass rounded-full px-5 py-2.5 flex items-center gap-3">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-white text-sm mono font-medium tracking-wider">{formatTime(interviewTime)}</span>
           </div>
         </div>
 
-        {/* User Card with Camera */}
-        <div className="group">
-          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-blue-500/30">
-            <div className="flex flex-col items-center space-y-4">
-              
-              {/* Camera/Video Container */}
-              <div className="relative">
-                <div className="w-40 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 p-1 shadow-lg transition-all duration-300">
+        {/* Main Content */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-4xl">
+            {/* Video Container with Neon Border */}
+            <div className="relative rounded-3xl overflow-hidden neon-border">
+              <div className="flex bg-[#080c14]">
+                {/* AI Avatar Panel */}
+                <div className="w-1/2 aspect-[4/3] relative flex items-center justify-center bg-gradient-to-br from-[#0a1628] to-[#05080f] border-r border-cyan-500/10">
+                  {/* Ambient Effects */}
+                  <div className="absolute inset-0">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px]" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-violet-500/5 rounded-full blur-[60px]" />
+                  </div>
+                  
+                  {/* AI Avatar */}
+                  <div className="relative float-anim">
+                    {/* Audio Visualization Rings */}
+                    {isSpeaking && (
+                      <>
+                        <div className="absolute inset-0 scale-[2.5] flex items-center justify-center">
+                          <div className="w-full h-full border border-cyan-500/20 rounded-full ripple" />
+                        </div>
+                        <div className="absolute inset-0 scale-[2] flex items-center justify-center">
+                          <div className="w-full h-full border border-cyan-500/30 rounded-full ripple" style={{ animationDelay: '0.5s' }} />
+                        </div>
+                        <div className="absolute inset-0 scale-[1.5] flex items-center justify-center">
+                          <div className="w-full h-full border border-cyan-500/40 rounded-full ripple" style={{ animationDelay: '1s' }} />
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Main Avatar Circle */}
+                    <div className="relative w-24 h-24">
+                      <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-cyan-500 p-[2px] ${isSpeaking ? 'glow-pulse' : ''}`}>
+                        <div className="w-full h-full rounded-full bg-[#0a1628] flex items-center justify-center">
+                          <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Status Dot */}
+                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[#0a1628] ${isSpeaking ? 'bg-cyan-400' : 'bg-green-400'}`}>
+                        {isSpeaking && <div className="w-full h-full rounded-full bg-cyan-400 animate-ping" />}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* AI Label */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                    <div className="glass-dark rounded-full px-4 py-1.5 flex items-center gap-2">
+                      <span className="text-cyan-400 text-xs mono font-medium tracking-wider">AI INTERVIEWER</span>
+                      {isSpeaking && (
+                        <div className="flex items-end gap-0.5 h-3">
+                          {[0, 1, 2, 3, 4].map((i) => (
+                            <div 
+                              key={i}
+                              className="w-0.5 bg-cyan-400 rounded-full audio-wave"
+                              style={{ 
+                                animationDelay: `${i * 0.1}s`,
+                                height: '100%'
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Scanning Line Effect when Speaking */}
+                  {isSpeaking && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <div 
+                        className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+                        style={{ animation: 'scanLine 3s ease-in-out infinite' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* User Video Panel */}
+                <div className="w-1/2 aspect-[4/3] bg-[#0a1018] relative overflow-hidden">
                   {isCameraOn ? (
-                    <div 
-                      className="w-full h-full rounded-xl bg-slate-900 overflow-hidden relative cursor-pointer"
-                      onClick={handleVideoInteraction}
-                    >
+                    <>
                       <video
                         ref={videoRef}
                         autoPlay
                         playsInline
                         muted
-                        className="absolute inset-0 w-full h-full object-contain bg-black"
-                        style={{ 
-                          transform: 'scaleX(-1)',
-                          minWidth: '100%',
-                          minHeight: '100%'
-                        }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ transform: 'scaleX(-1)' }}
                       />
-                      <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse z-10"></div>
+                      {/* Video Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       
-                      {videoRef.current?.paused && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                          <div className="text-center p-2">
-                            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
+                      {/* User Label */}
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                        <div className="glass-dark rounded-full px-4 py-1.5 flex items-center gap-2">
+                          <span className="text-amber-400 text-xs mono font-medium tracking-wider">YOU</span>
+                          {isListening && (
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                          )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    </>
                   ) : (
-                    <div className="w-full h-full rounded-xl bg-slate-900 flex items-center justify-center">
-                      <svg className="w-16 h-16 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <div className="w-20 h-20 rounded-full bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-700/50">
+                        <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <p className="text-slate-500 text-xs">{isCameraLoading ? 'Initializing camera...' : 'Camera unavailable'}</p>
+                      {cameraError && (
+                        <p className="text-red-400/80 text-xs mt-2">{cameraError}</p>
+                      )}
                     </div>
                   )}
                 </div>
-                
-                {/* Status indicators */}
-                {isListening && !isCameraOn && (
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
-                )}
-                {isCameraOn && isListening && (
-                  <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-green-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
-                )}
-                {isCameraOn && !isListening && (
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
-                )}
               </div>
+            </div>
 
-              {/* User Info and Camera Controls */}
-              <div className="text-center w-full">
-                <h3 className="text-xl font-bold text-white">You</h3>
-                <p className="text-sm text-slate-400 mt-1">Candidate</p>
-                <div className="mt-2 space-y-2 w-full">
-                  <span className={`inline-block text-xs px-3 py-1 rounded-full ${isListening ? 'bg-green-500/20 text-green-300' : 'bg-slate-700/50 text-slate-400'}`}>
-                    {isListening ? "Speaking..." : "Ready"}
-                  </span>
-                  
-                  <button
-                    onClick={toggleCamera}
-                    disabled={isCameraLoading}
-                    className={`w-full flex items-center justify-center gap-2 text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${isCameraOn 
-                      ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30' 
-                      : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30'
-                    } ${isCameraLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isCameraLoading ? (
-                      <>
-                        <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-                        <span>Loading...</span>
-                      </>
-                    ) : isCameraOn ? (
-                      <>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <span>Turn Camera Off</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <span>Turn Camera On</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                
-                {cameraError && (
-                  <p className="text-xs text-red-400 mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
-                    {cameraError}
-                  </p>
-                )}
-                
-                {!isCameraOn && !cameraError && (
-                  <p className="text-xs text-slate-500 mt-2">
-                    Click "Turn Camera On" to show your video
-                  </p>
-                )}
+            {/* Control Buttons */}
+            <div className="mt-8 flex items-center justify-center gap-4">
+              {/* Mic Status */}
+              <div className={`glass rounded-full p-4 transition-all duration-300 ${isListening ? 'bg-green-500/10 border-green-500/30' : ''}`}>
+                <svg className={`w-5 h-5 transition-colors ${isListening ? 'text-green-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
               </div>
-
-              {/* Visualizer */}
-              <div className="w-full pt-4">
-                <BarVisualizer
-                  state={isListening ? "speaking" : "idle"}
-                  options={{ maxHeight: 32, minHeight: 8, barCount: 5 }}
-                  style={{
-                    width: "100%",
-                    height: "60px",
-                    "--lk-bg": "transparent",
-                    "--lk-fg": "#60a5fa",
-                  }}
-                  className="bg-transparent"
-                />
+              
+              {/* End Call Button */}
+              <button
+                onClick={onEndCall}
+                className="group relative px-10 py-3.5 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300 group-hover:scale-105" />
+                <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
+                <span className="relative flex items-center gap-2 text-white">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
+                  </svg>
+                  End Interview
+                </span>
+              </button>
+              
+              {/* Camera Status */}
+              <div className={`glass rounded-full p-4 transition-all duration-300 ${isCameraOn ? 'bg-cyan-500/10 border-cyan-500/30' : ''}`}>
+                <svg className={`w-5 h-5 transition-colors ${isCameraOn ? 'text-cyan-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Live Transcript Container */}
-      <div className="w-full max-w-4xl">
-        <div className="bg-gradient-to-r from-slate-800/80 via-slate-800/90 to-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-lg overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <p className="text-xs text-slate-400 uppercase tracking-wide">Live Transcript</p>
+      {/* Right Section - Chat Panel */}
+      <div className="w-[400px] glass-dark flex flex-col border-l border-white/5">
+        {/* Chat Header */}
+        <div className="p-5 border-b border-white/5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                <span className="text-xs text-slate-500">Mic {isListening ? 'Active' : 'Inactive'}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${isCameraOn ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                <span className="text-xs text-slate-500">Camera {isCameraOn ? 'ON' : 'OFF'}</span>
+              <div>
+                <h2 className="text-white text-sm font-medium">Live Transcript</h2>
+                <p className="text-slate-500 text-xs">{conversation.length} messages</p>
               </div>
             </div>
-            <button 
-              onClick={clearTranscript}
-              className="text-xs text-slate-400 hover:text-slate-300 px-3 py-1 rounded-lg hover:bg-slate-700/50 transition-colors"
-            >
-              Clear
-            </button>
           </div>
-
-          <div className="max-h-64 overflow-y-auto p-6">
-            {conversation.length === 0 && !partialTranscript && !agentPartialTranscript ? (
-              <div className="text-center py-8">
-                <p className="text-slate-500">Speak to start the conversation...</p>
-                <p className="text-sm text-slate-600 mt-2">Your speech and AI responses will appear here in real-time</p>
+        </div>
+        
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+          {conversation.length === 0 && !partialTranscript && !agentPartialTranscript ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center mb-5 border border-slate-700/50">
+                <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {conversation.map((msg, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex ${msg.speaker === "ai" ? "justify-start" : "justify-end"}`}
-                  >
-                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.speaker === "ai" 
-                      ? "bg-purple-500/10 border border-purple-500/20 rounded-bl-none" 
-                      : "bg-blue-500/10 border border-blue-500/20 rounded-br-none"
+              <h3 className="text-slate-400 text-sm font-medium mb-2">Waiting for conversation</h3>
+              <p className="text-slate-600 text-xs leading-relaxed">The AI interviewer will begin speaking shortly. Your conversation will appear here in real-time.</p>
+            </div>
+          ) : (
+            <>
+              {conversation.map((msg, index) => (
+                <div 
+                  key={index} 
+                  className={`flex ${msg.speaker === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[85%] ${msg.speaker === 'user' ? 'order-1' : ''}`}>
+                    {/* Avatar & Label */}
+                    <div className={`flex items-center gap-2 mb-2 ${msg.speaker === 'user' ? 'flex-row-reverse' : ''}`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        msg.speaker === "ai" 
+                          ? "bg-gradient-to-br from-cyan-500 to-violet-600" 
+                          : "bg-gradient-to-br from-amber-500 to-orange-600"
+                      }`}>
+                        {msg.speaker === "ai" ? (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
+                        msg.speaker === "ai" ? "text-cyan-400/70" : "text-amber-400/70"
+                      }`}>
+                        {msg.speaker === "ai" ? "AI" : "You"}
+                      </span>
+                      <span className="text-slate-600 text-[10px]">{msg.timestamp}</span>
+                    </div>
+                    
+                    {/* Message Bubble */}
+                    <div className={`rounded-2xl px-4 py-3 ${
+                      msg.speaker === "ai" 
+                        ? "bg-slate-800/50 border border-slate-700/50 rounded-tl-sm" 
+                        : "bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/20 rounded-tr-sm"
                     }`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-medium ${msg.speaker === "ai" ? "text-purple-400" : "text-blue-400"}`}>
-                          {msg.speaker === "ai" ? "AI Interviewer" : "You"}
-                        </span>
-                        <span className="text-xs text-slate-500">{msg.timestamp}</span>
-                      </div>
-                      <p className="text-slate-200 text-sm leading-relaxed">{msg.text}</p>
+                      <p className="text-slate-300 text-sm leading-relaxed">{msg.text}</p>
                     </div>
                   </div>
-                ))}
-                
-                {/* AI Partial Transcript (Live Typing) */}
-                {agentPartialTranscript && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-purple-500/5 border border-purple-500/10 rounded-bl-none">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-purple-400/70">AI (speaking...)</span>
-                        <span className="text-xs text-slate-500">Now</span>
-                      </div>
-                      <p className="text-slate-300/70 text-sm italic leading-relaxed">{agentPartialTranscript}</p>
-                    </div>
-                  </div>
-                )}
+                </div>
+              ))}
 
-                {/* User Partial Transcript (Live Typing) */}
-                {partialTranscript && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-blue-500/5 border border-blue-500/10 rounded-br-none">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-blue-400/70">You (speaking...)</span>
-                        <span className="text-xs text-slate-500">Now</span>
+              {/* AI Partial */}
+              {agentPartialTranscript && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
                       </div>
-                      <p className="text-slate-300/70 text-sm italic leading-relaxed">{partialTranscript}</p>
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-cyan-400/50">AI</span>
+                    </div>
+                    <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl rounded-tl-sm px-4 py-3">
+                      <p className="text-slate-500 text-sm italic leading-relaxed">{agentPartialTranscript}</p>
                     </div>
                   </div>
-                )}
-                
-                {state === "thinking" && !agentPartialTranscript && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-purple-500/5 border border-purple-500/10 rounded-bl-none">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                        </div>
-                        <span className="text-xs text-purple-400/70">AI is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={conversationEndRef} />
-              </div>
-            )}
-          </div>
+                </div>
+              )}
 
-          <div className="px-6 py-3 border-t border-slate-700/50 bg-slate-900/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${state === "speaking" ? 'bg-purple-500 animate-pulse' : state === "thinking" ? 'bg-yellow-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs text-slate-500">AI: {state === "speaking" ? 'Speaking' : state === "thinking" ? 'Thinking' : 'Idle'}</span>
+              {/* User Partial */}
+              {partialTranscript && (
+                <div className="flex justify-end">
+                  <div className="max-w-[85%]">
+                    <div className="flex items-center gap-2 mb-2 flex-row-reverse">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-amber-400/50">You</span>
+                    </div>
+                    <div className="bg-amber-600/10 border border-amber-500/10 rounded-2xl rounded-tr-sm px-4 py-3">
+                      <p className="text-slate-500 text-sm italic leading-relaxed">{partialTranscript}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs text-slate-500">You: {isListening ? 'Speaking' : 'Idle'}</span>
+              )}
+
+              {/* Thinking Indicator */}
+              {state === "thinking" && !agentPartialTranscript && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-cyan-400/50">AI is thinking</span>
+                    </div>
+                    <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl rounded-tl-sm px-5 py-4">
+                      <div className="flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                          <div 
+                            key={i}
+                            className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                            style={{ animationDelay: `${i * 0.15}s` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isCameraOn ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs text-slate-500">Camera: {isCameraOn ? 'ON' : 'OFF'}</span>
-                </div>
-              </div>
-              <span className="text-xs text-slate-600">
-                {conversation.length} message{conversation.length !== 1 ? 's' : ''}
-              </span>
-            </div>
+              )}
+
+              <div ref={conversationEndRef} />
+            </>
+          )}
+        </div>
+        
+        {/* Chat Footer */}
+        <div className="p-4 border-t border-white/5">
+          <div className="flex items-center gap-2 text-slate-500 text-xs">
+            <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
+            <span>{isListening ? 'Listening to your voice...' : 'Waiting for speech...'}</span>
           </div>
         </div>
-      </div>
-
-      {/* Debug Info */}
-      <div className="bg-slate-800/50 rounded-lg p-4 max-w-4xl w-full">
-        <p className="text-xs text-slate-400 mb-2">Debug Info:</p>
-        <div className="grid grid-cols-3 gap-4 text-xs">
-          <div>
-            <span className="text-slate-500">Voice Assistant State: </span>
-            <span className={`font-medium ${state === "speaking" ? "text-purple-400" : state === "listening" ? "text-green-400" : "text-slate-400"}`}>
-              {state}
-            </span>
-          </div>
-          <div>
-            <span className="text-slate-500">Chat Messages Count: </span>
-            <span className="text-blue-400">{chatMessages?.length || 0}</span>
-          </div>
-          <div>
-            <span className="text-slate-500">Camera Status: </span>
-            <span className={`font-medium ${isCameraOn ? "text-green-400" : "text-slate-400"}`}>
-              {isCameraOn ? "ON" : "OFF"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-center space-x-4 pt-4">
-        <button 
-          onClick={onEndCall}
-          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold py-3 px-10 rounded-xl shadow-lg transition-all duration-200 flex items-center space-x-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
-          </svg>
-          <span>End Interview</span>
-        </button>
       </div>
     </div>
   );
