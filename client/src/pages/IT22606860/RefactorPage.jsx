@@ -1,11 +1,8 @@
-// ============================================
-// client/src/pages/IT22606860/RefactorPage.jsx (SIMPLIFIED)
-// ============================================
 import React, { useState } from 'react';
 import { 
-    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay
+    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot
 } from 'react-icons/fa';
-import toast from 'react-hot-toast';
+import { Toaster, toast } from 'sonner';
 import CodeEditor from '../../components/IT22606860/CodeEditor';
 import LoadingSpinner from '../../components/IT22606860/LoadingSpinner';
 
@@ -181,92 +178,100 @@ const RefactorPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 py-8">
-            <div className="container-custom">
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                        AI-Powered Code Refactoring
-                    </h1>
-                    <p className="text-white text-lg">
-                        Python code refactoring and optimization with DeepSeek AI
-                    </p>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+            <Toaster />
 
-                {/* Language Selection */}
-                <div className="card mb-8">
-                    <div className="max-w-md mx-auto">
-                        <label className="block text-sm font-semibold text-white mb-2">
-                            Programming Language
-                        </label>
-                        <select
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="select-primary w-full"
-                        >
-                            <option value="python">Python</option>
-                        </select>
-                        <p className="text-xs text-white mt-1">
-                            Enhanced with DeepSeek AI
-                        </p>
+            {/* Enhanced Header */}
+            <div className="border-b border-slate-800 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-xl sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-6 py-8">
+                    <div className="flex items-center gap-4 mb-2">
+                        <div className="p-3 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+                            <FaRobot className="text-white text-2xl" />
+                        </div>
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
+                                AI Code Refactor
+                            </h1>
+                            <p className="text-slate-400 text-sm mt-1">Powered by Advanced AI</p>
+                        </div>
                     </div>
+                    <p className="text-slate-400 text-lg ml-16">Transform your code with intelligent AI-powered refactoring</p>
+                </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-6 py-12">
+                {/* Language Selection Card */}
+                <div className="mb-8 bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-slate-700/50 rounded-xl p-6 backdrop-blur-sm hover:border-slate-600 transition-all duration-300 shadow-lg shadow-slate-900/50">
+                    <label className="block text-sm font-semibold text-slate-200 mb-3">Programming Language</label>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="w-full md:w-48 px-4 py-3 bg-slate-800/80 text-slate-100 border border-slate-700 rounded-lg focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all hover:border-slate-600"
+                    >
+                        <option value="python">Python</option>
+                    </select>
+                    <p className="text-xs text-slate-400 mt-2">Enhanced with DeepSeek AI</p>
                 </div>
 
-                {/* Code Editors */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* Input Editor */}
-                    <div className="card">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                                Input Code
-                            </h3>
+                {/* Code Editors Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Input Editor Card */}
+                    <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden backdrop-blur-sm hover:border-slate-600 transition-all duration-300 shadow-lg shadow-slate-900/50 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div className="border-b border-slate-700/50 p-5 flex items-center justify-between bg-gradient-to-r from-slate-800/50 to-slate-700/30">
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                                <h3 className="text-lg font-semibold text-slate-100">Input Code</h3>
+                            </div>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => handleCopy(inputCode)}
-                                    className="btn-icon text-white"
                                     disabled={!inputCode}
+                                    className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700/50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Copy code"
                                 >
-                                    <FaCopy className="text-white" />
+                                    <FaCopy />
                                 </button>
                                 <button
                                     onClick={handleExecuteInput}
-                                    className="btn-icon text-white bg-green-600 hover:bg-green-700"
                                     disabled={executingInput || !inputCode}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-lg shadow-green-600/30 hover:shadow-green-600/50"
                                     title="Run code"
                                 >
-                                    <FaPlay className="text-white" />
-                                    <span className="text-white">
-                                        {executingInput ? 'Running...' : 'Run'}
-                                    </span>
+                                    <FaPlay className="text-xs" />
+                                    <span>{executingInput ? "Running..." : "Run"}</span>
                                 </button>
                             </div>
                         </div>
-                        <CodeEditor
-                            value={inputCode}
-                            onChange={(value) => setInputCode(value || '')}
-                            language={language}
-                            height="400px"
-                        />
-                        <div className="mt-3 text-sm text-white">
-                            Lines: {inputCode.split('\n').length} |
-                            Characters: {inputCode.length}
+                        <div className="p-5">
+                            <CodeEditor
+                                value={inputCode}
+                                onChange={(value) => setInputCode(value || '')}
+                                language={language}
+                                height="350px"
+                            />
+                            <div className="mt-4 text-xs text-slate-400 flex gap-6">
+                                <span>
+                                    Lines: <span className="text-slate-300 font-mono font-semibold">{inputCode.split("\n").length}</span>
+                                </span>
+                                <span>
+                                    Characters: <span className="text-slate-300 font-mono font-semibold">{inputCode.length}</span>
+                                </span>
+                            </div>
                         </div>
 
-                        {/* Input Code Execution Output */}
+                        {/* Input Execution Output */}
                         {(inputOutput || inputError) && (
-                            <div className="mt-4">
-                                <h4 className="text-sm font-semibold text-white mb-2">
-                                    Execution Output:
+                            <div className="border-t border-slate-700/50 p-5 bg-gradient-to-b from-slate-800/30 to-slate-900/50">
+                                <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                                    <FaCheckCircle className="text-green-500" /> Execution Output
                                 </h4>
                                 {inputOutput && (
-                                    <pre className="bg-gray-800 text-green-400 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs mb-2">
+                                    <pre className="bg-slate-950/80 text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs mb-2 border border-green-500/20 shadow-inner">
                                         {inputOutput}
                                     </pre>
                                 )}
                                 {inputError && (
-                                    <pre className="bg-gray-800 text-red-400 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs">
+                                    <pre className="bg-slate-950/80 text-red-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs border border-red-500/20 shadow-inner">
                                         {inputError}
                                     </pre>
                                 )}
@@ -274,16 +279,14 @@ const RefactorPage = () => {
                         )}
                     </div>
 
-                    {/* Output Editor */}
-                    <div className="card">
-                        <div className="flex items-center justify-between mb-4">
+                    {/* Output Editor Card */}
+                    <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden backdrop-blur-sm hover:border-slate-600 transition-all duration-300 shadow-lg shadow-slate-900/50 hover:shadow-xl hover:shadow-cyan-500/10">
+                        <div className="border-b border-slate-700/50 p-5 flex items-center justify-between bg-gradient-to-r from-slate-800/50 to-slate-700/30">
                             <div className="flex items-center gap-3">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                                    Refactored Code
-                                </h3>
+                                <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse"></div>
+                                <h3 className="text-lg font-semibold text-slate-100">Refactored Code</h3>
                                 {processingTime && (
-                                    <span className="badge-success text-white">
+                                    <span className="text-xs font-mono bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg border border-cyan-500/40 font-semibold">
                                         {(processingTime / 1000).toFixed(2)}s
                                     </span>
                                 )}
@@ -291,119 +294,137 @@ const RefactorPage = () => {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => handleCopy(refactoredCode)}
-                                    className="btn-icon text-white"
                                     disabled={!refactoredCode}
+                                    className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700/50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Copy code"
                                 >
-                                    <FaCopy className="text-white" />
+                                    <FaCopy />
                                 </button>
                                 <button
                                     onClick={() => handleDownload(refactoredCode, `refactored.${language}`)}
-                                    className="btn-icon text-white"
                                     disabled={!refactoredCode}
+                                    className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700/50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Download code"
                                 >
-                                    <FaDownload className="text-white" />
+                                    <FaDownload />
                                 </button>
                                 <button
                                     onClick={handleExecuteRefactored}
-                                    className="btn-icon text-white bg-green-600 hover:bg-green-700"
                                     disabled={executingRefactored || !refactoredCode}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-lg shadow-green-600/30 hover:shadow-green-600/50"
                                     title="Run code"
                                 >
-                                    <FaPlay className="text-white" />
-                                    <span className="text-white">
-                                        {executingRefactored ? 'Running...' : 'Run'}
-                                    </span>
+                                    <FaPlay className="text-xs" />
+                                    <span>{executingRefactored ? "Running..." : "Run"}</span>
                                 </button>
                             </div>
                         </div>
-                        {loading ? (
-                            <LoadingSpinner message="Refactoring with DeepSeek AI... This may take 10-30 seconds" />
-                        ) : (
-                            <>
-                                <CodeEditor
-                                    value={refactoredCode}
-                                    onChange={() => { }}
-                                    language={language}
-                                    readOnly={true}
-                                    height="400px"
-                                />
-                                {refactoredCode && (
-                                    <div className="mt-3 text-sm text-white">
-                                        Lines: {refactoredCode.split('\n').length} |
-                                        Characters: {refactoredCode.length}
-                                    </div>
-                                )}
+                        <div className="p-5">
+                            {loading ? (
+                                <LoadingSpinner message="Refactoring with DeepSeek AI... This may take 10-30 seconds" />
+                            ) : (
+                                <>
+                                    <CodeEditor
+                                        value={refactoredCode}
+                                        onChange={() => {}}
+                                        language={language}
+                                        readOnly={true}
+                                        height="350px"
+                                    />
+                                    {refactoredCode && (
+                                        <div className="mt-4 text-xs text-slate-400 flex gap-6">
+                                            <span>
+                                                Lines:{" "}
+                                                <span className="text-slate-300 font-mono font-semibold">
+                                                    {refactoredCode.split("\n").length}
+                                                </span>
+                                            </span>
+                                            <span>
+                                                Characters:{" "}
+                                                <span className="text-slate-300 font-mono font-semibold">{refactoredCode.length}</span>
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
-                                {/* Refactored Code Execution Output */}
-                                {(refactoredOutput || refactoredError) && (
-                                    <div className="mt-4">
-                                        <h4 className="text-sm font-semibold text-white mb-2">
-                                            Execution Output:
-                                        </h4>
-                                        {refactoredOutput && (
-                                            <pre className="bg-gray-800 text-green-400 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs mb-2">
-                                                {refactoredOutput}
-                                            </pre>
-                                        )}
-                                        {refactoredError && (
-                                            <pre className="bg-gray-800 text-red-400 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs">
-                                                {refactoredError}
-                                            </pre>
-                                        )}
-                                    </div>
+                        {/* Refactored Execution Output */}
+                        {(refactoredOutput || refactoredError) && (
+                            <div className="border-t border-slate-700/50 p-5 bg-gradient-to-b from-slate-800/30 to-slate-900/50">
+                                <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                                    <FaCheckCircle className="text-green-500" /> Execution Output
+                                </h4>
+                                {refactoredOutput && (
+                                    <pre className="bg-slate-950/80 text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs mb-2 border border-green-500/20 shadow-inner">
+                                        {refactoredOutput}
+                                    </pre>
                                 )}
-                            </>
+                                {refactoredError && (
+                                    <pre className="bg-slate-950/80 text-red-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-xs border border-red-500/20 shadow-inner">
+                                        {refactoredError}
+                                    </pre>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
                     <button
                         onClick={handleRefactor}
-                        className="btn-primary text-lg px-8 py-4 shadow-glow-blue text-white"
                         disabled={loading || !inputCode}
+                        className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:via-blue-600 hover:to-cyan-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-xl shadow-blue-600/40 hover:shadow-blue-600/60 disabled:shadow-none"
                     >
-                        <FaMagic className="text-xl text-white" />
-                        <span className="text-white">
-                            {loading ? 'Refactoring with AI...' : 'Refactor with AI'}
-                        </span>
+                        <FaMagic className="text-xl" />
+                        <span>{loading ? "Refactoring with AI..." : "Refactor with AI"}</span>
                     </button>
-
                     <button
                         onClick={handleClear}
-                        className="btn-secondary text-lg px-8 py-4 text-white"
                         disabled={loading || executingInput || executingRefactored}
+                        className="flex items-center justify-center gap-3 px-8 py-4 bg-slate-700/80 text-slate-100 rounded-lg hover:bg-slate-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-lg shadow-slate-900/50 hover:shadow-slate-800/70"
                     >
-                        <FaTrash className="text-white" />
-                        <span className="text-white">Clear All</span>
+                        <FaTrash className="text-xl" />
+                        <span>Clear All</span>
                     </button>
                 </div>
 
                 {/* Info Section */}
-                <div className="card">
-                    <div className="text-center">
-                        <h3 className="text-xl font-bold text-white mb-3">
+                <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-slate-700/50 rounded-xl p-8 backdrop-blur-sm shadow-lg shadow-slate-900/50">
+                    <div className="text-center mb-10">
+                        <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-100 to-slate-200 bg-clip-text text-transparent mb-2">
                             How It Works
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
-                            <div className="p-4 bg-gray-800 rounded-lg">
-                                <div className="text-3xl mb-2">📝</div>
-                                <h4 className="font-semibold mb-2">1. Enter Code</h4>
-                                <p className="text-sm">Paste your Python code in the input editor</p>
+                        <p className="text-slate-400">Simple 3-step process to refactor your code with AI</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="p-6 bg-gradient-to-br from-blue-600/15 to-cyan-600/10 border border-blue-500/30 rounded-lg hover:border-blue-500/60 transition-all duration-300 hover:bg-gradient-to-br hover:from-blue-600/20 hover:to-cyan-600/15 shadow-lg shadow-blue-600/10">
+                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                                <span className="text-white font-bold text-xl">1</span>
                             </div>
-                            <div className="p-4 bg-gray-800 rounded-lg">
-                                <div className="text-3xl mb-2">🤖</div>
-                                <h4 className="font-semibold mb-2">2. AI Refactor</h4>
-                                <p className="text-sm">DeepSeek AI analyzes and improves your code</p>
+                            <h4 className="font-semibold text-slate-100 mb-2 text-lg">Enter Code</h4>
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                                Paste your code in the input editor to get started
+                            </p>
+                        </div>
+                        <div className="p-6 bg-gradient-to-br from-cyan-600/15 to-blue-600/10 border border-cyan-500/30 rounded-lg hover:border-cyan-500/60 transition-all duration-300 hover:bg-gradient-to-br hover:from-cyan-600/20 hover:to-blue-600/15 shadow-lg shadow-cyan-600/10">
+                            <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
+                                <span className="text-white font-bold text-xl">2</span>
                             </div>
-                            <div className="p-4 bg-gray-800 rounded-lg">
-                                <div className="text-3xl mb-2">✅</div>
-                                <h4 className="font-semibold mb-2">3. Test & Use</h4>
-                                <p className="text-sm">Run both versions to verify functionality</p>
+                            <h4 className="font-semibold text-slate-100 mb-2 text-lg">AI Refactor</h4>
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                                Advanced AI analyzes and optimizes your code quality
+                            </p>
+                        </div>
+                        <div className="p-6 bg-gradient-to-br from-green-600/15 to-emerald-600/10 border border-green-500/30 rounded-lg hover:border-green-500/60 transition-all duration-300 hover:bg-gradient-to-br hover:from-green-600/20 hover:to-emerald-600/15 shadow-lg shadow-green-600/10">
+                            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-4 shadow-lg shadow-green-500/30">
+                                <span className="text-white font-bold text-xl">3</span>
                             </div>
+                            <h4 className="font-semibold text-slate-100 mb-2 text-lg">Test & Use</h4>
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                                Execute and verify both versions to ensure functionality
+                            </p>
                         </div>
                     </div>
                 </div>
