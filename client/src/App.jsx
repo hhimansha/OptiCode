@@ -18,9 +18,9 @@ import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
 
-// Components
-import Header from './components/IT22606860/Header'
-import Footer from './components/IT22606860/Footer'
+// // Components
+// import Header from './components/IT22606860/Header'
+// import Footer from './components/IT22606860/Footer'
 
 const App = () => {
   return (
