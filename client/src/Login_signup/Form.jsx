@@ -51,7 +51,7 @@ const Form = () => {
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
       if (isLogin) {
-        navigate('/face');
+        navigate('/interview');
       }
     } else {
       setLoginSuccess(false);
