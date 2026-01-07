@@ -10,6 +10,7 @@ import axios from 'axios';
 // API URLs
 const EXPRESS_API_URL = 'http://localhost:5000/api';  // Primary Express backend
 const ML_API_URL = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000';  // Python ML Service
+const RISK_API_URL = 'http://localhost:8001';  // Risk Analysis Service
 
 // Create axios instance for primary Express backend
 const expressApi = axios.create({
@@ -27,6 +28,15 @@ const mlApi = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 120000, // 120 seconds for two-stage process (local model + DeepSeek)
+});
+
+// Create axios instance for Risk Analysis service
+const riskApi = axios.create({
+    baseURL: RISK_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 60000, // 60 seconds for risk analysis
 });
 
 // ============================================
@@ -108,6 +118,58 @@ export const refactorCode = async (code, instruction = null, language = 'python'
 };
 
 /**
+ * Analyze refactoring risk between original and refactored code
+ * @param {string} originalCode - Original code
+ * @param {string} refactoredCode - Refactored code
+ * @param {string} language - Programming language
+ * @returns {Promise} Response with risk analysis and chart data
+ */
+export const analyzeRefactoringRisk = async (originalCode, refactoredCode, language = 'python') => {
+    try {
+        console.log('[API] Calling Risk Analysis service...');
+        console.log('[API] Original code length:', originalCode.length);
+        console.log('[API] Refactored code length:', refactoredCode.length);
+        
+        const requestData = {
+            original_code: originalCode,
+            refactored_code: refactoredCode,
+            language: language
+        };
+        
+        // Note: Risk analysis runs on port 8001
+        const response = await riskApi.post('/api/risk-analyze', requestData);
+        
+        console.log('[API] Risk analysis response:', response.data);
+        
+        // Log risk details
+        if (response.data.risk_analysis) {
+            const risk = response.data.risk_analysis;
+            console.log(`[API] Risk Score: ${risk.risk_score} (${risk.risk_level})`);
+            console.log(`[API] Recommendation: ${risk.recommendation}`);
+        }
+        
+        return response.data;
+        
+    } catch (error) {
+        console.error('[API] Risk analysis error:', error);
+        
+        if (error.response) {
+            throw new Error(error.response.data.message || 'Failed to analyze risk');
+        } else if (error.request) {
+            throw new Error(
+                `Cannot connect to Risk Analysis service. ` +
+                'Please ensure:\n' +
+                '1. Risk analysis backend is running (python risk_analysis_api.py)\n' +
+                '2. Port 8001 is available\n' +
+                '3. OpenRouter API key is valid'
+            );
+        } else {
+            throw new Error(error.message || 'An unexpected error occurred during risk analysis');
+        }
+    }
+};
+
+/**
  * Execute code and get output
  * @param {string} code - Code to execute
  * @returns {Promise} Response with execution output/error
@@ -176,6 +238,20 @@ export const checkBackendHealth = async () => {
         return response.data;
     } catch (error) {
         throw new Error(`Backend service is not available at ${EXPRESS_API_URL}`);
+    }
+};
+
+/**
+ * Check risk analysis service health
+ * @returns {Promise} Health status
+ */
+export const checkRiskAnalysisHealth = async () => {
+    try {
+        const response = await riskApi.get('/health');
+        console.log('[API] Risk Analysis Service Health:', response.data);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Risk analysis service is not available at ${RISK_API_URL}`);
     }
 };
 
@@ -370,4 +446,4 @@ export const getPipelineConfig = async () => {
 // ============================================
 
 export default expressApi;
-export { mlApi };
+export { mlApi, riskApi };

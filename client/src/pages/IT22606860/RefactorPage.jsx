@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { 
-    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot
+    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot, FaShieldAlt
 } from 'react-icons/fa';
 import { Toaster, toast } from 'sonner';
 import CodeEditor from '../../components/IT22606860/CodeEditor';
 import LoadingSpinner from '../../components/IT22606860/LoadingSpinner';
+import RiskAnalysisPanel from '../../components/IT22606860/RiskAnalysisPanel';
 
 // Import API functions
 import { 
     refactorCode, 
-    executeCode
+    executeCode,
+    analyzeRefactoringRisk
 } from '../../services/api';
 
 const RefactorPage = () => {
@@ -27,6 +29,11 @@ const RefactorPage = () => {
     const [inputError, setInputError] = useState('');
     const [refactoredOutput, setRefactoredOutput] = useState('');
     const [refactoredError, setRefactoredError] = useState('');
+
+    // Risk analysis states
+    const [analyzingRisk, setAnalyzingRisk] = useState(false);
+    const [riskData, setRiskData] = useState(null);
+    const [riskError, setRiskError] = useState('');
 
     // ============================================
     // HANDLERS
@@ -46,6 +53,8 @@ const RefactorPage = () => {
         setProcessingTime(null);
         setRefactoredOutput('');
         setRefactoredError('');
+        setRiskData(null);
+        setRiskError('');
 
         try {
             console.log('[REFACTOR] Calling refactorCode API...');
@@ -83,6 +92,36 @@ const RefactorPage = () => {
             toast.error(error.message || 'An error occurred during refactoring');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAnalyzeRisk = async () => {
+        if (!inputCode.trim() || !refactoredCode.trim()) {
+            toast.error('Please refactor code first to analyze risk');
+            return;
+        }
+
+        setAnalyzingRisk(true);
+        setRiskData(null);
+        setRiskError('');
+
+        try {
+            console.log('[RISK] Starting risk analysis...');
+            const response = await analyzeRefactoringRisk(inputCode, refactoredCode, language);
+            
+            if (response.success) {
+                setRiskData(response);
+                toast.success('Risk analysis completed!');
+            } else {
+                setRiskError(response.message || 'Failed to analyze risk');
+                toast.error('Risk analysis failed');
+            }
+        } catch (error) {
+            console.error('[RISK] Error:', error);
+            setRiskError(error.message);
+            toast.error(error.message || 'Failed to analyze risk');
+        } finally {
+            setAnalyzingRisk(false);
         }
     };
 
@@ -174,6 +213,8 @@ const RefactorPage = () => {
         setInputError('');
         setRefactoredOutput('');
         setRefactoredError('');
+        setRiskData(null);
+        setRiskError('');
         toast.success('Cleared!');
     };
 
@@ -381,6 +422,14 @@ const RefactorPage = () => {
                         <span>{loading ? "Refactoring with AI..." : "Refactor with AI"}</span>
                     </button>
                     <button
+                        onClick={handleAnalyzeRisk}
+                        disabled={analyzingRisk || !inputCode || !refactoredCode}
+                        className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-xl shadow-purple-600/40 hover:shadow-purple-600/60 disabled:shadow-none"
+                    >
+                        <FaShieldAlt className="text-xl" />
+                        <span>{analyzingRisk ? "Analyzing Risk..." : "Analyze Risk"}</span>
+                    </button>
+                    <button
                         onClick={handleClear}
                         disabled={loading || executingInput || executingRefactored}
                         className="flex items-center justify-center gap-3 px-8 py-4 bg-slate-700/80 text-slate-100 rounded-lg hover:bg-slate-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-lg shadow-slate-900/50 hover:shadow-slate-800/70"
@@ -388,6 +437,25 @@ const RefactorPage = () => {
                         <FaTrash className="text-xl" />
                         <span>Clear All</span>
                     </button>
+                </div>
+
+                {/* Risk Analysis Dashboard */}
+                <div className="mt-12 mb-12">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg shadow-purple-500/30">
+                            <FaShieldAlt className="text-white text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-100">Risk Analysis Dashboard</h3>
+                            <p className="text-slate-400">AI-powered safety assessment for refactoring</p>
+                        </div>
+                    </div>
+                    
+                    <RiskAnalysisPanel 
+                        riskData={riskData}
+                        loading={analyzingRisk}
+                        error={riskError}
+                    />
                 </div>
 
                 {/* Info Section */}
