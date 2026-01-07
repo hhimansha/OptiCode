@@ -12,7 +12,17 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectDB } from './Config/db.js';
+//import userRoutes from './routers/IT22606860/Userrouter.js';
 
+// IT22606860 Routes
+import refactorRoutes from './routers/IT22606860/refactorRoutes.js';
+import historyRoutes from './routers/IT22606860/historyRoutes.js';
+import riskRoutes from './routers/IT22606860/riskRoutes.js';
+import bestPracticesRoutes from './routers/IT22606860/bestPracticesRoutes.js';
+import analyticsRoutes from './routers/IT22606860/analyticsRoutes.js';
+
+import errorHandler from './middlewares/errorHandler.js';
+import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 import Questionrouter from './routers/IT22639226/Questionrouter.js';
 
@@ -71,9 +81,46 @@ app.post("/api/predict-skill", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+// IT22606860 Routes - Additional feature endpoints
+app.use('/api/IT22606860/refactor', refactorRoutes);
+app.use('/api/IT22606860/history', historyRoutes);
+app.use('/api/IT22606860/risks', riskRoutes);
+app.use('/api/IT22606860/best-practices', bestPracticesRoutes);
+app.use('/api/IT22606860/analytics', analyticsRoutes);
+
+// LiveKit and Question routes
 app.use('/api/livekit', livekitRouter);
 app.use('/api/question', Questionrouter);
+
+// 404 handler for undefined routes (must be after all other routes)
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
+// =============================
+//       START SERVER
+// ============================= 
 // ✅ Start server
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('✅ HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('❌ Unhandled Rejection:', err);
+  process.exit(1);
 });
