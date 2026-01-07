@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes, BrowserRouter } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import CodeConceptExtractor from './component/IT22601360/CodeConceptExtractor'
 //import AIInterview from './component/AIInterview'
 import './App.css';
@@ -12,13 +12,22 @@ import Face from './modules/AI Interview/Face';
 import AssessmentPage from "./component/IT22604194/AssessmentPage";
 import AssessmentResultPage from "./component/IT22604194/AssessmentResultPage";
 
+// Pages
+import Home from './pages/IT22606860/Home'
+import RefactorPage from './pages/IT22606860/RefactorPage'
+import History from './pages/IT22606860/History'
+import Interviewquestion from './component/IT22639226/Interviewquestion'
 
-import Interviewquestion from './component/IT22639226/Interviewquestion';
+// // Components
+// import Header from './components/IT22606860/Header'
+// import Footer from './components/IT22606860/Footer'
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/refactor" element={<RefactorPage />} />
+        <Route path="/history" element={<History />} />
         <Route path="/" element={<Form />} />
         <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/assessment/result" element={<AssessmentResultPage />} />
@@ -29,7 +38,6 @@ const App = () => {
         <Route path="/livekit"element={<LiveInterview/>}/>  
         <Route path="/interview" element={<Interviewquestion/>} />
       </Routes>
-    </BrowserRouter>
   );
 }
 
