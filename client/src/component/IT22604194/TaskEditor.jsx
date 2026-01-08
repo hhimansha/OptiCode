@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import "../../styles/TaskEditor.css";
 import { useState, useEffect } from "react";
@@ -14,6 +14,8 @@ export default function TaskEditor() {
   const [hints, setHints] = useState([]);
   const [loadingHints, setLoadingHints] = useState(false);
   const [lastTypedAt, setLastTypedAt] = useState(Date.now());
+  const navigate = useNavigate();
+
   
   
 
@@ -75,6 +77,14 @@ const handleAnotherTask = async () => {
     alert("Could not generate a new task");
   }
 };
+const handleTakeQuizAgain = () => {
+  // Clear stored data
+  sessionStorage.removeItem("generatedTask");
+
+  // Navigate back to quiz page
+  navigate("/assessment");
+};
+
 
 
   // Live weakness detection (debounced)
@@ -136,8 +146,19 @@ useEffect(() => {
       <h1 className="title">🧠Adaptive Coding Task</h1>
       
       <p className="skill">
-        Predicted Skill: <span>{skillLevel}</span>
-      </p>
+  Predicted Skill:
+  <span className="skill-pill">{skillLevel}</span>
+
+  <button
+    className="quiz-again-btn"
+    onClick={handleTakeQuizAgain}
+    type="button"
+  >
+    Take Quiz Again
+  </button>
+</p>
+
+
 
       <div className="task-box">
         <h3>Your Task</h3>
