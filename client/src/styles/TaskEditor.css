@@ -219,10 +219,32 @@ body {
 .editor-actions {
   max-width: var(--content-width);
   margin: 0 auto;
+  background: transparent !important;
+  isolation: isolate;
   display: flex;
   justify-content: center;
   gap: 8px; /* adjust if needed */
 }
+.editor-actions * {
+  background-color: transparent !important;
+}
+/* Hide editor bottom glow / line */
+.editor-hint-wrapper {
+  padding-bottom: 24px;
+  overflow: hidden;
+}
+/* ABSOLUTE KILL SWITCH FOR THE LINE */
+.monaco-editor,
+.monaco-editor * {
+  border-bottom: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.editor-container {
+  border-bottom: none !important;
+}
+
+
 
 
 

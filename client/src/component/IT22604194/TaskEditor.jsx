@@ -148,24 +148,24 @@ useEffect(() => {
 
       {/* EDITOR + HINT PANEL */}
       <div className="editor-hint-wrapper">
-        <div className="editor-container"></div>
+        <div className="editor-container">
         <Editor
-          height="420px"
-          language="python"
-          theme="vs-dark"
-          value={code}
-          onChange={(value) => {
-           setCode(value || "");
-           setLastTypedAt(Date.now());
-           }}
-
-          options={{
-            fontSize: 16,
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-          }}
-        />
+    height="420px"
+    language="python"
+    theme="vs-dark"
+    value={code}
+    onChange={(value) => {
+      setCode(value || "");
+      setLastTypedAt(Date.now());
+    }}
+    options={{
+      fontSize: 16,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+    }}
+  />
+  </div>
 
         {/* FLOATING LIVE HINTS */}
         <div className="hint-panel">
