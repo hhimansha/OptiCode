@@ -2,14 +2,14 @@ import { useState } from "react";
 import questions from "./questions";
 import "../../styles/AssessmentUI.css";
 
-
+//1
 
 export default function AssessmentUI({ onSubmit }) {
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const QUESTIONS_PER_PAGE = 15;
+  const QUESTIONS_PER_PAGE = 10;
   const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
@@ -69,7 +69,8 @@ export default function AssessmentUI({ onSubmit }) {
        >
      OptiCode Skill Predictor
      </h2>
-     <h4>Page {currentPage} of {totalPages}</h4>
+     <h4>Page {currentPage} of {totalPages} (10 questions per page)</h4>
+
 
       <form onSubmit={handleSubmit}>
         {currentQuestions.map((q, index) => {

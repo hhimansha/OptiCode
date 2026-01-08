@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import AssessmentUI from "./AssessmentUI";
-
+//2
 export default function AssessmentPage() {
   const navigate = useNavigate();
 
