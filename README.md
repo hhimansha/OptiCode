@@ -10,6 +10,32 @@
 
 ---
 
+## 📦 Project Repositories
+
+This project is split into **two main repositories**:
+
+### 🌐 [MERN Application](https://github.com/hhimansha/OptiCode)
+**Frontend + Backend** - React UI, Node.js/Express API Gateway, MongoDB Database
+- 🔗 **Repository**: https://github.com/hhimansha/OptiCode
+- 📱 **Contains**: 
+  - React frontend with all UI components
+  - Express.js backend API gateway
+  - MongoDB database models
+  - User authentication & routing
+
+### 🤖 [Python AI Services](https://github.com/hhimansha/OptiCode-AI-services)
+**AI/ML Microservices** - FastAPI, Machine Learning Models, NLP Services
+- 🔗 **Repository**: https://github.com/hhimansha/OptiCode-AI-services
+- 🧠 **Contains**:
+  - Code Concept Extractor (Gemini AI + AST)
+  - Code Refactoring Engine (CodeT5)
+  - Adaptive Learning Models (Random Forest + Qwen)
+  - Mock Interview System (Voice + Vision AI)
+
+> **💡 Quick Start**: Clone both repositories to get the complete system working.
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
@@ -50,7 +76,7 @@
 
 ## 🏗️ System Architecture
 
-<img width="1188" height="769" alt="Screenshot 2026-01-11 204116" src="https://github.com/user-attachments/assets/3fb393b5-1cd4-4a91-acae-9aa3b54cde81" />
+<img width="1188" height="769" alt="Screenshot 2026-01-11 204116" src="https://github.com/user-attachments/assets/88ca9125-5253-4601-9a80-87099ccb84f8" />
 
 ---
 
@@ -114,8 +140,6 @@ Students often write code without understanding the underlying CS concepts (algo
 - **AI Extraction**: 2-5s (Gemini API)
 - **Accuracy**: ~85% concept detection rate
 - **Fallback Success**: 100% uptime with AST-based fallback
-
----
 
 ### 2. Code Refactoring with Risk Analysis [IT22606860]
 
@@ -304,11 +328,34 @@ Lack of interview practice leads to poor performance. This system provides autom
 - **MongoDB** ([Download](https://www.mongodb.com/try/download/community))
 - **Git** ([Download](https://git-scm.com/))
 
-### Step 1: Clone Repository
+### Repository Structure
+
+This project is split into **two separate repositories**:
+
+1. **MERN Application** (Frontend + Backend): [OptiCode](https://github.com/hhimansha/OptiCode)
+2. **Python AI Services** (ML Models): [OptiCode-AI-services](https://github.com/hhimansha/OptiCode-AI-services)
+
+### Step 1: Clone Both Repositories
 
 ```bash
-git clone https://github.com/hhimansha/opticode.git
-cd opticode
+# Clone MERN application
+git clone https://github.com/hhimansha/OptiCode.git
+cd OptiCode
+
+# Clone Python AI services (in parallel directory)
+cd ..
+git clone https://github.com/hhimansha/OptiCode-AI-services.git
+```
+
+**Directory Structure After Cloning:**
+```
+workspace/
+├── OptiCode/                    # MERN stack application
+│   ├── client/                  # React frontend
+│   └── server/                  # Node.js backend
+└── OptiCode-AI-services/        # Python AI microservices
+    ├── app/
+    └── requirements.txt
 ```
 
 ### Step 2: Setup Python AI Services
@@ -392,7 +439,105 @@ npm run dev
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
 - **Python AI Services**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
+- **API Docs (Swagger)**: http://localhost:8000/docs
+
+### 🔍 Verification
+
+Once all services are running, verify the setup:
+
+1. **Check AI Service Health:**
+   ```bash
+   curl http://localhost:8000/health
+   ```
+   Expected response: `{"status": "healthy"}`
+
+2. **Check Backend Gateway:**
+   ```bash
+   curl http://localhost:5000/api/health
+   ```
+
+3. **Access Frontend:**
+   Open http://localhost:3000 in your browser
+
+---
+
+## 📂 Project Structure
+
+```
+opticode/
+│
+├── OptiCode-AI-services/              # Python AI Microservices
+│   ├── app/
+│   │   ├── services/
+│   │   │   ├── IT22601360/           # Code Concept Extractor
+│   │   │   │   ├── preprocessor.py
+│   │   │   │   ├── ast_analyzer.py
+│   │   │   │   ├── gemini_extractor.py
+│   │   │   │   ├── enhanced_extractor.py
+│   │   │   │   ├── codebert_model.py
+│   │   │   │   └── visualizer.py
+│   │   │   ├── refactoring/          # Code Refactoring
+│   │   │   ├── learning/             # Adaptive Learning
+│   │   │   └── interview/            # Mock Interview
+│   │   ├── routers/
+│   │   │   ├── IT22601360/
+│   │   │   │   └── concept_extractor.py
+│   │   │   └── ...
+│   │   └── utils/
+│   │       └── constants.py
+│   ├── requirements.txt
+│   ├── main.py
+│   └── .env
+│
+├── OptiCode/
+│   ├── server/                        # Node.js Backend
+│   │   ├── controllers/
+│   │   │   ├── IT22601360/
+│   │   │   │   └── conceptExtractor.js
+│   │   │   └── ...
+│   │   ├── routers/
+│   │   │   ├── IT22601360/
+│   │   │   │   └── conceptExtractor.js
+│   │   │   └── ...
+│   │   ├── models/
+│   │   ├── config/
+│   │   ├── server.js
+│   │   ├── package.json
+│   │   └── .env
+│   │
+│   └── client/                        # React Frontend
+│       ├── src/
+│       │   ├── component/
+│       │   │   ├── IT22601360/
+│       │   │   │   ├── CodeConceptExtractor.jsx
+│       │   │   │   ├── ConceptGraph.jsx
+│       │   │   │   ├── ConceptList.jsx
+│       │   │   │   ├── DistributionChart.jsx
+│       │   │   │   └── ...
+│       │   │   └── ...
+│       │   ├── modules/
+│       │   │   └── IT22601360/
+│       │   │       └── conceptExtractorApi.js
+│       │   ├── App.js
+│       │   └── index.js
+│       ├── public/
+│       ├── package.json
+│       └── .env
+│
+├── training/                          # Model Training Scripts
+│   ├── codebert_finetuning/
+│   ├── codet5_refactoring/
+│   └── skill_prediction/
+│
+├── docs/                              # Documentation
+│   ├── architecture.md
+│   ├── api_reference.md
+│   └── deployment_guide.md
+│
+├── .gitignore
+├── README.md
+└── LICENSE
+```
 
 ---
 
@@ -407,11 +552,6 @@ This project is developed as part of a **Final Year Research Project** at **SLII
 3. **Adaptive Learning Models** - ML-driven skill assessment and task generation
 4. **Multi-Modal Interview System** - Integration of speech, vision, and language AI
 
-### Publications & Citations
-
-- Research papers submitted to [Conference/Journal Name]
-- Dataset contributions to [Repository Name]
-
 ---
 
 ## 👥 Contributors
@@ -421,19 +561,13 @@ This project is developed as part of a **Final Year Research Project** at **SLII
 | Component | Student ID | Name |
 |-----------|------------|------|
 | **Code Concept Extractor** | IT22601360 | Himansha L.M.H |
-| **Code Refactoring System** | [Student ID] | [Name] |
-| **Adaptive Learning System** | [Student ID] | [Name] |
-| **Mock Interview System** | [Student ID] | [Name] |
+| **Code Refactoring System** | IT22606860 | Sandamal R.T |
+| **Adaptive Learning System** | IT22604194 | Hettiarachchi G.V.G.A.S |
+| **Mock Interview System** | IT22639226 | Dharmasiri M.H.N.V |
 
 ### Supervision
-- **Project Supervisor**: [Supervisor Name]
-- **Co-Supervisor**: [Co-Supervisor Name]
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+- **Project Supervisor**: Ms. Sanjeevi Chandrasiri
+- **Co-Supervisor**: Ms. Lokesha Weerasinghe
 
 ---
 
@@ -445,6 +579,24 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **OpenAI** - Research inspiration
 - **SLIIT** - Academic support and guidance
 - **Open Source Community** - Various libraries and tools
+
+---
+
+## 📞 Contact & Support
+
+### Project Repositories
+- **MERN Application**: [github.com/hhimansha/OptiCode](https://github.com/hhimansha/OptiCode)
+- **Python AI Services**: [github.com/hhimansha/OptiCode-AI-services](https://github.com/hhimansha/OptiCode-AI-services)
+
+### Issues & Bug Reports
+- Report bugs in respective repositories using GitHub Issues
+- For concept extractor issues: [OptiCode-AI-services/issues](https://github.com/hhimansha/OptiCode-AI-services/issues)
+- For frontend/backend issues: [OptiCode/issues](https://github.com/hhimansha/OptiCode/issues)
+
+### Contact
+- **Email**: himanshainfo@gmail.com
+
+---
 
 ## 🚀 Future Enhancements
 
@@ -487,31 +639,39 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 🛡️ Security & Privacy
 
-- **API Key Management** - Environment variables only
-- **Data Encryption** - All communications over HTTPS
-- **User Privacy** - Code and interview data stored securely
+- **API Key Management** - Environment variables only, never commit to repositories
+- **Data Encryption** - All communications over HTTPS in production
+- **User Privacy** - Code and interview data stored securely in MongoDB
 - **GDPR Compliant** - User data deletion on request
-- **Rate Limiting** - API abuse prevention
+- **Rate Limiting** - API abuse prevention (5 RPM free tier, 60 RPM paid tier)
+- **Input Validation** - All user inputs sanitized to prevent injection attacks
 
 ---
 
 ## 🐛 Known Issues & Limitations
 
 ### Concept Extractor
-- CodeBERT model not fully integrated (Gemini-only mode)
-- Limited to predefined concept categories
-- Graph visualization may lag with 50+ concepts
+- CodeBERT model not fully integrated (Gemini-only mode active)
+- Limited to predefined concept categories (extensible via constants.py)
+- Graph visualization may lag with 50+ concepts (optimization needed)
+- Rate limiting on Gemini API free tier (5 requests/minute)
 
 ### Refactoring System
-- Python-only support currently
+- Python-only support currently (Java, JavaScript planned)
 - AST diffing may miss subtle semantic changes
+- Large files (>1000 LOC) may timeout
 
 ### Adaptive Learning
-- Code execution not implemented (hints only)
+- Code execution not implemented (static analysis only)
 - Some false-positive warnings for beginners
+- Limited to Python syntax analysis
 
 ### Mock Interview
 - Limited question diversity for niche roles
 - Audio quality depends on user microphone
+- Facial expression detection requires good lighting
 
 ---
+
+
+<div align="center">
