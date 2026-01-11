@@ -50,10 +50,7 @@
 
 ## 🏗️ System Architecture
 
-```
 <img width="1188" height="769" alt="Screenshot 2026-01-11 204116" src="https://github.com/user-attachments/assets/3fb393b5-1cd4-4a91-acae-9aa3b54cde81" />
-
-```
 
 ---
 
