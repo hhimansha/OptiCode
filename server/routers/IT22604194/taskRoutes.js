@@ -117,7 +117,12 @@ Task: <one clear sentence>.
         "Task: Write a Python program suitable for your current skill level that solves a real-world problem.";
     }
 
-    res.json({ generated_task: finalTask });
+    //res.json({ generated_task: finalTask });
+    res.json({
+  generated_task: finalTask,
+  expected_output: "15"
+});
+
 
   } catch (error) {
     console.error("Task generation failed:", error);

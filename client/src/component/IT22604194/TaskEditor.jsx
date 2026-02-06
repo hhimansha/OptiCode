@@ -84,6 +84,26 @@ const handleTakeQuizAgain = () => {
   // Navigate back to quiz page
   navigate("/assessment");
 };
+//code execution handler
+const handleSubmit = async () => {
+
+  const res = await fetch("http://localhost:8002/execute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      code_text: code,
+      time_since_last_keystroke_s: 0,
+      skill_level: skillLevel
+    })
+  });
+
+  const data = await res.json();
+
+  // because backend returns ARRAY
+  alert(data[0] || data[1]);
+};
+
+
 
 
 
@@ -138,6 +158,16 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, [lastTypedAt, code, skillLevel]);
+
+//Auto Load Next Task When Correct
+useEffect(() => {
+  if (hints.some(h => h.includes("Your answer is correct"))) {
+    setTimeout(() => {
+      handleAnotherTask();
+    }, 2000);
+  }
+}, [hints]);
+
 
 
   return (
@@ -209,7 +239,10 @@ useEffect(() => {
 
       <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
         <div className="editor-actions">
-      <button className="submit-btn">Submit Code</button>
+      <button className="submit-btn" onClick={handleSubmit}>
+ Submit Code
+</button>
+
 
       <button
         className="submit-btn"
