@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { 
+import {
     FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot, FaShieldAlt
 } from 'react-icons/fa';
 import { Toaster, toast } from 'sonner';
-import CodeEditor from '../../components/IT22606860/CodeEditor';
-import LoadingSpinner from '../../components/IT22606860/LoadingSpinner';
-import RiskAnalysisPanel from '../../components/IT22606860/RiskAnalysisPanel';
+import CodeEditor from '../../component/IT22606860/CodeEditor';
+import LoadingSpinner from '../../component/IT22606860/LoadingSpinner';
+import RiskAnalysisPanel from '../../component/IT22606860/RiskAnalysisPanel';
 
 // Import API functions
-import { 
-    refactorCode, 
+import {
+    refactorCode,
+    applyCompleteRefactoring, // NEW: Unified comprehensive refactoring
     executeCode,
     analyzeRefactoringRisk
 } from '../../services/api';
@@ -45,9 +46,9 @@ const RefactorPage = () => {
             return;
         }
 
-        console.log('[REFACTOR] Starting refactoring process...');
+        console.log('[REFACTOR] Starting UNIFIED refactoring process...');
         console.log('[REFACTOR] Input code length:', inputCode.length);
-        
+
         setLoading(true);
         setRefactoredCode('');
         setProcessingTime(null);
@@ -57,18 +58,27 @@ const RefactorPage = () => {
         setRiskError('');
 
         try {
-            console.log('[REFACTOR] Calling refactorCode API...');
-            const response = await refactorCode(inputCode, null, language);
-            
+            console.log('[REFACTOR] 🚀 Calling unified comprehensive refactoring API...');
+
+            // Use the new unified endpoint that applies ALL refactoring patterns
+            const response = await applyCompleteRefactoring(inputCode, {
+                apply_basic: true,
+                apply_priority: true,
+                apply_advanced: true,
+                apply_performance: true
+            });
+
             console.log('[REFACTOR] Full API response:', response);
             console.log('[REFACTOR] Response success:', response.success);
             console.log('[REFACTOR] Response refactored_code:', response.refactored_code);
 
             if (response.success) {
                 const refactored = response.refactored_code || '';
-                
+
                 console.log('[REFACTOR] Setting refactored code, length:', refactored.length);
-                
+                console.log('[REFACTOR] Total changes applied:', response.summary?.total_changes || 0);
+                console.log('[REFACTOR] Stages applied:', Object.keys(response.stages || {}));
+
                 if (!refactored || refactored.trim() === '') {
                     console.error('[REFACTOR] ERROR: Refactored code is empty!');
                     toast.error('Refactoring returned empty code');
@@ -76,9 +86,13 @@ const RefactorPage = () => {
                 }
 
                 setRefactoredCode(refactored);
-                setProcessingTime(response.processing_time);
-                
-                toast.success('Code refactored successfully with DeepSeek AI!');
+                setProcessingTime(response.summary?.processing_time_ms || response.processing_time);
+
+                // Show success message with details
+                const changesCount = response.summary?.total_changes || 0;
+                toast.success(
+                    `✅ Code refactored successfully! ${changesCount} improvements applied across ${Object.keys(response.stages || {}).length} stages.`
+                );
 
                 console.log('[REFACTOR] Refactoring complete!');
             } else {
@@ -108,7 +122,7 @@ const RefactorPage = () => {
         try {
             console.log('[RISK] Starting risk analysis...');
             const response = await analyzeRefactoringRisk(inputCode, refactoredCode, language);
-            
+
             if (response.success) {
                 setRiskData(response);
                 toast.success('Risk analysis completed!');
@@ -236,7 +250,7 @@ const RefactorPage = () => {
                             <p className="text-slate-400 text-sm mt-1">Powered by Advanced AI</p>
                         </div>
                     </div>
-                    <p className="text-slate-400 text-lg ml-16">Transform your code with intelligent AI-powered refactoring</p>
+                    <p className="text-slate-400 text-lg ml-16">Transform your code with 100+ AST refactoring patterns</p>
                 </div>
             </div>
 
@@ -251,7 +265,7 @@ const RefactorPage = () => {
                     >
                         <option value="python">Python</option>
                     </select>
-                    <p className="text-xs text-slate-400 mt-2">Enhanced with DeepSeek AI</p>
+                    <p className="text-xs text-slate-400 mt-2">\ud83d\ude80 100+ AST Patterns + Performance Optimization</p>
                 </div>
 
                 {/* Code Editors Grid */}
@@ -362,12 +376,12 @@ const RefactorPage = () => {
                         </div>
                         <div className="p-5">
                             {loading ? (
-                                <LoadingSpinner message="Refactoring with DeepSeek AI... This may take 10-30 seconds" />
+                                <LoadingSpinner message="\ud83d\ude80 Applying comprehensive refactoring... (Basic + Priority + Advanced + Performance)" />
                             ) : (
                                 <>
                                     <CodeEditor
                                         value={refactoredCode}
-                                        onChange={() => {}}
+                                        onChange={() => { }}
                                         language={language}
                                         readOnly={true}
                                         height="350px"
@@ -419,7 +433,7 @@ const RefactorPage = () => {
                         className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:via-blue-600 hover:to-cyan-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-xl shadow-blue-600/40 hover:shadow-blue-600/60 disabled:shadow-none"
                     >
                         <FaMagic className="text-xl" />
-                        <span>{loading ? "Refactoring with AI..." : "Refactor with AI"}</span>
+                        <span>{loading ? "Applying All Refactorings..." : "\ud83d\ude80 Refactor (All Patterns)"}</span>
                     </button>
                     <button
                         onClick={handleAnalyzeRisk}
@@ -450,8 +464,8 @@ const RefactorPage = () => {
                             <p className="text-slate-400">AI-powered safety assessment for refactoring</p>
                         </div>
                     </div>
-                    
-                    <RiskAnalysisPanel 
+
+                    <RiskAnalysisPanel
                         riskData={riskData}
                         loading={analyzingRisk}
                         error={riskError}

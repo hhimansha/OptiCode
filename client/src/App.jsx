@@ -16,6 +16,7 @@ import AssessmentResultPage from "./component/IT22604194/AssessmentResultPage";
 import Home from './pages/IT22606860/Home'
 import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
+import RefactorAssistant from './pages/IT22606860/RefactorAssistant'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 // // Components
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/refactor" element={<RefactorPage />} />
         <Route path="/history" element={<History />} />
+        <Route path="/assistant" element={<RefactorAssistant />} />
         <Route path="/" element={<Form />} />
         <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/assessment/result" element={<AssessmentResultPage />} />

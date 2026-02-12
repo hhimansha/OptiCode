@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTrash, FaEye, FaClock, FaCode } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { getHistory, deleteHistory, clearAllHistory } from '../../services/api';
-import CodeEditor from '../../components/IT22606860/CodeEditor';
+import CodeEditor from '../../component/IT22606860/CodeEditor';
 
 const History = () => {
   const [history, setHistory] = useState([]);
