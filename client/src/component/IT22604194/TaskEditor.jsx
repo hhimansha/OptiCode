@@ -15,6 +15,10 @@ export default function TaskEditor() {
   const [loadingHints, setLoadingHints] = useState(false);
   const [lastTypedAt, setLastTypedAt] = useState(Date.now());
   const navigate = useNavigate();
+  const [expectedOutput, setExpectedOutput] = useState("");
+  const [testInput, setTestInput] = useState("");
+
+
 
   
   
@@ -31,7 +35,7 @@ export default function TaskEditor() {
       //if (storedTask) setGeneratedTask(storedTask);
     //}
   //}, [location.state]);
-  useEffect(() => {
+  /*useEffect(() => {
   if (location.state?.generatedTask) {
     if (location.state?.skillLevel) {
     setSkillLevel(location.state.skillLevel); // show predicted skill level
@@ -45,7 +49,38 @@ export default function TaskEditor() {
       setGeneratedTask(storedTask);
     }
   }
+}, [location.state]);*/
+
+useEffect(() => {
+  if (location.state?.generatedTask) {
+
+    setGeneratedTask(location.state.generatedTask);
+
+    if (location.state?.skillLevel)
+      setSkillLevel(location.state.skillLevel);
+
+    if (location.state?.expected_output)
+      setExpectedOutput(location.state.expected_output);
+
+    if (location.state?.test_input)
+      setTestInput(location.state.test_input);
+
+    sessionStorage.setItem("generatedTask", location.state.generatedTask);
+    sessionStorage.setItem("expectedOutput", location.state.expected_output);
+    sessionStorage.setItem("testInput", location.state.test_input);
+
+  } else {
+
+    setGeneratedTask(sessionStorage.getItem("generatedTask") || "");
+    setExpectedOutput(sessionStorage.getItem("expectedOutput") || "");
+    setTestInput(sessionStorage.getItem("testInput") || "");
+
+  }
 }, [location.state]);
+
+
+
+
 const handleAnotherTask = async () => {
   try {
     // map skill string to numeric value
@@ -60,13 +95,24 @@ const handleAnotherTask = async () => {
     const response = await fetch("http://localhost:5000/api/tasks/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_skill: numericSkill }),
+      //body: JSON.stringify({ student_skill: numericSkill }),
+      body: JSON.stringify({
+        student_skill: numericSkill
+      }),
+
+
     });
 
     const data = await response.json();
 
+    //setGeneratedTask(data.generated_task);
     setGeneratedTask(data.generated_task);
+    setExpectedOutput(data.expected_output);
+    setTestInput(data.test_input);
+
     sessionStorage.setItem("generatedTask", data.generated_task);
+    sessionStorage.setItem("expectedOutput", data.expected_output);
+    sessionStorage.setItem("testInput", data.test_input);
 
     // optional: clear editor for new task
     setCode("# Write your Python solution here\n");
@@ -119,13 +165,55 @@ const handleSubmit = async () => {
         setLoadingHints(true);
         const idleSeconds = Math.floor((Date.now() - lastTypedAt) / 1000);
 
-        const result = await analyzeWeakness(
-                      code,
-                      skillLevel,
+        //const result = await analyzeWeakness(
+                      //code,
+                      /*skillLevel,
                       idleSeconds
            );
 
-        setHints(result.hints || []);
+        setHints(result.hints || []);*/
+        //old 
+        /*const result = await analyzeWeakness(
+                         code,
+                         skillLevel,
+                         idleSeconds
+          );*/
+          //new Send expectedOutput to weakness API
+          const result = await analyzeWeakness(
+                          code,
+                          skillLevel,
+                          idleSeconds,
+                          expectedOutput,
+                          testInput
+          );
+
+
+
+// normal ML hints first
+setHints(result.hints || []);
+
+// ---------------- GEMINI TUTOR ----------------
+const weaknesses = result.weaknesses || {};
+const primary = Object.keys(weaknesses).find(k => weaknesses[k] === 1);
+
+if (primary) {
+  const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      weakness: primary,
+      skill: skillLevel,
+      code,
+      task: generatedTask
+    })
+  });
+
+  const tutorData = await tutor.json();
+
+  // override hints with Gemini tutor
+  setHints([tutorData.hint]);
+}
+
       } catch (err) {
         console.error("Weakness analysis failed:", err);
       } finally {
@@ -134,7 +222,8 @@ const handleSubmit = async () => {
     }, 1200);
 
     return () => clearTimeout(timeout);
-  }, [code, skillLevel]);
+  }, [code, skillLevel, expectedOutput, testInput]);
+
 
   // IDLE WATCHER (runs even when user stops typing)
 useEffect(() => {
@@ -143,11 +232,19 @@ useEffect(() => {
 
     if (idleSeconds >= 6 && code.trim().length >= 3) {
       try {
-        const result = await analyzeWeakness(
+        /*const result = await analyzeWeakness(
           code,
           skillLevel,
           idleSeconds
+        );*/
+        const result = await analyzeWeakness(
+          code,
+          skillLevel,
+          idleSeconds,
+          expectedOutput,
+          testInput
         );
+
 
         setHints(result.hints || []);
       } catch (err) {
@@ -161,7 +258,8 @@ useEffect(() => {
 
 //Auto Load Next Task When Correct
 useEffect(() => {
-  if (hints.some(h => h.includes("Your answer is correct"))) {
+  if (Array.isArray(hints) && hints.some(h => h.includes("correct"))) 
+ {
     setTimeout(() => {
       handleAnotherTask();
     }, 2000);

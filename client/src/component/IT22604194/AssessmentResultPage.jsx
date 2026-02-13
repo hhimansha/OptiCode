@@ -40,13 +40,32 @@ export default function AssessmentResultPage() {
     //  VERY IMPORTANT
     sessionStorage.removeItem("generatedTask");
 
-    navigate("/exercise", {
+    /*navigate("/exercise", {
       state: {
         generatedTask: taskData.generated_task,
         skillLevel: result.skill_level,
         numericSkill,
       },
-    });
+    });*/
+    /*navigate("/exercise", {
+  state: {
+    generatedTask: taskData.generated_task,
+    expectedOutput: taskData.expected_output,
+    weaknessTarget: taskData.weakness_target,
+    skillLevel: result.skill_level
+  },
+});*/
+navigate("/exercise", {
+  state: {
+    generatedTask: taskData.generated_task,
+    expected_output: taskData.expected_output,
+    test_input: taskData.test_input,
+    skillLevel: result.skill_level
+  }
+});
+
+
+
 
   } catch (err) {
     console.error("Error starting exercise:", err);
