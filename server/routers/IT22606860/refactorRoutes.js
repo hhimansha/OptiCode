@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { 
     refactorCode, 
     getSuggestions,
@@ -12,7 +13,21 @@ import {
 } from '../../controllers/IT22606860/refactorController.js';
 import { validateRequest } from '../../middelwares/IT22606860/validateRequest.js';
 
+// Optional auth - attaches userId if token present, doesn't block if missing
+const optionalAuth = (req, res, next) => {
+    const { token } = req.cookies;
+    if (!token) return next();
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.id) req.userId = decoded.id;
+    } catch (e) { /* ignore invalid token */ }
+    next();
+};
+
 const router = express.Router();
+
+// Apply optional auth to all refactor routes
+router.use(optionalAuth);
 
 // Main refactoring endpoints
 router.post('/', validateRequest(['code', 'instruction']), refactorCode);

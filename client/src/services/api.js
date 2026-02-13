@@ -18,6 +18,7 @@ const expressApi = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 30000, // 30 seconds
+    withCredentials: true, // Send cookies for auth
 });
 
 // Create axios instance for ML/Refactoring service
@@ -548,7 +549,7 @@ export const getHistory = async (page = 1, limit = 10, modelUsed = null, sortBy 
         const params = { page, limit, sortBy };
         if (modelUsed) params.modelUsed = modelUsed;
 
-        const response = await expressApi.get('/history', { params });
+        const response = await expressApi.get('/IT22606860/history', { params });
         return response.data;
     } catch (error) {
         console.error('Error fetching history:', error);
@@ -563,7 +564,7 @@ export const getHistory = async (page = 1, limit = 10, modelUsed = null, sortBy 
  */
 export const getHistoryById = async (id) => {
     try {
-        const response = await expressApi.get(`/history/${id}`);
+        const response = await expressApi.get(`/IT22606860/history/${id}`);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -577,7 +578,7 @@ export const getHistoryById = async (id) => {
  */
 export const deleteHistory = async (id) => {
     try {
-        const response = await expressApi.delete(`/history/${id}`);
+        const response = await expressApi.delete(`/IT22606860/history/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting history:', error);
@@ -591,7 +592,7 @@ export const deleteHistory = async (id) => {
  */
 export const clearAllHistory = async () => {
     try {
-        const response = await expressApi.delete('/history/clear');
+        const response = await expressApi.delete('/IT22606860/history/clear');
         return response.data;
     } catch (error) {
         console.error('Error clearing history:', error);
@@ -605,7 +606,7 @@ export const clearAllHistory = async () => {
  */
 export const getHistoryStats = async () => {
     try {
-        const response = await expressApi.get('/history/stats');
+        const response = await expressApi.get('/IT22606860/history/stats');
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -619,7 +620,7 @@ export const getHistoryStats = async () => {
  */
 export const getRecentHistory = async (limit = 5) => {
     try {
-        const response = await expressApi.get('/history/recent', {
+        const response = await expressApi.get('/IT22606860/history/recent', {
             params: { limit }
         });
         return response.data;
@@ -643,7 +644,7 @@ export const searchHistory = async (query, language = null, modelUsed = null, pa
         if (language) params.language = language;
         if (modelUsed) params.modelUsed = modelUsed;
 
-        const response = await expressApi.get('/history/search', { params });
+        const response = await expressApi.get('/IT22606860/history/search', { params });
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -660,7 +661,7 @@ export const searchHistory = async (query, language = null, modelUsed = null, pa
  */
 export const saveFeedback = async (historyId, rating, feedback, accepted) => {
     try {
-        const response = await expressApi.post('/refactor/feedback', {
+        const response = await expressApi.post('/IT22606860/refactor/feedback', {
             historyId,
             rating,
             feedback,
@@ -920,6 +921,126 @@ export const checkLLMHealth = async () => {
             status: 'offline',
             error: error.message
         };
+    }
+};
+
+// ============================================
+// DASHBOARD ANALYTICS ENDPOINTS (Authenticated)
+// ============================================
+
+/**
+ * Get dashboard overview - summary metrics for the authenticated user
+ * @returns {Promise} Response with overview data
+ */
+export const getDashboardOverview = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/overview');
+        return response.data;
+    } catch (error) {
+        console.error('Dashboard overview error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get code evolution timeline
+ * @param {number} days - Number of days to look back
+ * @returns {Promise} Response with timeline data
+ */
+export const getEvolutionTimeline = async (days = 90) => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/timeline', {
+            params: { days }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Timeline error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get session comparison details
+ * @param {string} sessionId - History item ID
+ * @returns {Promise} Response with comparison data
+ */
+export const getSessionComparison = async (sessionId) => {
+    try {
+        const response = await expressApi.get(`/IT22606860/dashboard/comparison/${sessionId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Comparison error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get performance analytics
+ * @returns {Promise} Response with performance data
+ */
+export const getPerformanceAnalytics = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/performance');
+        return response.data;
+    } catch (error) {
+        console.error('Performance analytics error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get risk & security analytics
+ * @returns {Promise} Response with risk data
+ */
+export const getRiskSecurityAnalytics = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/risk-security');
+        return response.data;
+    } catch (error) {
+        console.error('Risk analytics error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get best practice compliance data
+ * @returns {Promise} Response with compliance data
+ */
+export const getBestPracticeCompliance = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/best-practices');
+        return response.data;
+    } catch (error) {
+        console.error('Best practices error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get technical debt tracker data
+ * @returns {Promise} Response with technical debt data
+ */
+export const getTechnicalDebtTracker = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/technical-debt');
+        return response.data;
+    } catch (error) {
+        console.error('Technical debt error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get developer growth score and recommendations
+ * @returns {Promise} Response with growth data
+ */
+export const getDeveloperGrowth = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/growth');
+        return response.data;
+    } catch (error) {
+        console.error('Growth error:', error);
+        throw new Error(error.response?.data?.message || error.message);
     }
 };
 

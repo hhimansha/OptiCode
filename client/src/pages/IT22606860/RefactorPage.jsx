@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot, FaShieldAlt
+    FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot, FaShieldAlt,
+    FaChartLine, FaHistory
 } from 'react-icons/fa';
 import { Toaster, toast } from 'sonner';
 import CodeEditor from '../../component/IT22606860/CodeEditor';
@@ -9,13 +11,13 @@ import RiskAnalysisPanel from '../../component/IT22606860/RiskAnalysisPanel';
 
 // Import API functions
 import {
-    refactorCode,
     applyCompleteRefactoring, // NEW: Unified comprehensive refactoring
     executeCode,
     analyzeRefactoringRisk
 } from '../../services/api';
 
 const RefactorPage = () => {
+    const navigate = useNavigate();
     // Basic states
     const [inputCode, setInputCode] = useState('');
     const [refactoredCode, setRefactoredCode] = useState('');
@@ -251,6 +253,24 @@ const RefactorPage = () => {
                         </div>
                     </div>
                     <p className="text-slate-400 text-lg ml-16">Transform your code with 100+ AST refactoring patterns</p>
+                    
+                    {/* Navigation Buttons */}
+                    <div className="flex items-center gap-3 mt-4 ml-16">
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white rounded-xl hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 transition-all duration-200 font-medium text-sm shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50"
+                        >
+                            <FaChartLine />
+                            <span>Analytics Dashboard</span>
+                        </button>
+                        <button
+                            onClick={() => navigate('/history')}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-700/80 text-slate-200 rounded-xl hover:bg-slate-600 transition-all duration-200 font-medium text-sm border border-slate-600/50 shadow-lg shadow-slate-900/50"
+                        >
+                            <FaHistory />
+                            <span>View History</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

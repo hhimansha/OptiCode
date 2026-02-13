@@ -50,6 +50,11 @@ const Form = () => {
       setLoginSuccess(true);
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
+      // Store user data for dashboard and analytics
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
       if (isLogin) {
         navigate('/face');
       }

@@ -1,4 +1,5 @@
 import RefactorHistory from '../../models/IT22606860/RefactorHistory.js';
+import mongoose from 'mongoose';
 
 // Get refactoring history with pagination
 export const getHistory = async (req, res, next) => {
@@ -14,10 +15,10 @@ export const getHistory = async (req, res, next) => {
         const limitNum = parseInt(limit);
         const skip = (pageNum - 1) * limitNum;
 
-        // Build query
+        // Build query - scope to authenticated user
         const query = {};
-        if (req.user) {
-            query.userId = req.user._id;
+        if (req.userId) {
+            query.userId = new mongoose.Types.ObjectId(req.userId);
         }
         if (modelUsed) {
             query.modelUsed = modelUsed;
@@ -101,8 +102,8 @@ export const clearAllHistory = async (req, res, next) => {
     try {
         // Build query - only delete user's own history if authenticated
         const query = {};
-        if (req.user) {
-            query.userId = req.user._id;
+        if (req.userId) {
+            query.userId = new mongoose.Types.ObjectId(req.userId);
         }
 
         const result = await RefactorHistory.deleteMany(query);
@@ -124,8 +125,8 @@ export const clearAllHistory = async (req, res, next) => {
 export const getHistoryStats = async (req, res, next) => {
     try {
         const query = {};
-        if (req.user) {
-            query.userId = req.user._id;
+        if (req.userId) {
+            query.userId = new mongoose.Types.ObjectId(req.userId);
         }
 
         const stats = await RefactorHistory.aggregate([
@@ -207,8 +208,8 @@ export const getRecentHistory = async (req, res, next) => {
         const limitNum = parseInt(limit);
 
         const query = {};
-        if (req.user) {
-            query.userId = req.user._id;
+        if (req.userId) {
+            query.userId = new mongoose.Types.ObjectId(req.userId);
         }
 
         const recent = await RefactorHistory.find(query)
@@ -244,8 +245,8 @@ export const searchHistory = async (req, res, next) => {
         const query = {};
         
         // User filter
-        if (req.user) {
-            query.userId = req.user._id;
+        if (req.userId) {
+            query.userId = new mongoose.Types.ObjectId(req.userId);
         }
 
         // Search in instruction or code

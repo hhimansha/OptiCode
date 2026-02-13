@@ -17,6 +17,7 @@ import Home from './pages/IT22606860/Home'
 import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
 import RefactorAssistant from './pages/IT22606860/RefactorAssistant'
+import RefactorDashboard from './pages/IT22606860/RefactorDashboard'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
 
 // // Components
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/refactor" element={<RefactorPage />} />
         <Route path="/history" element={<History />} />
+        <Route path="/dashboard" element={<RefactorDashboard />} />
         <Route path="/assistant" element={<RefactorAssistant />} />
         <Route path="/" element={<Form />} />
         <Route path="/assessment" element={<AssessmentPage />} />
