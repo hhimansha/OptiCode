@@ -1,7 +1,8 @@
 import { OpenRouter } from "@openrouter/sdk";
+import InterviewQuestion from '../../models/IT22639226/InterviewQuestion.js'; // import schema
 
 const openrouter = new OpenRouter({
-  apiKey: process.env.OpenRouter_Api_key
+  apiKey: process.env.OPENROUTER_API_KEY
 });
 
 export const generateInterviewQuestions = async (req, res) => {
@@ -12,96 +13,62 @@ export const generateInterviewQuestions = async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert technical interviewer conducting a real-life React interview."
+          content: "You are an expert technical interviewer who generates simple coding interview questions with answers."
         },
         {
           role: "user",
           content: `
-Based on the following content, generate interview questions WITH answers.
+Write a program which will find all numbers divisible by 7 but not by 5 between 2000 and 3200.  
+Assume the user has written the following code:
 
 CONTENT:
-Introduction to React
-An introduction to the React view library
-What is React?
-React is a JavaScript library that aims to simplify development of visual interfaces.
-Developed at Facebook and released to the world in 2013, it drives some of the most widely
-used apps, powering Facebook and Instagram among countless other applications.
-Its primary goal is to make it easy to reason about an interface and its state at any point in
-time, by dividing the UI into a collection of components.
-Why is React so popular?
-React has taken the frontend web development world by storm. Why?
-Less complex than the other alternatives
-At the time when React was announced, Ember.js and Angular 1.x were the predominant
-choices as a framework. Both these imposed so many conventions on the code that porting an
-existing app was not convenient at all. React made a choice to be very easy to integrate into
-an existing project, because that's how they had to do it at Facebook in order to introduce it to
-the existing codebase. Also, those 2 frameworks brought too much to the table, while React
-only chose to implement the View layer instead of the full MVC stack.
-Perfect timing
-At the time, Angular 2.x was announced by Google, along with the backwards incompatibility
-and major changes it was going to bring. Moving from Angular 1 to 2 was like moving to a
-different framework, so this, along with execution speed improvements that React promised,
-made it something developers were eager to try.
-Backed by Facebook
-Being backed by Facebook obviously is going to benefit a project if it turns out to be
-successful.
-Introduction to React
-7
-Facebook currently has a strong interest in React, sees the value of it being Open Source, and
-this is a huge plus for all the developers using it in their own projects.
-Is React simple to learn?
-Even though I said that React is simpler than alternative frameworks, diving into React is still
-complicated, but mostly because of the corollary technologies that can be integrated with
-React, like Redux and GraphQL.
-React in itself has a very small API, and you basically need to understand 4 concepts to get
-started:
-Components
-JSX
-State
-Props
-All these (and more) are explained in this handbook.
-Now, based on the above content, generate exactly 10 interview questions along with clear, correct answers.
+result = []
 
-REQUIREMENTS:
-- Generate exactly 10 questions
-- Include clear, correct answers
-- Difficulty: medium (30–40 min interview)
-- Real-life technical interview tone
-- Return ONLY valid JSON
-- No explanations outside JSON
+for i in range(2000, 3201):
+    if i % 7 == 0 and i % 5 != 0:
+        result.append(str(i))
 
-FORMAT:
-{
-  "interviewQuestions": [
-    { "question": "", "answer": "" }
-  ]
-}
+print(",".join(result))
+
+Please generate **exactly 5 simple questions** about this code, each with its answer, and respond **ONLY in valid JSON array format**.
 `
         }
       ]
     });
 
+    // Collect streamed content
     let fullResponse = "";
-
     for await (const chunk of stream) {
-      const content = chunk?.choices?.[0]?.delta?.content;
-      if (content) fullResponse += content;
+      const delta = chunk?.choices?.[0]?.delta?.content;
+      if (delta) fullResponse += delta;
     }
 
-    const cleanJson = fullResponse
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    const cleanJson = fullResponse.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    const result = JSON.parse(cleanJson);
+    let questionsArray = [];
+    try {
+      questionsArray = JSON.parse(cleanJson);
+    } catch (err) {
+      console.error("Failed to parse JSON:", err);
+      return res.status(500).json({
+        message: "Failed to parse AI response as JSON",
+        rawResponse: cleanJson
+      });
+    }
 
-    // ✅ SEND RESPONSE
-    res.status(200).json(result);
+    // Save to MongoDB
+    const savedQuestions = await InterviewQuestion.create({
+       user: req.userId, // comes from userAuth middleware
+      questions: questionsArray
+    });
+
+    res.status(200).json(savedQuestions);
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Failed to generate interview questions"
+      message: "Failed to generate interview questions",
+      error: error.message
     });
   }
 };
