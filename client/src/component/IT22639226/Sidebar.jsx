@@ -9,7 +9,7 @@ const Sidebar = ({ onCreateInterview, loading }) => {
   const menuItems = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: "assessment",
       path: "/assessment",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,8 +29,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
     },
     {
       id: "all",
-      label: "All Interview",
-      path: "/interviews",
+      label: "Code refctor Risk analysis",
+      path: "/refactor",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -76,7 +76,7 @@ const Sidebar = ({ onCreateInterview, loading }) => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
-
+ 
         .shimmer-btn {
           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
           background-size: 200% 100%;
@@ -128,8 +128,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
           {/* Logo Text */}
           <div className="sidebar-font">
             <span className="text-xl font-bold">
-              <span className="text-cyan-400">AI</span>
-              <span className="text-white">cruiter</span>
+              <span className="text-cyan-400">Opti</span>
+              <span className="text-white">Code</span>
             </span>
           </div>
         </div>
@@ -209,23 +209,6 @@ const Sidebar = ({ onCreateInterview, loading }) => {
 
       {/* Bottom Section - User/Upgrade */}
       <div className="p-4 border-t border-white/5">
-        {/* Upgrade Card */}
-        <div className="bg-gradient-to-br from-violet-600/20 to-cyan-600/20 rounded-xl p-4 border border-white/5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white text-xs font-semibold sidebar-font">Upgrade to Pro</p>
-              <p className="text-slate-400 text-[10px]">Get unlimited interviews</p>
-            </div>
-          </div>
-          <button className="w-full py-2 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-all duration-300 sidebar-font">
-            Upgrade Now
-          </button>
-        </div>
       </div>
     </div>
   );
