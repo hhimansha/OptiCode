@@ -769,7 +769,7 @@ const handleApiError = (error, operation, serviceUrl = ML_API_URL) => {
         throw new Error(
             `Cannot connect to service at ${serviceUrl}. ` +
             `Please ensure:\n` +
-            `1. Python backend is running (python refactor_api_fast.py)\n` +
+            `1. Python backend is running (python run_backend.py)\n` +
             `2. All dependencies are installed (pip install -r requirements.txt)\n` +
             `3. Port ${serviceUrl.split(':')[2]} is available`
         );
