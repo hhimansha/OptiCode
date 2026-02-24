@@ -1,8 +1,33 @@
 import express from "express";
-import fetch from "node-fetch";
 import { structuredTasks } from "../../data/structuredTasks.js";
+import { generateTaskWithGemini } from "../../services/IT22604194/geminiService.js";
 
 const router = express.Router();
+
+// Local fallback pool per skill level (used when Gemini quota exceeded)
+const fallbackTasks = {
+  Beginner: [
+    { task: "Print the sum of 5 and 10.", test_input: "", expected_output: "15" },
+    { task: "Create a variable x = 7 and print it.", test_input: "", expected_output: "7" },
+    { task: "Print numbers from 1 to 3 using a for loop.", test_input: "", expected_output: "1\n2\n3" },
+    { task: "Print the result of 4 multiplied by 5.", test_input: "", expected_output: "20" },
+    { task: "Calculate 10 - 4 and print the result.", test_input: "", expected_output: "6" },
+  ],
+  Intermediate: [
+    { task: "Print the sum of all numbers from 1 to 10.", test_input: "", expected_output: "55" },
+    { task: "Print all even numbers from 2 to 10 using a loop.", test_input: "", expected_output: "2\n4\n6\n8\n10" },
+    { task: "Write a function is_even(n) that returns True if n is even. Print is_even(4).", test_input: "", expected_output: "True" },
+    { task: "Print the factorial of 4 by computing it.", test_input: "", expected_output: "24" },
+    { task: "Write a function max_of_two(a,b) that returns the larger number. Print max_of_two(3,7).", test_input: "", expected_output: "7" },
+  ],
+  Advanced: [
+    { task: "Print all prime numbers between 1 and 20.", test_input: "", expected_output: "2\n3\n5\n7\n11\n13\n17\n19" },
+    { task: "Write a recursive function to compute factorial of 5. Print the result.", test_input: "", expected_output: "120" },
+    { task: "Print the first 8 Fibonacci numbers.", test_input: "", expected_output: "0\n1\n1\n2\n3\n5\n8\n13" },
+    { task: "Write a function is_palindrome(s). Print is_palindrome('racecar').", test_input: "", expected_output: "True" },
+    { task: "Compute and print the sum of digits of 12345.", test_input: "", expected_output: "15" },
+  ]
+};
 
 /**
  * POST /api/tasks/generate
@@ -21,61 +46,12 @@ router.post("/generate", async (req, res) => {
       student_skill <= 4 ? "Intermediate" :
       "Advanced";
 
-    // ================= QWEN PROMPT =================
-
-    const prompt = `
-Generate ONE Python coding task.
-
-Return STRICT JSON ONLY:
-
-{
-  "task": "...",
-  "test_input": "...",
-  "expected_output": "..."
-}
-
-Skill: ${skillLabel}
-
-Rules:
-- Task must require printing output
-- test_input must match task
-- expected_output must be correct for test_input
-- No explanation
-- No markdown
-- Only valid JSON
-`;
-
-    const HF_API_URL =
-      "https://ashani-shashikala-qwen-lora-task-generator-own.hf.space/generate";
-
-    let parsed = null;
-
-    for (let i = 0; i < 3; i++) {
-      const response = await fetch(HF_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
-
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      const raw = (data.response || "").trim();
-
-      try {
-        parsed = JSON.parse(raw);
-        if (parsed.task && parsed.expected_output !== undefined) break;
-      } catch {
-        parsed = null;
-      }
-    }
-
-    // ================= STRUCTURED WEAKNESS TASK (OPTIONAL BOOST) =================
-
+    // ===== STEP 1: Weakness-targeted structured task =====
     if (weakness) {
       const pool = structuredTasks?.[skillLabel]?.[weakness];
       if (pool && pool.length > 0) {
         const chosen = pool[Math.floor(Math.random() * pool.length)];
+        console.log(`Serving structured task for ${skillLabel} / ${weakness}`);
         return res.json({
           generated_task: chosen.task,
           expected_output: chosen.expected_output,
@@ -85,24 +61,29 @@ Rules:
       }
     }
 
-    // ================= QWEN RESULT =================
+    // ===== STEP 2: Gemini dynamic task generation =====
+    console.log(`Generating task with Gemini for ${skillLabel} / weakness: ${weakness}`);
+    const geminiTask = await generateTaskWithGemini(skillLabel, weakness);
 
-    if (parsed) {
+    if (geminiTask) {
       return res.json({
-        generated_task: "Task: " + parsed.task,
-        expected_output: String(parsed.expected_output),
-        test_input: String(parsed.test_input || ""),
+        generated_task: geminiTask.task,
+        expected_output: geminiTask.expected_output,
+        test_input: geminiTask.test_input,
         weakness_target: weakness || "logic_error"
       });
     }
 
-    // ================= LAST RESORT =================
+    // ===== STEP 3: Local fallback (Gemini quota exceeded) =====
+    console.log(`Gemini unavailable, using local fallback for ${skillLabel}`);
+    const pool = fallbackTasks[skillLabel] || fallbackTasks.Beginner;
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
 
     return res.json({
-      generated_task: "Task: Print the sum of 5 and 10.",
-      test_input: "",
-      expected_output: "15",
-      weakness_target: "logic_error"
+      generated_task: chosen.task,
+      expected_output: chosen.expected_output,
+      test_input: chosen.test_input,
+      weakness_target: weakness || "logic_error"
     });
 
   } catch (error) {
