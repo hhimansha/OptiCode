@@ -50,6 +50,12 @@ const Form = () => {
       setLoginSuccess(true);
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
+      // Store userId for progress tracking
+      if (data.user?._id) {
+        localStorage.setItem("userId", data.user._id);
+        localStorage.setItem("userName", data.user.name || "");
+      }
+
       if (isLogin) {
         navigate('/face');
       }

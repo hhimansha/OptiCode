@@ -1,32 +1,63 @@
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// ─── HINT GENERATION (for weakness hints in TaskEditor) ───────────────────
-export async function askGemini({ weakness, skill, code, task }) {
-  try {
-    const prompt = `
-You are an AI coding tutor in an adaptive learning platform for university students learning Python.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-Student skill level: ${skill}
-Coding task given: ${task}
-Detected weakness: ${weakness}
-Student's current code:
-${code}
-
-Give a SHORT, targeted hint (max 2 sentences) appropriate for a ${skill} level student.
-Do NOT give the full solution. Guide them toward fixing the ${weakness} issue.
-`;
-    const result = await callGemini(prompt);
-    return result || getFallbackHint(weakness, skill);
-
-  } catch (err) {
-    console.error("Gemini hint failed:", err);
-    return getFallbackHint(weakness, skill);
-  }
+// ─── LOAD TRAINING DATA ONCE AT STARTUP ──────────────────────────────────
+let trainingData = [];
+try {
+  const dataPath = path.join(__dirname, "../../data/cleaned_merged.jsonl");
+  const lines = fs.readFileSync(dataPath, "utf-8").trim().split("\n");
+  trainingData = lines.map(line => JSON.parse(line));
+  console.log(`✅ Loaded ${trainingData.length} training examples for task generation`);
+} catch (err) {
+  console.warn("⚠️ Training data not found, using prompt only");
 }
 
-// ─── TASK GENERATION (replaces HuggingFace Qwen model) ───────────────────
+// ─── GET FEW-SHOT EXAMPLES FROM YOUR TRAINING DATA ───────────────────────
+function getFewShotExamples(skillLevel, weakness) {
+  const skillMap = { Beginner: [1, 2], Intermediate: [3, 4], Advanced: [5] };
+  const skillNumbers = skillMap[skillLevel] || [1, 2];
+
+  // Filter by skill level
+  let filtered = trainingData.filter(t => skillNumbers.includes(t.skill));
+
+  // If weakness provided, try to match concept
+  const weaknessConceptMap = {
+    logic_error: ["logic", "conditionals", "boolean"],
+    infinite_loop: ["loops", "loop"],
+    missing_base_case: ["recursion"],
+    syntax_error: ["print", "variables"],
+    hardcoded_value: ["variables", "math"],
+    missing_print: ["print", "output"],
+    no_function: ["functions", "methods"],
+    idle_stuck: ["print", "variables", "math"]
+  };
+
+  if (weakness && weaknessConceptMap[weakness]) {
+    const concepts = weaknessConceptMap[weakness];
+    const matched = filtered.filter(t => concepts.includes(t.concept));
+    if (matched.length >= 2) filtered = matched;
+  }
+
+  // Pick 3 random examples
+  const shuffled = filtered.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
+}
+
+// ─── TASK GENERATION (customized with your training data) ─────────────────
 export async function generateTaskWithGemini(skillLabel, weakness) {
   try {
+    const examples = getFewShotExamples(skillLabel, weakness);
+
+    const exampleText = examples.map((ex, i) => `
+Example ${i + 1}:
+Task: ${ex.task}
+Expected Output: ${Array.isArray(ex.expected_output) ? ex.expected_output.join("\\n") : ex.expected_output}
+`).join("\n");
+
     const weaknessContext = weakness
       ? `The task should specifically help the student practice and overcome their detected weakness: "${weakness.replace(/_/g, " ")}".`
       : "";
@@ -37,16 +68,17 @@ You are a task generator for an AI adaptive coding education platform for univer
 Generate ONE Python coding task for a ${skillLabel} level student.
 ${weaknessContext}
 
-Skill level guidelines:
-- Beginner: simple arithmetic, variables, basic print statements, simple for loops
-- Intermediate: functions, conditionals, list operations, while loops
-- Advanced: recursion, algorithms, data structures, OOP
+Here are example tasks from our training dataset at this skill level to guide your style:
+${exampleText}
+
+Follow the SAME style and difficulty as the examples above.
 
 Rules:
 - Task must be solvable by printing output to console
-- expected_output must be exactly correct with no extra spaces
+- expected_output must be exactly correct
 - test_input should be empty string if no input needed
 - No explanation, no markdown, no extra text
+- Match the difficulty and concept style of the examples
 
 Return ONLY this exact JSON format:
 {
@@ -77,6 +109,30 @@ Return ONLY this exact JSON format:
   }
 }
 
+// ─── HINT GENERATION ──────────────────────────────────────────────────────
+export async function askGemini({ weakness, skill, code, task }) {
+  try {
+    const prompt = `
+You are an AI coding tutor in an adaptive learning platform for university students learning Python.
+
+Student skill level: ${skill}
+Coding task given: ${task}
+Detected weakness: ${weakness}
+Student's current code:
+${code}
+
+Give a SHORT, targeted hint (max 2 sentences) appropriate for a ${skill} level student.
+Do NOT give the full solution. Guide them toward fixing the ${weakness} issue.
+`;
+    const result = await callGemini(prompt);
+    return result || getFallbackHint(weakness, skill);
+
+  } catch (err) {
+    console.error("Gemini hint failed:", err);
+    return getFallbackHint(weakness, skill);
+  }
+}
+
 // ─── SHARED GEMINI API CALLER ─────────────────────────────────────────────
 async function callGemini(prompt) {
   const res = await fetch(
@@ -99,11 +155,10 @@ async function callGemini(prompt) {
   }
 
   if (!data.candidates?.length) return null;
-
   return data.candidates[0]?.content?.parts?.[0]?.text || null;
 }
 
-// ─── LOCAL FALLBACK HINTS (when Gemini quota exceeded) ───────────────────
+// ─── LOCAL FALLBACK HINTS ─────────────────────────────────────────────────
 function getFallbackHint(weakness, skill) {
   const hints = {
     syntax_error: {
@@ -147,6 +202,5 @@ function getFallbackHint(weakness, skill) {
       Advanced: "Re-evaluate your approach and consider a different algorithm."
     }
   };
-
   return hints[weakness]?.[skill] || "Review your code carefully and try a different approach.";
 }
