@@ -1,4 +1,3 @@
-
 import fetch from "node-fetch";
 
 import Userrouter from "./routers/Userrouter.js";
@@ -20,6 +19,9 @@ import historyRoutes from './routers/IT22606860/historyRoutes.js';
 import riskRoutes from './routers/IT22606860/riskRoutes.js';
 import bestPracticesRoutes from './routers/IT22606860/bestPracticesRoutes.js';
 import analyticsRoutes from './routers/IT22606860/analyticsRoutes.js';
+
+// IT22601360 Routes
+import conceptExtractorRouter from './routers/IT22601360/conceptExtractor.js';
 
 import errorHandler from './middlewares/errorHandler.js';
 import userRoutes from './routers/Userrouter.js';
@@ -47,10 +49,10 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // increased limit for source code payloads
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"], // Allow frontend
+    origin: ["http://localhost:5173", "http://localhost:3000"],
     credentials: true
 }));
 
@@ -91,16 +93,14 @@ app.use('/api/IT22606860/analytics', analyticsRoutes);
 // LiveKit and Question routes
 app.use('/api/livekit', livekitRouter);
 app.use('/api/question', Questionrouter);
+app.use('/api/IT22601360', conceptExtractorRouter);
 
-// 404 handler for undefined routes (must be after all other routes)
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+    res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handling middleware (must be last)
+// Error handler
 app.use(errorHandler);
 
 // =============================
@@ -113,14 +113,11 @@ app.listen(PORT, () => {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('✅ HTTP server closed');
+    console.log('👋 SIGTERM signal received: closing HTTP server');
     process.exit(0);
-  });
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('❌ Unhandled Rejection:', err);
-  process.exit(1);
+    console.error('❌ Unhandled Rejection:', err);
+    process.exit(1);
 });
