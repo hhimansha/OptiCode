@@ -46,7 +46,7 @@ export default function VoiceAssistantPage() {
     setError("Microphone permission denied! Please allow mic access and reload.");
     handleDisconnect();
   };
-
+  
   return (
     <div className="min-h-screen bg-[#05080f] flex items-center justify-center overflow-hidden">
       <style>{`
@@ -403,7 +403,7 @@ function LandingScreen({ isLoading, error, onConnect }) {
 function InterviewInterface({ onEndCall, userId }) {
   const { state, audioTrack, agentTranscriptions } = useVoiceAssistant();
   const { messages: chatMessages } = useChat();
-   
+  
   const [conversation, setConversation] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -413,9 +413,13 @@ function InterviewInterface({ onEndCall, userId }) {
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState(null);
   const [interviewTime, setInterviewTime] = useState(0);
-   
+  const [emotionData, setEmotionData] = useState(null);
+  const [emotionError, setEmotionError] = useState('');
+  
   const recognitionRef = useRef(null);
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const wsRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const conversationEndRef = useRef(null);
   const lastMessageIdRef = useRef(0);
@@ -463,7 +467,7 @@ function InterviewInterface({ onEndCall, userId }) {
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       mediaStreamRef.current = stream;
-      setIsCameraOn(true); 
+      setIsCameraOn(true);
       
     } catch (error) {
       console.error("Camera access error:", error);
@@ -482,10 +486,99 @@ function InterviewInterface({ onEndCall, userId }) {
     }
   }, [isCameraOn]);
 
+  // WebSocket for emotion detection
+  useEffect(() => {
+    if (!isCameraOn) return;
+
+    const startEmotionDetection = async () => {
+      try {
+        const ws = new WebSocket('ws://localhost:8000/ws/emotion');
+        wsRef.current = ws;
+
+        ws.onopen = () => console.log('Connected to Emotion Model');
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.status === 'success') {
+              setEmotionData(data);
+            } else {
+              setEmotionData(null);
+            }
+          } catch (e) {
+            console.error('Error parsing emotion data:', e);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setEmotionError('Emotion detection connection failed');
+        };
+
+        // Frame capture interval
+        const intervalId = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN && videoRef.current && canvasRef.current) {
+            captureAndSendFrame();
+          }
+        }, 100);
+
+        return () => {
+          clearInterval(intervalId);
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.close();
+          }
+        };
+      } catch (error) {
+        console.error('Emotion detection setup error:', error);
+        setEmotionError('Failed to start emotion detection');
+      }
+    };
+
+    startEmotionDetection();
+
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
+    };
+  }, [isCameraOn]);
+
+  const captureAndSendFrame = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (video && canvas && video.readyState === 4) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = 320;
+      canvas.height = 240;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const base64Data = canvas.toDataURL('image/jpeg', 0.7);
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(base64Data);
+      }
+    }
+  };
+
+  const getEmoji = (emotion) => {
+    const map = {
+      'Angry': '😠',
+      'Disgust': '🤢',
+      'Fear': '😱',
+      'Happy': '😄',
+      'Sad': '😢',
+      'Surprise': '😲',
+      'Neutral': '😐'
+    };
+    return map[emotion] || '😐';
+  };
+
   useEffect(() => {
     return () => {
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
       }
     };
   }, []);
@@ -728,6 +821,9 @@ function InterviewInterface({ onEndCall, userId }) {
 
                 {/* User Video Panel */}
                 <div className="w-1/2 aspect-[4/3] bg-[#0a1018] relative overflow-hidden">
+                  {/* Hidden Canvas for processing */}
+                  <canvas ref={canvasRef} className="hidden" />
+
                   {isCameraOn ? (
                     <>
                       <video
@@ -738,30 +834,43 @@ function InterviewInterface({ onEndCall, userId }) {
                         className="absolute inset-0 w-full h-full object-cover"
                         style={{ transform: 'scaleX(-1)' }}
                       />
-                      {/* Video Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       
+                      {/* Overlay Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                      {/* EMOTION RESULT DISPLAY */}
+                      <div className="absolute top-6 right-6">
+                        <div className={`glass-dark backdrop-blur-md border border-white/10 rounded-2xl p-4 transition-all duration-300 ${emotionData ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
+                          {emotionData && (
+                            <div className="flex flex-col items-end">
+                              <span className="text-xs text-slate-400 font-medium tracking-wider mb-1">DETECTED EMOTION</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-3xl">{getEmoji(emotionData.emotion)}</span>
+                                <div className="text-right">
+                                  <p className="text-white font-bold text-xl uppercase tracking-wide">
+                                    {emotionData.emotion}
+                                  </p>
+                                  <p className="text-emerald-400 text-xs font-mono">
+                                    {Math.round(emotionData.confidence * 100)}% CONFIDENCE
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       {/* User Label */}
                       <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                        <div className="glass-dark rounded-full px-4 py-1.5 flex items-center gap-2">
+                        <div className="glass-dark bg-black/40 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2">
                           <span className="text-amber-400 text-xs mono font-medium tracking-wider">YOU</span>
-                          {isListening && (
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                          )}
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <div className="w-20 h-20 rounded-full bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-700/50">
-                        <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <p className="text-slate-500 text-xs">{isCameraLoading ? 'Initializing camera...' : 'Camera unavailable'}</p>
-                      {cameraError && (
-                        <p className="text-red-400/80 text-xs mt-2">{cameraError}</p>
-                      )}
+                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                      {cameraError || (isCameraLoading ? "Initializing camera..." : "Camera unavailable")}
                     </div>
                   )}
                 </div>
