@@ -50,7 +50,7 @@ exports.extractConcepts = async (req, res) => {
             });
         }
 
-        const response = await aiServiceClient.post('/extract', {
+        const response = await aiServiceClient.post('/extract-enhanced', {
             code,
             language: language || 'python'
         });
@@ -80,6 +80,79 @@ exports.extractConcepts = async (req, res) => {
         }
     }
 };
+
+// Add this function to generate graph data from concepts
+const generateGraphDataFromConcepts = (concepts) => {
+    if (!concepts || !Array.isArray(concepts)) {
+        return null;
+    }
+
+    // Create nodes
+    const nodes = concepts.map((concept, index) => ({
+        id: index.toString(),
+        label: concept.name,
+        name: concept.name,
+        category: concept.category,
+        color: getCategoryColor(concept.category),
+        confidence: concept.confidence,
+        description: concept.description,
+        size: 20 + (concept.confidence * 40), // Size based on confidence
+        val: 20 + (concept.confidence * 40)
+    }));
+
+    // Create links based on categories
+    const links = [];
+    
+    // Group concepts by category
+    const categories = {};
+    concepts.forEach((concept, index) => {
+        if (!categories[concept.category]) {
+            categories[concept.category] = [];
+        }
+        categories[concept.category].push(index.toString());
+    });
+
+    // Connect concepts within same category
+    Object.values(categories).forEach(categoryConcepts => {
+        for (let i = 0; i < categoryConcepts.length - 1; i++) {
+            links.push({
+                source: categoryConcepts[i],
+                target: categoryConcepts[i + 1],
+                value: 0.5
+            });
+        }
+    });
+
+    return {
+        nodes,
+        links
+    };
+};
+
+// Helper function for colors
+const getCategoryColor = (category) => {
+    const colors = {
+        'data_structure': '#4CAF50',
+        'algorithm': '#2196F3',
+        'design_pattern': '#9C27B0',
+        'architecture': '#FF9800',
+        'paradigm': '#E91E63',
+        'programming_concept': '#00BCD4'
+    };
+    return colors[category] || '#666';
+};
+
+// Then update when you get the response:
+const result = await conceptExtractorApi.extractConcepts(code, language);
+const graphData = generateGraphDataFromConcepts(result.concepts);
+const enhancedResult = {
+    ...result,
+    visualizations: {
+        ...result.visualizations,
+        graph: graphData || result.visualizations?.graph
+    }
+};
+setExtractionResult(enhancedResult);
 
 /**
  * Quick Classify (Rule-based only)

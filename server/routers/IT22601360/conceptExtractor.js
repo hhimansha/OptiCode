@@ -13,7 +13,7 @@ const conceptExtractorController = require('../controllers/IT22601360/conceptExt
 router.get('/health', conceptExtractorController.healthCheck);
 
 // Main extraction endpoint
-router.post('/extract', conceptExtractorController.extractConcepts);
+router.post('/extract-enhanced', conceptExtractorController.extractConcepts);
 
 // Quick classification (no LLM)
 router.post('/classify', conceptExtractorController.quickClassify);

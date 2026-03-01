@@ -10,3 +10,5 @@ export { default as ConceptList } from './ConceptList';
 export { default as ConceptGraph } from './ConceptGraph';
 export { default as DistributionChart } from './DistributionChart';
 export { default as ConceptDetails } from './ConceptDetails';
+export { default as RecommendedCourses } from './RecommendedCourses';
+export { default as FileTreeView } from './FileTreeView';

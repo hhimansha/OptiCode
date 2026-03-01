@@ -58,7 +58,7 @@ export const conceptExtractorApi = {
      */
     extractConcepts: async (code, language = 'python') => {
         try {
-            const response = await apiClient.post('/extract', {
+            const response = await apiClient.post('/extract-enhanced', {
                 code,
                 language
             });
