@@ -1,73 +1,135 @@
-import { OpenRouter } from "@openrouter/sdk";
-import InterviewQuestion from '../../models/IT22639226/InterviewQuestion.js'; // import schema
-
-const openrouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY
-});
+import axios from "axios";
+import InterviewQuestion from "../../models/IT22639226/InterviewQuestion.js";
+import JSON5 from "json5";
+import { jsonrepair } from "jsonrepair";
 
 export const generateInterviewQuestions = async (req, res) => {
   try {
-    const stream = await openrouter.chat.send({
-      model: "deepseek/deepseek-r1-0528:free",
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert technical interviewer who generates simple coding interview questions with answers."
-        },
-        {
-          role: "user",
-          content: `
-Write a program which will find all numbers divisible by 7 but not by 5 between 2000 and 3200.  
-Assume the user has written the following code:
+    const prompt = `
+You are a programming instructor.
 
-CONTENT:
+Analyze the following Python code and generate interview questions ONLY about this code.
+
+CODE:
 result = []
-
 for i in range(2000, 3201):
     if i % 7 == 0 and i % 5 != 0:
         result.append(str(i))
-
 print(",".join(result))
 
-Please generate **exactly 5 simple questions** about this code, each with its answer, and respond **ONLY in valid JSON array format**.
-`
-        }
-      ]
+Rules:
+- Generate exactly 5 questions
+- Questions must be about loops, conditions, modulus, or list usage in this code
+- Do NOT generate general knowledge questions
+- Return STRICT JSON
+- Escape quotes inside strings
+
+Return ONLY this format:
+
+[
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."}
+]
+`;
+
+    const response = await axios.post("http://localhost:11434/api/generate", {
+      model: "gemma3:4b",
+      prompt,
+      stream: false,
+      options: { temperature: 0.2 }
     });
 
-    // Collect streamed content
-    let fullResponse = "";
-    for await (const chunk of stream) {
-      const delta = chunk?.choices?.[0]?.delta?.content;
-      if (delta) fullResponse += delta;
-    }
+    let aiText = response.data.response;
 
-    const cleanJson = fullResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+    console.log("Raw AI Response:", aiText);
 
-    let questionsArray = [];
-    try {
-      questionsArray = JSON.parse(cleanJson);
-    } catch (err) {
-      console.error("Failed to parse JSON:", err);
+    // Remove markdown
+    aiText = aiText.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+    // Extract JSON array
+    const match = aiText.match(/\[[\s\S]*\]/);
+
+    if (!match) {
       return res.status(500).json({
-        message: "Failed to parse AI response as JSON",
-        rawResponse: cleanJson
+        message: "AI did not return JSON array",
+        raw: aiText
       });
     }
 
-    // Save to MongoDB
+    let cleanedJson = match[0];
+
+    // Remove control characters
+    cleanedJson = cleanedJson.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+
+    // 🔥 FIX quotes inside backticks
+    cleanedJson = cleanedJson.replace(/`([^`]*)`/g, (m) =>
+      m.replace(/"/g, '\\"')
+    );
+
+    // 🔥 Fix broken ",.join
+    cleanedJson = cleanedJson.replace(/",\.join/g, '\",.join');
+
+    let questionsArray;
+
+    try {
+      questionsArray = JSON5.parse(cleanedJson);
+      console.log("Parsed with JSON5");
+    } catch (e1) {
+      console.warn("JSON5 failed, trying jsonrepair");
+
+      try {
+        const repaired = jsonrepair(cleanedJson);
+        questionsArray = JSON5.parse(repaired);
+        console.log("Parsed with jsonrepair");
+      } catch (e2) {
+        console.warn("jsonrepair failed, using fallback");
+
+        const regex =
+          /"question"\s*:\s*"([\s\S]*?)"\s*,\s*"answer"\s*:\s*"([\s\S]*?)"/g;
+
+        const matches = [...cleanedJson.matchAll(regex)];
+
+        if (matches.length === 5) {
+          questionsArray = matches.map((m) => ({
+            question: m[1],
+            answer: m[2]
+          }));
+        } else {
+          return res.status(500).json({
+            message: "Parsing failed completely",
+            raw: cleanedJson
+          });
+        }
+      }
+    }
+
+    if (!Array.isArray(questionsArray) || questionsArray.length !== 5) {
+      return res.status(500).json({
+        message: "AI did not return exactly 5 questions",
+        data: questionsArray
+      });
+    }
+
+    console.log("Parsed Questions:", questionsArray);
+
     const savedQuestions = await InterviewQuestion.create({
-       user: req.userId, // comes from userAuth middleware
+      user: req.userId || "test-user",
       questions: questionsArray
     });
 
-    res.status(200).json(savedQuestions);
+    res.status(200).json({
+      message: "Questions generated successfully",
+      data: savedQuestions
+    });
 
   } catch (error) {
-    console.error(error);
+    console.error("Controller Error:", error);
+
     res.status(500).json({
-      message: "Failed to generate interview questions",
+      message: "Failed to generate questions",
       error: error.message
     });
   }

@@ -218,7 +218,7 @@ export default function VoiceAssistantPage() {
           <LiveKitRoom
             token={roomDetails.token}
             connect={shouldConnect}
-            audio
+            audio={false}
             video={false}
             serverUrl={import.meta.env.VITE_LK_SERVER_URL}
             onMediaDeviceFailure={onDeviceFailure}
@@ -402,13 +402,14 @@ function LandingScreen({ isLoading, error, onConnect }) {
 
 function InterviewInterface({ onEndCall, userId }) {
   const { state, audioTrack, agentTranscriptions } = useVoiceAssistant();
-  const { messages: chatMessages } = useChat();
+  const { messages: chatMessages, send: sendChatMessage } = useChat();
   
   const [conversation, setConversation] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [partialTranscript, setPartialTranscript] = useState("");
   const [agentPartialTranscript, setAgentPartialTranscript] = useState("");
+  const [draftMessage, setDraftMessage] = useState("");
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState(null);
@@ -425,6 +426,23 @@ function InterviewInterface({ onEndCall, userId }) {
   const lastMessageIdRef = useRef(0);
   const lastAgentTranscriptionIdRef = useRef(null);
   const timerRef = useRef(null);
+
+  // Send message handler
+  const handleSendMessage = async () => {
+    if (!draftMessage.trim()) return;
+
+    if (sendChatMessage) {
+      await sendChatMessage(draftMessage);
+    }
+
+    setConversation(prev => [...prev, {
+      speaker: "user",
+      text: draftMessage,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+
+    setDraftMessage("");
+  };
 
   // Interview timer
   useEffect(() => {
@@ -585,7 +603,7 @@ function InterviewInterface({ onEndCall, userId }) {
 
   useEffect(() => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [conversation, agentPartialTranscript]);
+  }, [conversation, agentPartialTranscript, draftMessage]);
 
   // Handle AI Transcriptions
   useEffect(() => {
@@ -659,11 +677,7 @@ function InterviewInterface({ onEndCall, userId }) {
       if (interimTranscript) setPartialTranscript(interimTranscript);
 
       if (finalTranscript) {
-        setConversation(prev => [...prev, {
-          speaker: "user",
-          text: finalTranscript,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
+        setDraftMessage(prev => prev ? prev + " " + finalTranscript : finalTranscript);
         setPartialTranscript("");
         setIsSpeaking(false);
       }
@@ -1059,10 +1073,29 @@ function InterviewInterface({ onEndCall, userId }) {
         </div>
         
         {/* Chat Footer */}
-        <div className="p-4 border-t border-white/5">
-          <div className="flex items-center gap-2 text-slate-500 text-xs">
-            <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
-            <span>{isListening ? 'Listening to your voice...' : 'Waiting for speech...'}</span>
+        <div className="p-4 border-t border-white/5 bg-[#0a1018]">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-slate-500 text-xs">
+              <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
+              <span>{isListening ? 'Dictating...' : 'Ready for dictation...'}</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={draftMessage}
+                onChange={(e) => setDraftMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Speak to type, then edit..."
+                className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-slate-600"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!draftMessage.trim()}
+                className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-cyan-500/20 disabled:shadow-none"
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>
