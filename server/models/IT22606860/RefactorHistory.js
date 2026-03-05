@@ -42,8 +42,8 @@ const RefactorHistorySchema = new mongoose.Schema({
     },
     modelUsed: {
         type: String,
-        enum: ['trained', 'huggingface', 'rules', 'ensemble'],
-        default: 'trained'
+        enum: ['trained', 'huggingface', 'rules', 'ensemble', 'ast', 'hybrid', 'ml', 'llm'],
+        default: 'ast'
     },
     processingTime: {
         type: Number, // in milliseconds
@@ -121,6 +121,17 @@ const RefactorHistorySchema = new mongoose.Schema({
             executionTime: Number
         },
         testsPassed: Boolean
+    },
+    
+    // Changes Applied (from AST refactoring)
+    changesApplied: [{
+        type: String
+    }],
+    
+    // Refactoring Summary
+    summary: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
     }
 }, {
     timestamps: true,

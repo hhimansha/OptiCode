@@ -537,6 +537,41 @@ export const checkAllServicesHealth = async () => {
 // ============================================
 
 /**
+ * Save refactoring history to backend
+ * @param {Object} data - History data to save
+ * @param {string} data.originalCode - Original code before refactoring
+ * @param {string} data.refactoredCode - Refactored code
+ * @param {string} data.language - Programming language
+ * @param {string} data.instruction - Refactoring instruction/description
+ * @param {string} data.modelUsed - Model/method used (ast, ml, llm, etc.)
+ * @param {number} data.processingTime - Processing time in ms
+ * @param {Array} data.changesApplied - List of changes applied
+ * @param {Object} data.summary - Refactoring summary
+ * @returns {Promise} Response with saved history item
+ */
+export const saveRefactorHistory = async (data) => {
+    try {
+        console.log('[API] Saving refactoring to history...');
+        const response = await expressApi.post('/IT22606860/history', {
+            originalCode: data.originalCode,
+            refactoredCode: data.refactoredCode,
+            language: data.language || 'python',
+            instruction: data.instruction || 'Unified comprehensive refactoring',
+            modelUsed: data.modelUsed || 'ast',
+            processingTime: data.processingTime || 0,
+            changesApplied: data.changesApplied || [],
+            summary: data.summary || {}
+        });
+        console.log('[API] History saved:', response.data.historyId);
+        return response.data;
+    } catch (error) {
+        console.error('[API] Error saving history:', error);
+        // Don't throw - history saving is non-critical
+        return { success: false, error: error.message };
+    }
+};
+
+/**
  * Get refactoring history with pagination
  * @param {number} page - Page number
  * @param {number} limit - Items per page
@@ -582,6 +617,27 @@ export const deleteHistory = async (id) => {
         return response.data;
     } catch (error) {
         console.error('Error deleting history:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Update history item (rename, add risk analysis, etc.)
+ * @param {string} id - History item ID
+ * @param {Object} data - Data to update
+ * @param {string} data.instruction - New instruction/name
+ * @param {Object} data.riskAnalysis - Risk analysis data
+ * @param {number} data.userRating - User rating (1-5)
+ * @param {string} data.userFeedback - User feedback text
+ * @param {boolean} data.accepted - Whether refactoring was accepted
+ * @returns {Promise} Response
+ */
+export const updateHistory = async (id, data) => {
+    try {
+        const response = await expressApi.put(`/IT22606860/history/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating history:', error);
         throw new Error(error.response?.data?.message || error.message);
     }
 };

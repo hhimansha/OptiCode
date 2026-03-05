@@ -1,6 +1,88 @@
 import RefactorHistory from '../../models/IT22606860/RefactorHistory.js';
 import mongoose from 'mongoose';
 
+// Helper to compute basic quality metrics
+const computeBasicMetrics = (code) => {
+    if (!code) return { loc: 0, complexity: 1, maintainabilityIndex: 50 };
+    const lines = code.split('\n');
+    const loc = lines.length;
+    const complexityKeywords = ['if', 'elif', 'else', 'for', 'while', 'try', 'except', 'catch', 'switch', 'case', '&&', '||', 'and', 'or'];
+    let complexity = 1;
+    complexityKeywords.forEach(kw => {
+        const regex = new RegExp(`\\b${kw}\\b`, 'g');
+        const matches = code.match(regex);
+        if (matches) complexity += matches.length;
+    });
+    const maintainabilityIndex = Math.max(0, Math.min(100,
+        171 - 5.2 * Math.log(Math.max(1, complexity)) - 0.23 * complexity - 16.2 * Math.log(Math.max(1, loc))
+    ));
+    return { loc, complexity, maintainabilityIndex: parseFloat(maintainabilityIndex.toFixed(2)) };
+};
+
+// Create new history entry
+export const createHistory = async (req, res, next) => {
+    try {
+        const { 
+            originalCode, 
+            refactoredCode, 
+            language = 'python',
+            instruction = 'Unified comprehensive refactoring',
+            modelUsed = 'ast',
+            processingTime = 0,
+            changesApplied = [],
+            summary = {}
+        } = req.body;
+
+        if (!originalCode || !refactoredCode) {
+            return res.status(400).json({
+                success: false,
+                message: 'Both originalCode and refactoredCode are required'
+            });
+        }
+
+        // Compute quality metrics
+        const beforeMetrics = computeBasicMetrics(originalCode);
+        const afterMetrics = computeBasicMetrics(refactoredCode);
+        const improvement = {
+            locReduction: parseFloat(((beforeMetrics.loc - afterMetrics.loc) / Math.max(beforeMetrics.loc, 1) * 100).toFixed(2)),
+            complexityReduction: parseFloat(((beforeMetrics.complexity - afterMetrics.complexity) / Math.max(beforeMetrics.complexity, 1) * 100).toFixed(2)),
+            maintainabilityImprovement: parseFloat((afterMetrics.maintainabilityIndex - beforeMetrics.maintainabilityIndex).toFixed(2)),
+            overallScore: parseFloat((((afterMetrics.maintainabilityIndex - beforeMetrics.maintainabilityIndex) + ((beforeMetrics.complexity - afterMetrics.complexity) / Math.max(beforeMetrics.complexity, 1) * 100)) / 2).toFixed(2))
+        };
+
+        const history = await RefactorHistory.create({
+            userId: req.userId || null,
+            inputCode: originalCode,
+            originalCode: originalCode,
+            refactoredCode: refactoredCode,
+            language: language,
+            instruction: instruction,
+            modelUsed: modelUsed,
+            processingTime: processingTime,
+            status: 'completed',
+            qualityMetrics: {
+                before: beforeMetrics,
+                after: afterMetrics,
+                improvement
+            },
+            changesApplied: changesApplied,
+            summary: summary
+        });
+
+        console.log(`[HISTORY] Created history entry: ${history._id}`);
+
+        res.status(201).json({
+            success: true,
+            data: history,
+            historyId: history._id,
+            message: 'History saved successfully'
+        });
+    } catch (error) {
+        console.error('[HISTORY CREATE] Error:', error.message);
+        next(error);
+    }
+};
+
 // Get refactoring history with pagination
 export const getHistory = async (req, res, next) => {
     try {
@@ -24,12 +106,12 @@ export const getHistory = async (req, res, next) => {
             query.modelUsed = modelUsed;
         }
 
-        // Get history with pagination
+        // Get history with pagination - include inputCode for preview
         const history = await RefactorHistory.find(query)
             .sort({ [sortBy]: -1 })
             .skip(skip)
             .limit(limitNum)
-            .select('-originalCode -refactoredCode'); // Exclude large fields for list
+            .select('instruction language modelUsed processingTime status createdAt qualityMetrics riskAnalysis changesApplied inputCode refactoredCode'); // Include code for display
 
         const total = await RefactorHistory.countDocuments(query);
 
@@ -70,6 +152,45 @@ export const getHistoryById = async (req, res, next) => {
         });
     } catch (error) {
         console.error('[HISTORY] Error:', error.message);
+        next(error);
+    }
+};
+
+// Update history item (for renaming instruction, adding risk analysis, etc.)
+export const updateHistory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { instruction, riskAnalysis, userRating, userFeedback, accepted } = req.body;
+
+        const updateData = {};
+        if (instruction !== undefined) updateData.instruction = instruction;
+        if (riskAnalysis !== undefined) updateData.riskAnalysis = riskAnalysis;
+        if (userRating !== undefined) updateData.userRating = userRating;
+        if (userFeedback !== undefined) updateData.userFeedback = userFeedback;
+        if (accepted !== undefined) updateData.accepted = accepted;
+
+        const updated = await RefactorHistory.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: 'History item not found'
+            });
+        }
+
+        console.log(`[HISTORY] Updated history entry: ${id}`);
+
+        res.status(200).json({
+            success: true,
+            data: updated,
+            message: 'History updated successfully'
+        });
+    } catch (error) {
+        console.error('[HISTORY UPDATE] Error:', error.message);
         next(error);
     }
 };

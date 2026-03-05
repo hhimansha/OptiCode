@@ -6,7 +6,8 @@ const CodeEditor = ({
     onChange,
     language = 'javascript',
     readOnly = false,
-    height = '400px'
+    height = '400px',
+    showLineNumbers = true
 }) => {
     const handleEditorChange = (value) => {
         if (onChange) {
@@ -15,7 +16,8 @@ const CodeEditor = ({
     };
 
     return (
-        <div className="rounded-lg overflow-hidden border border-gray-700 shadow-lg">
+        <div className="rounded-xl overflow-hidden border border-slate-700/60 shadow-xl bg-slate-950">
+            {/* Line numbers gutter styling is handled by Monaco */}
             <Editor
                 height={height}
                 language={language}
@@ -26,16 +28,33 @@ const CodeEditor = ({
                     readOnly: readOnly,
                     minimap: { enabled: false },
                     fontSize: 14,
-                    fontFamily: "'Fira Code', 'Courier New', monospace",
-                    lineNumbers: 'on',
+                    fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+                    lineNumbers: showLineNumbers ? 'on' : 'off',
+                    lineNumbersMinChars: 4,
+                    glyphMargin: false,
+                    folding: true,
+                    lineDecorationsWidth: 8,
                     scrollBeyondLastLine: false,
                     automaticLayout: true,
                     padding: { top: 16, bottom: 16 },
                     renderLineHighlight: 'all',
+                    renderLineHighlightOnlyWhenFocus: false,
                     smoothScrolling: true,
                     cursorBlinking: 'smooth',
-                    cursorSmoothCaretAnimation: true,
+                    cursorSmoothCaretAnimation: 'on',
                     wordWrap: 'on',
+                    bracketPairColorization: { enabled: true },
+                    guides: {
+                        indentation: true,
+                        bracketPairs: true
+                    },
+                    overviewRulerBorder: false,
+                    scrollbar: {
+                        vertical: 'auto',
+                        horizontal: 'auto',
+                        verticalScrollbarSize: 10,
+                        horizontalScrollbarSize: 10
+                    }
                 }}
             />
         </div>
