@@ -1,71 +1,33 @@
-// File: routers/livekitRouter.js
 import express from 'express';
 import { v4 as uuid } from 'uuid';
-import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
+import { AccessToken } from 'livekit-server-sdk';
+import userAuth from '../middlewares/Userauth.js'; // Adjust path as needed
 
 const router = express.Router();
 
-const createAccessToken = async (userInfo, grant) => {
-  const LiveKitAPi = process.env.LIVEKIT_API_KEY;
-  const LivekitSecret = process.env.LIVEKIT_API_SECRET;
-  
-  const accessToken = new AccessToken(LiveKitAPi, LivekitSecret, {
-    identity: userInfo.identity,
-    name: userInfo.name
-  });
-  
-  accessToken.addGrant(grant);
-  return await accessToken.toJwt();
-};
-
-// GET /api/livekit
-router.get('/', async (req, res) => {
+// Apply userAuth middleware here so req.userId is available
+router.get('/', userAuth, async (req, res) => {
   try {
-    // Extract userId from query parameters - FIXED THIS LINE
-    const userId = req.query.userId; // Simple direct access to query parameter
+    const userId = req.userId; // Populated by userAuth middleware
+    const roomName = `room-${uuid()}`;
     
-    if (!userId) {
-      return res.status(400).json({ error: 'userId query parameter is required' });
-    }
-    
-    const roomName = uuid();
-    
-    const LiveKITHost = process.env.LIVEKIT_URL;
-    const LivekitSecret = process.env.LIVEKIT_API_SECRET;
-    const LiveKitAPi = process.env.LIVEKIT_API_KEY;
-    
-    if (!LiveKITHost || !LivekitSecret || !LiveKitAPi) {
-      const missing = [];
-      if (!LiveKITHost) missing.push('LIVEKIT_URL');
-      if (!LivekitSecret) missing.push('LIVEKIT_API_SECRET');
-      if (!LiveKitAPi) missing.push('LIVEKIT_API_KEY');
-      throw new Error(`LiveKit configuration is missing: ${missing.join(', ')}`);
-    }
-    
-    const roomClient = new RoomServiceClient(LiveKITHost, LiveKitAPi, LivekitSecret);
-    const room = await roomClient.createRoom({ 
-      name: roomName
+    const token = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
+      identity: userId, // This is what the Python Agent will read
+      name: userId,
     });
 
-    const grant = {
+    token.addGrant({
       room: roomName,
       roomJoin: true,
       canPublish: true,
       canSubscribe: true,
-      canPublishData: true,
-      canUpdateOwnMetadata: true  
-    };
-      
-    const token = await createAccessToken({
-      identity: userId,
-      name: userId
-    }, grant);
-    
-    // Return JSON response
-    return res.status(200).json({ roomName, token });
+    });
+
+    const jwt = await token.toJwt();
+    return res.status(200).json({ roomName, token: jwt });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Something went wrong' });
+    return res.status(500).json({ error: 'Server Error' });
   }
 });
 

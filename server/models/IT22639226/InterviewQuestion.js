@@ -6,7 +6,8 @@ const InterviewQuestionSchema = new mongoose.Schema({
   questions: [
     {
       question: { type: String, required: true },
-      answer: { type: String, required: true }
+      answer: { type: String, required: true },
+      useranswer: { type: String, default: "" } // field to store user's answer
     }
   ],
   createdAt: { type: Date, default: Date.now }

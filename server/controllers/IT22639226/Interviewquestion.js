@@ -11,11 +11,22 @@ You are a programming instructor.
 Analyze the following Python code and generate interview questions ONLY about this code.
 
 CODE:
-result = []
-for i in range(2000, 3201):
-    if i % 7 == 0 and i % 5 != 0:
-        result.append(str(i))
-print(",".join(result))
+import requests
+from bs4 import BeautifulSoup
+
+def get_headlines(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # This searches for all <h2> tags; common for headlines
+    headlines = soup.find_all('h2')
+    
+    for i, title in enumerate(headlines, 1):
+        print(f"{i}. {title.text.strip()}")
+
+
+
+
 
 Rules:
 - Generate exactly 5 questions

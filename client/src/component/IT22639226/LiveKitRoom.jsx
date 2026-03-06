@@ -22,7 +22,10 @@ export default function VoiceAssistantPage() {
     setIsLoading(true);
     try {
       setError(null);
-      const response = await fetch(`http://localhost:5000/api/livekit?userId=${userId}`);
+      const response = await fetch(`http://localhost:5000/api/livekit?userId=${userId}`, {
+        method: 'GET',
+        credentials: 'include'
+      });
       const data = await response.json();
 
       if (!response.ok) throw new Error("Failed to connect to voice agent");
