@@ -2,8 +2,8 @@
  * Code Concept Extractor - API Service
  * Student: IT22601360
  *
- * AI calls  → Python service  (port 8000)
- * Save/History → Express/MongoDB (port 5000)
+ * AI calls  → Python FastAPI service  (port 8000)
+ * Save/History → Express/MongoDB       (port 5000)
  */
 
 import axios from 'axios';
@@ -11,175 +11,205 @@ import axios from 'axios';
 const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
 const MERN_API_URL   = import.meta.env.VITE_API_URL        || 'http://localhost:5000';
 
-// ─── Axios clients ────────────────────────────────────────────────────────────
+// ── Axios clients ─────────────────────────────────────────────────────────────
 
 const aiClient = axios.create({
-    baseURL: `${AI_SERVICE_URL}/api/IT22601360`,
-    timeout: 120000,
-    headers: { 'Content-Type': 'application/json' }
+  baseURL: `${AI_SERVICE_URL}/api/IT22601360`,
+  timeout: 120_000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
 const mernClient = axios.create({
-    baseURL: `${MERN_API_URL}/api/IT22601360`,
-    timeout: 15000,
-    headers: { 'Content-Type': 'application/json' }
+  baseURL: `${MERN_API_URL}/api/IT22601360`,
+  timeout: 15_000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Logging interceptors
-aiClient.interceptors.request.use(config => {
-    console.log(`🚀 AI Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
+aiClient.interceptors.request.use(cfg => {
+  console.log(`🚀 AI → ${cfg.method?.toUpperCase()} ${cfg.url}`);
+  return cfg;
 });
 aiClient.interceptors.response.use(
-    res   => { console.log(`✅ AI Response: ${res.status}`); return res; },
-    error => { console.error('❌ AI Error:', error.response?.data || error.message); return Promise.reject(error); }
+  res   => { console.log(`✅ AI ← ${res.status}`); return res; },
+  err   => { console.error('❌ AI Error:', err.response?.data || err.message); return Promise.reject(err); },
 );
 
-mernClient.interceptors.request.use(config => {
-    console.log(`🚀 MERN Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
-});
 mernClient.interceptors.response.use(
-    res   => { console.log(`✅ MERN Response: ${res.status}`); return res; },
-    error => { console.error('❌ MERN Error:', error.response?.data || error.message); return Promise.reject(error); }
+  res   => res,
+  err   => { console.error('❌ MERN Error:', err.response?.data || err.message); return Promise.reject(err); },
 );
 
 
-// ─── AI Service API ───────────────────────────────────────────────────────────
+// ── AI Service ────────────────────────────────────────────────────────────────
 
 export const conceptExtractorApi = {
 
-    extractConcepts: async (code, language = 'python') => {
-        try {
-            const response = await aiClient.post('/extract-enhanced', { code, language });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.detail || 'Failed to extract concepts. Please try again.');
-        }
-    },
-
-    quickClassify: async (code, language = 'python') => {
-        try {
-            const response = await aiClient.post('/classify', { code, language }, { timeout: 5000 });
-            return response.data;
-        } catch (error) {
-            console.warn('Quick classify failed:', error.message);
-            return null;
-        }
-    },
-
-    getConceptDetails: async (conceptName, codeContext = '', detailLevel = 'intermediate') => {
-        try {
-            const response = await aiClient.post('/concept-details', { conceptName, codeContext, detailLevel });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.detail || 'Failed to get concept details.');
-        }
-    },
-
-    getVisualization: async (concepts, type = 'all') => {
-        try {
-            const response = await aiClient.post('/visualize', { concepts, type });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.detail || 'Failed to generate visualization.');
-        }
-    },
-
-    getSupportedLanguages: async () => {
-        try {
-            const response = await aiClient.get('/supported-languages');
-            return response.data;
-        } catch {
-            return { languages: ['python', 'javascript', 'typescript', 'java', 'cpp', 'c'] };
-        }
-    },
-
-    getModelInfo: async () => {
-        try {
-            const response = await aiClient.get('/model-info');
-            return response.data;
-        } catch {
-            return null;
-        }
-    },
-
-    healthCheck: async () => {
-        try {
-            const response = await aiClient.get('/health');
-            return response.data;
-        } catch (error) {
-            return { status: 'unhealthy', error: error.message };
-        }
+  /** Single-snippet extraction (paste mode) */
+  extractConcepts: async (code, language = 'python') => {
+    try {
+      const { data } = await aiClient.post('/extract-enhanced', { code, language });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Failed to extract concepts. Please try again.');
     }
+  },
+
+  /**
+   * Upload a collection of File objects (from webkitdirectory input).
+   * Sends multipart/form-data to /extract-files.
+   * Returns the full project extraction result including per-file concepts,
+   * aggregated_concepts, and project_summary (with project_purpose).
+   *
+   * @param {File[]} files - Array of File objects from the folder input
+   * @param {Function} [onUploadProgress] - Optional axios upload progress callback
+   */
+  uploadProjectFiles: async (files, onUploadProgress = null) => {
+    if (!files || files.length === 0) throw new Error('No files provided');
+
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file, file.webkitRelativePath || file.name));
+
+    try {
+      const { data } = await aiClient.post('/extract-files', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 600_000, // 10 min for large projects
+        onUploadProgress,
+      });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Failed to analyze project. Please try again.');
+    }
+  },
+
+  /**
+   * Generate a natural-language project purpose from concept metadata.
+   * Useful when you want to refresh the summary independently.
+   */
+  generateProjectPurpose: async (filenames, conceptNames) => {
+    try {
+      const { data } = await aiClient.post('/project-purpose', { filenames, conceptNames });
+      return data.purpose || '';
+    } catch {
+      return '';
+    }
+  },
+
+  quickClassify: async (code, language = 'python') => {
+    try {
+      const { data } = await aiClient.post('/classify', { code, language }, { timeout: 5_000 });
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
+  getConceptDetails: async (conceptName, codeContext = '', detailLevel = 'intermediate') => {
+    try {
+      const { data } = await aiClient.post('/concept-details', { conceptName, codeContext, detailLevel });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Failed to get concept details.');
+    }
+  },
+
+  getVisualization: async (concepts, type = 'all') => {
+    try {
+      const { data } = await aiClient.post('/visualize', { concepts, type });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Failed to generate visualization.');
+    }
+  },
+
+  getSupportedLanguages: async () => {
+    try {
+      const { data } = await aiClient.get('/supported-languages');
+      return data;
+    } catch {
+      return { languages: ['python', 'javascript', 'typescript', 'java', 'cpp', 'c', 'go', 'rust'] };
+    }
+  },
+
+  getModelInfo: async () => {
+    try {
+      const { data } = await aiClient.get('/model-info');
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
+  healthCheck: async () => {
+    try {
+      const { data } = await aiClient.get('/health');
+      return data;
+    } catch (err) {
+      return { status: 'unhealthy', error: err.message };
+    }
+  },
 };
 
 
-// ─── MongoDB History API (via Express on port 5000) ───────────────────────────
+// ── MongoDB History API ───────────────────────────────────────────────────────
 
 export const conceptHistoryApi = {
 
-    /**
-     * Save extraction result to MongoDB
-     * Called automatically after every successful analysis
-     */
-    saveExtraction: async (extractionResult, sourceCode, language, userId = null) => {
-        try {
-            const payload = {
-                sourceCode,
-                language,
-                concepts:       extractionResult.concepts       || [],
-                metrics:        extractionResult.metrics        || {},
-                processingTime: extractionResult.processingTime || 0,
-                ...(userId && { userId })
-            };
-            const response = await mernClient.post('/history', payload);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to save extraction to database.');
-        }
-    },
-
-    getHistory: async (options = {}) => {
-        try {
-            const { page = 1, limit = 20, language, concept, userId } = options;
-            const params = { page, limit };
-            if (language) params.language = language;
-            if (concept)  params.concept  = concept;
-            if (userId)   params.userId   = userId;
-            const response = await mernClient.get('/history', { params });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to fetch extraction history.');
-        }
-    },
-
-    getExtractionById: async (id) => {
-        try {
-            const response = await mernClient.get(`/history/${id}`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to fetch extraction.');
-        }
-    },
-
-    deleteExtraction: async (id) => {
-        try {
-            const response = await mernClient.delete(`/history/${id}`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to delete extraction.');
-        }
-    },
-
-    getStats: async () => {
-        try {
-            const response = await mernClient.get('/history/stats/summary');
-            return response.data;
-        } catch {
-            return null;
-        }
+  saveExtraction: async (extractionResult, sourceCode, language, userId = null) => {
+    try {
+      const { data } = await mernClient.post('/history', {
+        sourceCode,
+        language,
+        concepts:       extractionResult.concepts       || [],
+        metrics:        extractionResult.metrics        || {},
+        processingTime: extractionResult.processingTime || 0,
+        ...(userId && { userId }),
+      });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to save extraction.');
     }
+  },
+
+  getHistory: async (options = {}) => {
+    try {
+      const { page = 1, limit = 20, language, concept, userId } = options;
+      const params = { page, limit };
+      if (language) params.language = language;
+      if (concept)  params.concept  = concept;
+      if (userId)   params.userId   = userId;
+      const { data } = await mernClient.get('/history', { params });
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to fetch history.');
+    }
+  },
+
+  getExtractionById: async (id) => {
+    try {
+      const { data } = await mernClient.get(`/history/${id}`);
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to fetch extraction.');
+    }
+  },
+
+  deleteExtraction: async (id) => {
+    try {
+      const { data } = await mernClient.delete(`/history/${id}`);
+      return data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to delete extraction.');
+    }
+  },
+
+  getStats: async () => {
+    try {
+      const { data } = await mernClient.get('/history/stats/summary');
+      return data;
+    } catch {
+      return null;
+    }
+  },
 };
 
 export default conceptExtractorApi;
