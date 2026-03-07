@@ -1,13 +1,13 @@
-// models/InterviewQuestion.js
 import mongoose from 'mongoose';
 
 const InterviewQuestionSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // linked user
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  task: { type: String, required: true },
+  code: { type: String, required: true },
   questions: [
     {
       question: { type: String, required: true },
       answer: { type: String, required: true },
-      useranswer: { type: String, default: "" } // field to store user's answer
     }
   ],
   createdAt: { type: Date, default: Date.now }
