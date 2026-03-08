@@ -48,7 +48,7 @@ const Form = () => {
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
       if (isLogin) {
-        navigate('/face'); // <-- redirect after login
+        navigate('/interview'); // <-- redirect after login
       }
 
     } else {

@@ -15,7 +15,7 @@ body {
 }
 
 
-.title {
+/*.title {
   text-align: center;
   font-size: 34px;
   font-weight: 700;
@@ -24,7 +24,7 @@ body {
   background: linear-gradient(90deg, #60a5fa, #a78bfa);
   
   -webkit-text-fill-color: transparent;
-}
+}*/
 
 .skill {
   text-align: center;
@@ -103,7 +103,7 @@ body {
   transform: translateX(-160px);
 }
 .submit-btn:hover {
-  transform: translateY(-2px);
+  
   box-shadow: 0 0 26px rgba(124, 58, 237, 0.65);
 }
 .hints-box {
@@ -205,6 +205,27 @@ body {
   border-radius: 14px;
   overflow: hidden;
 }
+
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;   
+  text-align: center;
+  margin-bottom: 18px;
+  -webkit-text-fill-color: #ffffff;
+}
+.editor-actions {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 8px; /* adjust if needed */
+}
+
+
+
 
 
 
