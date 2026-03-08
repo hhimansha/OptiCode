@@ -44,4 +44,4 @@ const studentProgressSchema = new mongoose.Schema({
   sessions:        [sessionSchema]
 });
 
-export default mongoose.model("StudentProgress", studentProgressSchema);
+export default mongoose.model("studentProgress", studentProgressSchema);

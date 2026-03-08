@@ -4,7 +4,7 @@ import { generateTaskWithGemini } from "../../services/IT22604194/geminiService.
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import StudentProgress from "../../models/IT22604194/StudentProgress.js";
+import studentProgress from "../../models/IT22604194/StudentProgress.js";
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -485,7 +485,7 @@ router.post("/generate", async (req, res) => {
 
     if (userId) {
       try {
-        progress = await StudentProgress.findOne({ userId });
+        progress = await studentProgress.findOne({ userId });
 
         if (
           learning_mode === "level_up" &&

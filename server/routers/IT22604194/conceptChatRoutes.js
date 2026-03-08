@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import express from "express";
-import StudentProgress from "../../models/IT22604194/StudentProgress.js";
+import studentProgress from "../../models/IT22604194/StudentProgress.js";
 
 const router = express.Router();
 
@@ -161,7 +161,7 @@ router.post("/start", async (req, res) => {
     let skillLevel = "Beginner";
     if (userId) {
       try {
-        const progress = await StudentProgress.findOne({ userId });
+        const progress = await studentProgress.findOne({ userId });
         if (progress?.skillLevel) skillLevel = progress.skillLevel;
       } catch (e) {
         console.warn("Could not fetch student skill level:", e.message);

@@ -1,5 +1,5 @@
 import express from "express";
-import StudentProgress from "../../models/IT22604194/StudentProgress.js";
+import studentProgress from "../../models/IT22604194/StudentProgress.js";
 
 const router = express.Router();
 
@@ -226,10 +226,10 @@ router.post("/save", async (req, res) => {
       codeSubmission
     } = req.body;
 
-    let progress = await StudentProgress.findOne({ userId });
+    let progress = await studentProgress.findOne({ userId });
 
     if (!progress) {
-      progress = new StudentProgress({
+      progress = new studentProgress({
         userId,
         skillLevel,
         bktMastery: BKT.pKnown[skillLevel] || 0.2
@@ -349,7 +349,7 @@ router.post("/save", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const progress = await StudentProgress.findOne({ userId: req.params.userId });
+    const progress = await studentProgress.findOne({ userId: req.params.userId });
 
     if (!progress) {
       return res.json({
@@ -398,7 +398,7 @@ router.post("/reset-level", async (req, res) => {
       return res.status(400).json({ error: "userId and skillLevel are required" });
     }
 
-    await StudentProgress.findOneAndUpdate(
+    await studentProgress.findOneAndUpdate(
       { userId },
       {
         $set: {
