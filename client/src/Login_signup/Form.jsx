@@ -62,7 +62,7 @@ const Form = () => {
       }
 
       if (isLogin) {
-        navigate('/face');
+        navigate('/interview');
       }
     } else {
       setLoginSuccess(false);
