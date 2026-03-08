@@ -6,6 +6,26 @@ import BestPractice from '../../models/IT22606860/BestPractice.js';
 // Python ML API URL
 const ML_API_URL = process.env.ML_API_URL || 'http://localhost:8000';
 
+// Helper to compute basic quality metrics from code
+const computeBasicMetrics = (code) => {
+    const lines = code.split('\n');
+    const loc = lines.length;
+    const nonEmptyLines = lines.filter(l => l.trim().length > 0).length;
+    // Simple cyclomatic complexity estimation
+    const complexityKeywords = ['if', 'elif', 'else', 'for', 'while', 'try', 'except', 'catch', 'switch', 'case', '&&', '||', 'and', 'or'];
+    let complexity = 1;
+    complexityKeywords.forEach(kw => {
+        const regex = new RegExp(`\\b${kw}\\b`, 'g');
+        const matches = code.match(regex);
+        if (matches) complexity += matches.length;
+    });
+    // Maintainability index (simplified Halstead-based)
+    const maintainabilityIndex = Math.max(0, Math.min(100,
+        171 - 5.2 * Math.log(Math.max(1, complexity)) - 0.23 * complexity - 16.2 * Math.log(Math.max(1, loc))
+    ));
+    return { loc, complexity, maintainabilityIndex: parseFloat(maintainabilityIndex.toFixed(2)) };
+};
+
 // Refactor code endpoint
 export const refactorCode = async (req, res, next) => {
     try {
@@ -43,9 +63,19 @@ export const refactorCode = async (req, res, next) => {
             if (response.data.success) {
                 const processingTime = Date.now() - startTime;
 
-                // Save to history
+                // Compute quality metrics
+                const beforeMetrics = computeBasicMetrics(code);
+                const afterMetrics = computeBasicMetrics(response.data.refactored_code);
+                const improvement = {
+                    locReduction: parseFloat(((beforeMetrics.loc - afterMetrics.loc) / Math.max(beforeMetrics.loc, 1) * 100).toFixed(2)),
+                    complexityReduction: parseFloat(((beforeMetrics.complexity - afterMetrics.complexity) / Math.max(beforeMetrics.complexity, 1) * 100).toFixed(2)),
+                    maintainabilityImprovement: parseFloat((afterMetrics.maintainabilityIndex - beforeMetrics.maintainabilityIndex).toFixed(2)),
+                    overallScore: parseFloat((((afterMetrics.maintainabilityIndex - beforeMetrics.maintainabilityIndex) + ((beforeMetrics.complexity - afterMetrics.complexity) / Math.max(beforeMetrics.complexity, 1) * 100)) / 2).toFixed(2))
+                };
+
+                // Save to history with userId and quality metrics
                 const history = await RefactorHistory.create({
-                    userId: req.user?._id,
+                    userId: req.userId || null,
                     inputCode: code,
                     originalCode: code,
                     refactoredCode: response.data.refactored_code,
@@ -53,7 +83,12 @@ export const refactorCode = async (req, res, next) => {
                     instruction: instruction || 'Refactor this code',
                     modelUsed: 'trained',
                     processingTime: response.data.processing_time || processingTime,
-                    status: 'completed'
+                    status: 'completed',
+                    qualityMetrics: {
+                        before: beforeMetrics,
+                        after: afterMetrics,
+                        improvement
+                    }
                 });
 
                 return res.status(200).json({
@@ -81,9 +116,19 @@ export const refactorCode = async (req, res, next) => {
             const processingTime = Date.now() - startTime;
             const refactoredCode = `// Refactored based on: ${instruction}\n${code}`;
 
-            // Save to history with failed status
+            // Compute quality metrics for fallback
+            const fbBeforeMetrics = computeBasicMetrics(code);
+            const fbAfterMetrics = computeBasicMetrics(refactoredCode);
+            const fbImprovement = {
+                locReduction: parseFloat(((fbBeforeMetrics.loc - fbAfterMetrics.loc) / Math.max(fbBeforeMetrics.loc, 1) * 100).toFixed(2)),
+                complexityReduction: parseFloat(((fbBeforeMetrics.complexity - fbAfterMetrics.complexity) / Math.max(fbBeforeMetrics.complexity, 1) * 100).toFixed(2)),
+                maintainabilityImprovement: parseFloat((fbAfterMetrics.maintainabilityIndex - fbBeforeMetrics.maintainabilityIndex).toFixed(2)),
+                overallScore: 0
+            };
+
+            // Save to history with userId
             const historyEntry = await RefactorHistory.create({
-                userId: req.user?._id,
+                userId: req.userId || null,
                 inputCode: code,
                 originalCode: code,
                 refactoredCode,
@@ -91,7 +136,12 @@ export const refactorCode = async (req, res, next) => {
                 language: language || 'javascript',
                 status: 'completed',
                 processingTime,
-                modelUsed: 'rules'
+                modelUsed: 'rules',
+                qualityMetrics: {
+                    before: fbBeforeMetrics,
+                    after: fbAfterMetrics,
+                    improvement: fbImprovement
+                }
             });
 
             return res.status(200).json({
