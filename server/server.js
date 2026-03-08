@@ -2,6 +2,9 @@ import fetch from "node-fetch";
 
 import Userrouter from "./routers/Userrouter.js";
 import taskRoutes from "./routers/IT22604194/taskRoutes.js";
+import tutorRoutes from "./routers/IT22604194/tutorRoutes.js";
+import progressRoutes from "./routers/IT22604194/progressRoutes.js";
+import conceptChatRoutes from "./routers/IT22604194/conceptChatRoutes.js";
 import livekitRouter from "./routers/livekitRouter.js";
 //import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 // import AiInterviewRouter from "./routers/Ai_interviewrouter.js"; // Uncomment if needed and export matches
@@ -62,6 +65,9 @@ app.use(cors({
 app.use("/api/users", Userrouter);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/livekit", livekitRouter);
+app.use("/api/tutor", tutorRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/concept-chat", conceptChatRoutes);
 
 // Mock route for predict-skill (Missing in conflict resolution)
 app.post("/api/predict-skill", async (req, res) => {
