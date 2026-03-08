@@ -98,7 +98,7 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                 </div>
 
                 {/* Detail Level Selector */}
-                <div className="px-6 py-3 bg-slate-800/50 border-b border-slate-700 flex items-center gap-3">
+                {/* <div className="px-6 py-3 bg-slate-800/50 border-b border-slate-700 flex items-center gap-3">
                     <span className="text-sm text-gray-400 font-medium">Detail Level:</span>
                     <div className="flex gap-2">
                         {['basic', 'intermediate', 'advanced'].map((level) => (
@@ -115,7 +115,7 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                             </button>
                         ))}
                     </div>
-                </div>
+                </div> */}
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto px-6 py-6 bg-slate-900">
@@ -169,7 +169,7 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                             </section>
 
                             {/* How Used in Code */}
-                            {details.how_used_in_code && (
+                            {/* {details.how_used_in_code && (
                                 <section className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                         <span>💻</span>
@@ -179,10 +179,10 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                                         {details.how_used_in_code}
                                     </p>
                                 </section>
-                            )}
+                            )} */}
 
                             {/* Complexity */}
-                            {(details.time_complexity || details.space_complexity) && (
+                            {/* {(details.time_complexity || details.space_complexity) && (
                                 <section className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                         <span>⏱️</span>
@@ -203,10 +203,10 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                                         )}
                                     </div>
                                 </section>
-                            )}
+                            )} */}
 
                             {/* Advantages */}
-                            {details.advantages && details.advantages.length > 0 && (
+                            {/* {details.advantages && details.advantages.length > 0 && (
                                 <section className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                         <span>✅</span>
@@ -221,10 +221,10 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                                         ))}
                                     </ul>
                                 </section>
-                            )}
+                            )} */}
 
                             {/* Disadvantages */}
-                            {details.disadvantages && details.disadvantages.length > 0 && (
+                            {/* {details.disadvantages && details.disadvantages.length > 0 && (
                                 <section className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                         <span>❌</span>
@@ -239,10 +239,10 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                                         ))}
                                     </ul>
                                 </section>
-                            )}
+                            )} */}
 
                             {/* Real World Examples */}
-                            {details.real_world_examples && details.real_world_examples.length > 0 && (
+                            {/* {details.real_world_examples && details.real_world_examples.length > 0 && (
                                 <section className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                         <span>🌍</span>
@@ -257,7 +257,7 @@ const ConceptDetails = ({ concept, codeContext, onClose }) => {
                                         ))}
                                     </ul>
                                 </section>
-                            )}
+                            )} */}
 
                             {/* Related Concepts */}
                             {(details.related_concepts?.length > 0 || concept.relatedConcepts?.length > 0) && (
