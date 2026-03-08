@@ -3,9 +3,9 @@ import {
     FaMagic, FaCopy, FaDownload, FaTrash, FaPlay, FaCheckCircle, FaRobot, FaShieldAlt
 } from 'react-icons/fa';
 import { Toaster, toast } from 'sonner';
-import CodeEditor from '../../components/IT22606860/CodeEditor';
-import LoadingSpinner from '../../components/IT22606860/LoadingSpinner';
-import RiskAnalysisPanel from '../../components/IT22606860/RiskAnalysisPanel';
+import CodeEditor from '../../component/IT22606860/CodeEditor';
+import LoadingSpinner from '../../component/IT22606860/LoadingSpinner';
+import RiskAnalysisPanel from '../../component/IT22606860/RiskAnalysisPanel';
 
 // Import API functions
 import { 
@@ -362,7 +362,7 @@ const RefactorPage = () => {
                         </div>
                         <div className="p-5">
                             {loading ? (
-                                <LoadingSpinner message="Refactoring with DeepSeek AI... This may take 10-30 seconds" />
+                                <LoadingSpinner message="Refactoring ... This may take 10-30 seconds" />
                             ) : (
                                 <>
                                     <CodeEditor

@@ -31,8 +31,8 @@ const Header = () => {
                     {/* Navigation */}
                     <nav className="flex gap-1 sm:gap-2">
                         <Link
-                            to="/"
-                            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isActive('/')
+                            to="/home"
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isActive('/home')
                                 ? 'bg-blue-600 text-white shadow-glow-blue'
                                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                 }`}
@@ -47,6 +47,15 @@ const Header = () => {
                                 }`}
                         >
                             Refactor
+                        </Link>
+                        <Link
+                            to="/assistant"
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isActive('/assistant')
+                                ? 'bg-blue-600 text-white shadow-glow-blue'
+                                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                }`}
+                        >
+                            AI Assistant
                         </Link>
                         <Link
                             to="/history"
