@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import Userrouter from "./routers/Userrouter.js";
 import taskRoutes from "./routers/IT22604194/taskRoutes.js";
 import livekitRouter from "./routers/livekitRouter.js";
+//import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 // import AiInterviewRouter from "./routers/Ai_interviewrouter.js"; // Uncomment if needed and export matches
 import express from 'express';
 import cors from 'cors';
@@ -27,6 +28,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 import Questionrouter from './routers/IT22639226/Questionrouter.js';
+import studentProgressRoutes from './routers/IT22639226/StudentProgressRoutes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const result = dotenv.config({ path: path.join(__dirname, '.env') });
@@ -93,6 +95,8 @@ app.use('/api/IT22606860/analytics', analyticsRoutes);
 // LiveKit and Question routes
 app.use('/api/livekit', livekitRouter);
 app.use('/api/question', Questionrouter);
+app.use("/api/interview", Ai_interviewrouter);
+app.use('/api/student-progress', studentProgressRoutes);
 app.use('/api/IT22601360', conceptExtractorRouter);
 
 // 404 handler
