@@ -31,6 +31,9 @@ export default function TaskEditor() {
   //}, [location.state]);
   useEffect(() => {
   if (location.state?.generatedTask) {
+    if (location.state?.skillLevel) {
+    setSkillLevel(location.state.skillLevel); // show predicted skill level
+  }
     // Always prefer NEW task from navigation
     setGeneratedTask(location.state.generatedTask);
     sessionStorage.setItem("generatedTask", location.state.generatedTask);
@@ -41,6 +44,37 @@ export default function TaskEditor() {
     }
   }
 }, [location.state]);
+const handleAnotherTask = async () => {
+  try {
+    // map skill string to numeric value
+    const skillMap = {
+      Beginner: 1,
+      Intermediate: 3,
+      Advanced: 5,
+    };
+
+    const numericSkill = skillMap[skillLevel];
+
+    const response = await fetch("http://localhost:5000/api/tasks/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ student_skill: numericSkill }),
+    });
+
+    const data = await response.json();
+
+    setGeneratedTask(data.generated_task);
+    sessionStorage.setItem("generatedTask", data.generated_task);
+
+    // optional: clear editor for new task
+    setCode("# Write your Python solution here\n");
+    setHints([]);
+
+  } catch (err) {
+    console.error("Failed to fetch another task:", err);
+    alert("Could not generate a new task");
+  }
+};
 
 
   // Live weakness detection (debounced)
@@ -98,8 +132,9 @@ useEffect(() => {
 
   return (
     <div className="task-container">
+      
       <h1 className="title">🧠Adaptive Coding Task</h1>
-
+      
       <p className="skill">
         Predicted Skill: <span>{skillLevel}</span>
       </p>
@@ -151,7 +186,21 @@ useEffect(() => {
         </div>
       </div>
 
+      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+        <div className="editor-actions">
       <button className="submit-btn">Submit Code</button>
+
+      <button
+        className="submit-btn"
+        onClick={handleAnotherTask}
+        type="button"
+        style={{ background: "linear-gradient(90deg, #0ea5e9, #6366f1)" }}
+   >
+      🔁 Take New Task
+      </button>
+      </div>
+      </div>
+
     </div>
   );
 }
