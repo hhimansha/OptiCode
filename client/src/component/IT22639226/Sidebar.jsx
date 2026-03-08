@@ -9,8 +9,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
   const menuItems = [
     {
       id: "dashboard",
-      label: "Dashboard",
-      path: "/dashboard",
+      label: "assessment",
+      path: "/assessment",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -19,8 +19,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
     },
     {
       id: "scheduled",
-      label: "Scheduled Interview",
-      path: "/scheduled",
+      label: "Concept extractor",
+      path: "/code",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -29,8 +29,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
     },
     {
       id: "all",
-      label: "All Interview",
-      path: "/interviews",
+      label: "Code refctor Risk analysis",
+      path: "/refactor",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -76,7 +76,7 @@ const Sidebar = ({ onCreateInterview, loading }) => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
-
+ 
         .shimmer-btn {
           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
           background-size: 200% 100%;
@@ -128,8 +128,8 @@ const Sidebar = ({ onCreateInterview, loading }) => {
           {/* Logo Text */}
           <div className="sidebar-font">
             <span className="text-xl font-bold">
-              <span className="text-cyan-400">AI</span>
-              <span className="text-white">cruiter</span>
+              <span className="text-cyan-400">Opti</span>
+              <span className="text-white">Code</span>
             </span>
           </div>
         </div>
@@ -209,23 +209,6 @@ const Sidebar = ({ onCreateInterview, loading }) => {
 
       {/* Bottom Section - User/Upgrade */}
       <div className="p-4 border-t border-white/5">
-        {/* Upgrade Card */}
-        <div className="bg-gradient-to-br from-violet-600/20 to-cyan-600/20 rounded-xl p-4 border border-white/5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white text-xs font-semibold sidebar-font">Upgrade to Pro</p>
-              <p className="text-slate-400 text-[10px]">Get unlimited interviews</p>
-            </div>
-          </div>
-          <button className="w-full py-2 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-all duration-300 sidebar-font">
-            Upgrade Now
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ body {
 }
 
 
-.title {
+/*.title {
   text-align: center;
   font-size: 34px;
   font-weight: 700;
@@ -24,7 +24,7 @@ body {
   background: linear-gradient(90deg, #60a5fa, #a78bfa);
   
   -webkit-text-fill-color: transparent;
-}
+}*/
 
 .skill {
   text-align: center;
@@ -103,7 +103,7 @@ body {
   transform: translateX(-160px);
 }
 .submit-btn:hover {
-  transform: translateY(-2px);
+  
   box-shadow: 0 0 26px rgba(124, 58, 237, 0.65);
 }
 .hints-box {
@@ -205,6 +205,101 @@ body {
   border-radius: 14px;
   overflow: hidden;
 }
+
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;   
+  text-align: center;
+  margin-bottom: 18px;
+  -webkit-text-fill-color: #ffffff;
+}
+.editor-actions {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  background: transparent !important;
+  isolation: isolate;
+  display: flex;
+  justify-content: center;
+  gap: 8px; /* adjust if needed */
+}
+.editor-actions * {
+  background-color: transparent !important;
+}
+/* Hide editor bottom glow / line */
+.editor-hint-wrapper {
+  padding-bottom: 24px;
+  overflow: hidden;
+}
+/* ABSOLUTE KILL SWITCH FOR THE LINE */
+.monaco-editor,
+.monaco-editor * {
+  border-bottom: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.editor-container {
+  border-bottom: none !important;
+}
+.skill-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.quiz-again-btn:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+.quiz-again-btn {
+  background: transparent;
+  border: 1px solid #7c3aed;
+  color: #c7d2fe;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.skill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.skill-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: #fff;
+  font-weight: 600;
+}
+
+.quiz-again-btn {
+  background: transparent;
+  border: 1px solid #7c3aed;
+  color: #c7d2fe;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quiz-again-btn:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+
+
+
+
+
 
 
 

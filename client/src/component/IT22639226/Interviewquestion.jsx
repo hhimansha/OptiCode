@@ -14,15 +14,17 @@ const Interviewquestion = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        "http://localhost:5000/api/question/generate-questions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
+   const response = await fetch(
+  "http://localhost:5000/api/question/generate-questions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include" // this replaces 'withCredentials: true'
+  }
+);
+
 
       if (response.ok) {
         navigate("/livekit");

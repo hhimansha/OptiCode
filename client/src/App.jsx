@@ -11,6 +11,9 @@ import LiveInterview from './component/IT22639226/LiveKitRoom';
 import Face from './modules/AI Interview/Face';
 import AssessmentPage from "./component/IT22604194/AssessmentPage";
 import AssessmentResultPage from "./component/IT22604194/AssessmentResultPage";
+import StudentProfile from "./component/IT22604194/StudentProfile";
+import ConceptChatbot from "./component/IT22604194/ConceptChatbot";
+import DemoPage from "./component/IT22604194/DemoPage";
 
 // Pages
 import Home from './pages/IT22606860/Home'
@@ -41,6 +44,9 @@ const App = () => {
         <Route path="/code" element={<CodeConceptExtractor />} />
         <Route path="/livekit"element={<LiveInterview/>}/>  
         <Route path="/interview" element={<Interviewquestion/>} />
+        <Route path="/profile" element={<StudentProfile />} />
+        <Route path="/concept-tutor" element={<ConceptChatbot />} />
+        <Route path="/demo" element={<DemoPage />} />
       </Routes>
   );
 }

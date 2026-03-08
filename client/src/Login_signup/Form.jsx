@@ -44,19 +44,25 @@ const Form = () => {
 
     console.log('🟡 Response status:', response.status);
     const data = await response.json();
+    if (data.success) {
+       localStorage.setItem("userId", data.user.id);      // ADD THIS
+       localStorage.setItem("userName", data.user.name);  // ADD THIS
+  // your existing navigation code
+    }
     console.log('🟡 Response data:', data);
 
     if (data.success) {
       setLoginSuccess(true);
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
-      // Store user data for dashboard and analytics
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      // Store userId for progress tracking
+      if (data.user?._id) {
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("userName", data.user.name || "");
       }
 
       if (isLogin) {
-        navigate('/face');
+        navigate('/interview');
       }
     } else {
       setLoginSuccess(false);
