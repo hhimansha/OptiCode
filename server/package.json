@@ -25,6 +25,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jose": "^6.1.2",
+    "json5": "^2.2.3",
+    "jsonrepair": "^3.13.2",
     "jsonwebtoken": "^9.0.2",
     "livekit-server-sdk": "^2.14.1",
     "mongoose": "^8.20.1",
