@@ -515,9 +515,13 @@ const RefactorPage = () => {
                         </div>
                         <div className="p-4">
                             {loading ? (
+<<<<<<< HEAD
+                                <LoadingSpinner message="Refactoring ... This may take 10-30 seconds" />
+=======
                                 <div className="h-[380px] flex items-center justify-center">
                                     <LoadingSpinner message="Applying comprehensive refactoring patterns..." />
                                 </div>
+>>>>>>> 3100e7d6494d5034dbc634c59a8382e85e3e8893
                             ) : (
                                 <>
                                     <CodeEditor
