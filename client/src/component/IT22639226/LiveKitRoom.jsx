@@ -400,6 +400,9 @@ function InterviewInterface({ onEndCall, userId }) {
   
   // NEW STATE: For fetching task and code from backend
   const [taskData, setTaskData] = useState(null);
+
+  // NEW STATE: Toggles visibility of the 'End Interview' button
+  const [showEndButton, setShowEndButton] = useState(false);
   
   const recognitionRef = useRef(null);
   const videoRef = useRef(null);
@@ -410,6 +413,19 @@ function InterviewInterface({ onEndCall, userId }) {
   const lastMessageIdRef = useRef(0);
   const lastAgentTranscriptionIdRef = useRef(null);
   const timerRef = useRef(null);
+
+  // --- HELPER FUNCTION TO DETECT INTERVIEW END ---
+  const checkInterviewEnd = (text) => {
+    const lowerText = text.toLowerCase();
+    if (
+      lowerText.includes("interview is now over") ||
+      lowerText.includes("waiting for your marks") ||
+      lowerText.includes("have been recorded") ||
+      lowerText.includes("answers to all questions")
+    ) {
+      setShowEndButton(true);
+    }
+  };
 
   // --- FETCH TASK DATA FROM BACKEND ---
   useEffect(() => {
@@ -457,6 +473,7 @@ function InterviewInterface({ onEndCall, userId }) {
     onEndCall();
   };
 
+  // --- UPDATED SEND MESSAGE FUNCTION ---
   const handleSendMessage = async () => {
     if (!draftMessage.trim()) return;
 
@@ -464,10 +481,15 @@ function InterviewInterface({ onEndCall, userId }) {
       await sendChatMessage(draftMessage);
     }
 
+    // Capture the current emotion from the emotionData state. 
+    // Fallback to 'Neutral' if the camera is off or face isn't detected.
+    const currentEmotion = emotionData ? emotionData.emotion : 'Neutral';
+
     setConversation(prev => [...prev, {
       speaker: "user",
       text: draftMessage,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      emotion: currentEmotion
     }]);
 
     setDraftMessage("");
@@ -644,6 +666,9 @@ function InterviewInterface({ onEndCall, userId }) {
             text: latest.text,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }]);
+          
+          // Check if AI said the concluding phrase
+          checkInterviewEnd(latest.text);
           setAgentPartialTranscript("");
         }
       }
@@ -661,6 +686,9 @@ function InterviewInterface({ onEndCall, userId }) {
           text: lastMessage.message,
           timestamp: new Date(lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }]);
+
+        // Check if AI sent the concluding phrase via chat
+        checkInterviewEnd(lastMessage.message);
       }
     }
   }, [chatMessages]);
@@ -909,19 +937,22 @@ function InterviewInterface({ onEndCall, userId }) {
                 </svg>
               </div>
               
-              <button
-                onClick={handleEndCall}
-                className="group relative px-10 py-3.5 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-300 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300 group-hover:scale-105" />
-                <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
-                <span className="relative flex items-center gap-2 text-white">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
-                  </svg>
-                  End Interview
-                </span>
-              </button>
+              {/* Conditionally Rendered End Button */}
+              {showEndButton && (
+                <button
+                  onClick={handleEndCall}
+                  className="group relative px-10 py-3.5 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300 group-hover:scale-105" />
+                  <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
+                  <span className="relative flex items-center gap-2 text-white">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
+                    </svg>
+                    End Interview
+                  </span>
+                </button>
+              )}
               
               <div className={`glass rounded-full p-4 transition-all duration-300 ${isCameraOn ? 'bg-cyan-500/10 border-cyan-500/30' : ''}`}>
                 <svg className={`w-5 h-5 transition-colors ${isCameraOn ? 'text-cyan-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1023,9 +1054,12 @@ function InterviewInterface({ onEndCall, userId }) {
                           </svg>
                         )}
                       </div>
+                      
+                      {/* UPDATED: Now displays the emotion next to the 'You' label */}
                       <span className={`text-[10px] font-medium uppercase tracking-wider ${msg.speaker === "ai" ? "text-cyan-400/70" : "text-amber-400/70"}`}>
-                        {msg.speaker === "ai" ? "AI" : "You"}
+                        {msg.speaker === "ai" ? "AI" : `You - ${msg.emotion || 'Neutral'}`}
                       </span>
+                      
                       <span className="text-slate-600 text-[10px]">{msg.timestamp}</span>
                     </div>
                     

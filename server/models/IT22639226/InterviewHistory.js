@@ -13,7 +13,11 @@ const interviewHistorySchema = new mongoose.Schema({
   conversation: [{
     speaker: String,
     text: String,
-    timestamp: String
+    timestamp: String,
+    emotion: { 
+      type: String, 
+      default: 'Neutral' // Defaults to Neutral if no emotion is detected
+    }
   }],
   createdAt: { 
     type: Date, 
