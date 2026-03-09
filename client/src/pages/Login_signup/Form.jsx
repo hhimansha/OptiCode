@@ -42,14 +42,24 @@ const Form = () => {
     });
 
     const data = await response.json();
+    if (data.success) {
+        localStorage.setItem("userId", data.user.id);      // ADD THIS
+        localStorage.setItem("userName", data.user.name);  // ADD THIS
+  // your existing navigation code
+    }
 
     if (data.success) {
       setLoginSuccess(true);
       console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
 
       if (isLogin) {
-        navigate('/face'); // <-- redirect after login
+        navigate('/interview'); // <-- redirect after login
       }
+      if (!isLogin) {
+      navigate("/assessment");
+      return;
+      }
+      
 
     } else {
       setLoginSuccess(false);

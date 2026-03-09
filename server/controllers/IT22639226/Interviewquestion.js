@@ -1,107 +1,148 @@
-import { OpenRouter } from "@openrouter/sdk";
-
-const openrouter = new OpenRouter({
-  apiKey: process.env.OpenRouter_Api_key
-});
+import axios from "axios";
+import JSON5 from "json5";
+import { jsonrepair } from "jsonrepair";
+// Ensure these paths perfectly match your folder structure!
+import InterviewQuestion from "../../models/IT22639226/InterviewQuestion.js";
+import StudentProgress from "../../models/StudentProgress.js"; 
 
 export const generateInterviewQuestions = async (req, res) => {
   try {
-    const stream = await openrouter.chat.send({
-      model: "deepseek/deepseek-r1-0528:free",
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert technical interviewer conducting a real-life React interview."
-        },
-        {
-          role: "user",
-          content: `
-Based on the following content, generate interview questions WITH answers.
-
-CONTENT:
-Introduction to React
-An introduction to the React view library
-What is React?
-React is a JavaScript library that aims to simplify development of visual interfaces.
-Developed at Facebook and released to the world in 2013, it drives some of the most widely
-used apps, powering Facebook and Instagram among countless other applications.
-Its primary goal is to make it easy to reason about an interface and its state at any point in
-time, by dividing the UI into a collection of components.
-Why is React so popular?
-React has taken the frontend web development world by storm. Why?
-Less complex than the other alternatives
-At the time when React was announced, Ember.js and Angular 1.x were the predominant
-choices as a framework. Both these imposed so many conventions on the code that porting an
-existing app was not convenient at all. React made a choice to be very easy to integrate into
-an existing project, because that's how they had to do it at Facebook in order to introduce it to
-the existing codebase. Also, those 2 frameworks brought too much to the table, while React
-only chose to implement the View layer instead of the full MVC stack.
-Perfect timing
-At the time, Angular 2.x was announced by Google, along with the backwards incompatibility
-and major changes it was going to bring. Moving from Angular 1 to 2 was like moving to a
-different framework, so this, along with execution speed improvements that React promised,
-made it something developers were eager to try.
-Backed by Facebook
-Being backed by Facebook obviously is going to benefit a project if it turns out to be
-successful.
-Introduction to React
-7
-Facebook currently has a strong interest in React, sees the value of it being Open Source, and
-this is a huge plus for all the developers using it in their own projects.
-Is React simple to learn?
-Even though I said that React is simpler than alternative frameworks, diving into React is still
-complicated, but mostly because of the corollary technologies that can be integrated with
-React, like Redux and GraphQL.
-React in itself has a very small API, and you basically need to understand 4 concepts to get
-started:
-Components
-JSX
-State
-Props
-All these (and more) are explained in this handbook.
-Now, based on the above content, generate exactly 10 interview questions along with clear, correct answers.
-
-REQUIREMENTS:
-- Generate exactly 10 questions
-- Include clear, correct answers
-- Difficulty: medium (30–40 min interview)
-- Real-life technical interview tone
-- Return ONLY valid JSON
-- No explanations outside JSON
-
-FORMAT:
-{
-  "interviewQuestions": [
-    { "question": "", "answer": "" }
-  ]
-}
-`
-        }
-      ]
-    });
-
-    let fullResponse = "";
-
-    for await (const chunk of stream) {
-      const content = chunk?.choices?.[0]?.delta?.content;
-      if (content) fullResponse += content;
+    // 1. Ensure the user is authenticated (comes from userAuth middleware)
+    const userId = req.userId; 
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: User ID is missing" });
     }
 
-    const cleanJson = fullResponse
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    // 2. Fetch the logged-in user's progress
+    const studentProgress = await StudentProgress.findOne({ userId: userId });
+    
+    if (!studentProgress || !studentProgress.sessions || studentProgress.sessions.length === 0) {
+      return res.status(404).json({ message: "No coding sessions found for this user." });
+    }
 
-    const result = JSON.parse(cleanJson);
+    // Get the most recent session (last item in the array)
+    const latestSession = studentProgress.sessions[studentProgress.sessions.length - 1];
+    const task = latestSession.task;
+    const code = latestSession.codeSubmission;
 
-    // ✅ SEND RESPONSE
-    res.status(200).json(result);
+    // Safety check: Ensure the session actually contains code before asking AI
+    if (!task || !code) {
+        return res.status(400).json({ message: "Task or code is missing from the user's latest session." });
+    }
+
+    // 3. Construct the dynamic prompt for the AI
+    const prompt = `
+You are a programming instructor.
+
+Analyze the following Task and Python code and generate interview questions ONLY about this code.
+
+TASK:
+${task}
+
+CODE:
+${code}
+
+Rules:
+- Generate exactly 5 questions
+- Questions must be about the concepts used in the code (e.g., loops, conditions, modulus, data structures, etc.)
+- Do NOT generate general knowledge questions
+- Return STRICT JSON
+- Escape quotes inside strings
+
+Return ONLY this format:
+
+[
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."},
+ {"question":"...","answer":"..."}
+]
+`;
+
+    // 4. Send request to Local Ollama (gemma3:4b)
+    const response = await axios.post("http://localhost:11434/api/generate", {
+      model: "gemma3:4b",
+      prompt,
+      stream: false,
+      options: { temperature: 0.2 }
+    });
+
+    let aiText = response.data.response;
+    console.log("Raw AI Response:", aiText);
+
+    // 5. Clean and parse the JSON response robustly
+    aiText = aiText.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const match = aiText.match(/\[[\s\S]*\]/);
+
+    if (!match) {
+      return res.status(500).json({
+        message: "AI did not return a JSON array",
+        raw: aiText
+      });
+    }
+
+    let cleanedJson = match[0];
+    cleanedJson = cleanedJson.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+    cleanedJson = cleanedJson.replace(/`([^`]*)`/g, (m) => m.replace(/"/g, '\\"'));
+    cleanedJson = cleanedJson.replace(/",\.join/g, '\",.join');
+
+    let questionsArray;
+
+    try {
+      questionsArray = JSON5.parse(cleanedJson);
+      console.log("Parsed with JSON5");
+    } catch (e1) {
+      console.warn("JSON5 failed, trying jsonrepair");
+      try {
+        const repaired = jsonrepair(cleanedJson);
+        questionsArray = JSON5.parse(repaired);
+        console.log("Parsed with jsonrepair");
+      } catch (e2) {
+        console.warn("jsonrepair failed, using fallback regex");
+        const regex = /"question"\s*:\s*"([\s\S]*?)"\s*,\s*"answer"\s*:\s*"([\s\S]*?)"/g;
+        const matches = [...cleanedJson.matchAll(regex)];
+
+        if (matches.length === 5) {
+          questionsArray = matches.map((m) => ({
+            question: m[1],
+            answer: m[2]
+          }));
+        } else {
+          return res.status(500).json({
+            message: "Parsing failed completely",
+            raw: cleanedJson
+          });
+        }
+      }
+    }
+
+    // Ensure we got exactly 5 questions back
+    if (!Array.isArray(questionsArray) || questionsArray.length !== 5) {
+      return res.status(500).json({
+        message: "AI did not return exactly 5 questions",
+        data: questionsArray
+      });
+    }
+
+    // 6. Store the generated questions, task, and code in MongoDB
+    const savedQuestions = await InterviewQuestion.create({
+      user: userId,
+      task: task,
+      code: code,
+      questions: questionsArray
+    });
+
+    res.status(200).json({
+      message: "Questions generated and saved successfully",
+      data: savedQuestions
+    });
 
   } catch (error) {
-    console.error(error);
+    console.error("Controller Error:", error);
     res.status(500).json({
-      message: "Failed to generate interview questions"
+      message: "Failed to generate questions",
+      error: error.message
     });
   }
 };

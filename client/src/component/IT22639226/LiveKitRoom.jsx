@@ -22,7 +22,10 @@ export default function VoiceAssistantPage() {
     setIsLoading(true);
     try {
       setError(null);
-      const response = await fetch(`http://localhost:5000/api/livekit?userId=${userId}`);
+      const response = await fetch(`http://localhost:5000/api/livekit?userId=${userId}`, {
+        method: 'GET',
+        credentials: 'include'
+      });
       const data = await response.json();
 
       if (!response.ok) throw new Error("Failed to connect to voice agent");
@@ -46,7 +49,7 @@ export default function VoiceAssistantPage() {
     setError("Microphone permission denied! Please allow mic access and reload.");
     handleDisconnect();
   };
-
+  
   return (
     <div className="min-h-screen bg-[#05080f] flex items-center justify-center overflow-hidden">
       <style>{`
@@ -63,6 +66,7 @@ export default function VoiceAssistantPage() {
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
           width: 3px;
+          height: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
@@ -143,12 +147,6 @@ export default function VoiceAssistantPage() {
           100% { top: 100%; opacity: 0; }
         }
         
-        /* Type Cursor */
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        
         .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
         .float-anim { animation: float 6s ease-in-out infinite; }
         .audio-wave { animation: audioWave 0.8s ease-in-out infinite; }
@@ -218,7 +216,7 @@ export default function VoiceAssistantPage() {
           <LiveKitRoom
             token={roomDetails.token}
             connect={shouldConnect}
-            audio
+            audio={false}
             video={false}
             serverUrl={import.meta.env.VITE_LK_SERVER_URL}
             onMediaDeviceFailure={onDeviceFailure}
@@ -265,7 +263,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
       
       {/* Main Card */}
       <div className="relative">
-        {/* Glow Behind Card */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-violet-500/20 to-cyan-500/20 blur-[80px] scale-150" />
         
         <div className="relative glass rounded-[32px] p-12 max-w-md w-full">
@@ -278,7 +275,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
           {/* AI Avatar */}
           <div className="flex justify-center mb-10">
             <div className="relative float-anim">
-              {/* Outer Rings */}
               <div className="absolute inset-0 scale-[2] opacity-20">
                 <div className="absolute inset-0 border border-cyan-500/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
               </div>
@@ -286,17 +282,13 @@ function LandingScreen({ isLoading, error, onConnect }) {
                 <div className="absolute inset-0 border border-violet-500/50 rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
               </div>
               
-              {/* Main Avatar */}
               <div className="relative w-28 h-28 glow-pulse">
-                {/* Gradient Ring */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-cyan-500 p-[3px]">
                   <div className="w-full h-full rounded-full bg-[#0a1628] flex items-center justify-center">
-                    {/* AI Icon */}
                     <div className="relative">
                       <svg className="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      {/* Glow Effect on Icon */}
                       <div className="absolute inset-0 blur-md opacity-50">
                         <svg className="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -306,7 +298,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
                   </div>
                 </div>
                 
-                {/* Orbiting Dot */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="orbit">
                     <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50" />
@@ -316,7 +307,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
             </div>
           </div>
 
-          {/* Title */}
           <div className="text-center mb-3">
             <h1 className="text-4xl font-semibold text-white tracking-tight mb-2">
               AI Interview
@@ -331,19 +321,13 @@ function LandingScreen({ isLoading, error, onConnect }) {
             Experience next-generation AI-powered mock interviews with real-time voice interaction
           </p>
 
-          {/* Connect Button */}
           <button 
             onClick={onConnect} 
             disabled={isLoading}
             className="group relative w-full py-4 px-8 rounded-2xl font-medium text-sm tracking-wide transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
           >
-            {/* Button Background */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-cyan-400 to-cyan-500 transition-all duration-500 group-hover:scale-105" />
-            
-            {/* Shimmer Effect */}
             <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            {/* Button Content */}
             <span className="relative flex items-center justify-center gap-3 text-slate-900 font-semibold">
               {isLoading ? (
                 <>
@@ -364,7 +348,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
             </span>
           </button>
 
-          {/* Error Message */}
           {error && (
             <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
               <p className="text-red-400 text-xs text-center flex items-center justify-center gap-2">
@@ -376,7 +359,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
             </div>
           )}
           
-          {/* Features */}
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
               { icon: "🎤", label: "Voice AI" },
@@ -392,7 +374,6 @@ function LandingScreen({ isLoading, error, onConnect }) {
         </div>
       </div>
       
-      {/* Bottom Text */}
       <p className="absolute bottom-8 text-slate-600 text-xs tracking-wider">
         Powered by Advanced AI Technology
       </p>
@@ -402,27 +383,118 @@ function LandingScreen({ isLoading, error, onConnect }) {
 
 function InterviewInterface({ onEndCall, userId }) {
   const { state, audioTrack, agentTranscriptions } = useVoiceAssistant();
-  const { messages: chatMessages } = useChat();
-   
+  const { messages: chatMessages, send: sendChatMessage } = useChat();
+  
   const [conversation, setConversation] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [partialTranscript, setPartialTranscript] = useState("");
   const [agentPartialTranscript, setAgentPartialTranscript] = useState("");
+  const [draftMessage, setDraftMessage] = useState("");
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState(null);
   const [interviewTime, setInterviewTime] = useState(0);
-   
+  const [emotionData, setEmotionData] = useState(null);
+  const [emotionError, setEmotionError] = useState('');
+  
+  // NEW STATE: For fetching task and code from backend
+  const [taskData, setTaskData] = useState(null);
+
+  // NEW STATE: Toggles visibility of the 'End Interview' button
+  const [showEndButton, setShowEndButton] = useState(false);
+  
   const recognitionRef = useRef(null);
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const wsRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const conversationEndRef = useRef(null);
   const lastMessageIdRef = useRef(0);
   const lastAgentTranscriptionIdRef = useRef(null);
   const timerRef = useRef(null);
 
-  // Interview timer
+  // --- HELPER FUNCTION TO DETECT INTERVIEW END ---
+  const checkInterviewEnd = (text) => {
+    const lowerText = text.toLowerCase();
+    if (
+      lowerText.includes("interview is now over") ||
+      lowerText.includes("waiting for your marks") ||
+      lowerText.includes("have been recorded") ||
+      lowerText.includes("answers to all questions")
+    ) {
+      setShowEndButton(true);
+    }
+  };
+
+  // --- FETCH TASK DATA FROM BACKEND ---
+  useEffect(() => {
+    const fetchLatestSession = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/student-progress/latest', {
+          method: 'GET',
+          credentials: 'include' // Needed for userAuth middleware
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setTaskData(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching task data:", error);
+      }
+    };
+
+    fetchLatestSession();
+  }, []);
+
+  const handleEndCall = async () => {
+    if (conversation.length > 0) {
+      try {
+        await fetch('http://localhost:5000/api/interview/save-history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include', 
+          body: JSON.stringify({
+            conversation: conversation,
+            duration: interviewTime
+          })
+        });
+        console.log("Chat history saved successfully");
+      } catch (error) {
+        console.error("Failed to save chat history:", error);
+      }
+    }
+    
+    onEndCall();
+  };
+
+  // --- UPDATED SEND MESSAGE FUNCTION ---
+  const handleSendMessage = async () => {
+    if (!draftMessage.trim()) return;
+
+    if (sendChatMessage) {
+      await sendChatMessage(draftMessage);
+    }
+
+    // Capture the current emotion from the emotionData state. 
+    // Fallback to 'Neutral' if the camera is off or face isn't detected.
+    const currentEmotion = emotionData ? emotionData.emotion : 'Neutral';
+
+    setConversation(prev => [...prev, {
+      speaker: "user",
+      text: draftMessage,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      emotion: currentEmotion
+    }]);
+
+    setDraftMessage("");
+  };
+
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setInterviewTime(prev => prev + 1);
@@ -439,7 +511,6 @@ function InterviewInterface({ onEndCall, userId }) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Initialize camera automatically
   useEffect(() => {
     initializeCamera();
   }, []);
@@ -463,7 +534,7 @@ function InterviewInterface({ onEndCall, userId }) {
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       mediaStreamRef.current = stream;
-      setIsCameraOn(true); 
+      setIsCameraOn(true);
       
     } catch (error) {
       console.error("Camera access error:", error);
@@ -483,18 +554,104 @@ function InterviewInterface({ onEndCall, userId }) {
   }, [isCameraOn]);
 
   useEffect(() => {
+    if (!isCameraOn) return;
+
+    const startEmotionDetection = async () => {
+      try {
+        const ws = new WebSocket('ws://localhost:8000/ws/emotion');
+        wsRef.current = ws;
+
+        ws.onopen = () => console.log('Connected to Emotion Model');
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.status === 'success') {
+              setEmotionData(data);
+            } else {
+              setEmotionData(null);
+            }
+          } catch (e) {
+            console.error('Error parsing emotion data:', e);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setEmotionError('Emotion detection connection failed');
+        };
+
+        const intervalId = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN && videoRef.current && canvasRef.current) {
+            captureAndSendFrame();
+          }
+        }, 100);
+
+        return () => {
+          clearInterval(intervalId);
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.close();
+          }
+        };
+      } catch (error) {
+        console.error('Emotion detection setup error:', error);
+        setEmotionError('Failed to start emotion detection');
+      }
+    };
+
+    startEmotionDetection();
+
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
+    };
+  }, [isCameraOn]);
+
+  const captureAndSendFrame = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (video && canvas && video.readyState === 4) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = 320;
+      canvas.height = 240;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const base64Data = canvas.toDataURL('image/jpeg', 0.7);
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(base64Data);
+      }
+    }
+  };
+
+  const getEmoji = (emotion) => {
+    const map = {
+      'Angry': '😠',
+      'Disgust': '🤢',
+      'Fear': '😱',
+      'Happy': '😄',
+      'Sad': '😢',
+      'Surprise': '😲',
+      'Neutral': '😐'
+    };
+    return map[emotion] || '😐';
+  };
+
+  useEffect(() => {
     return () => {
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
       }
     };
   }, []);
 
   useEffect(() => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [conversation, agentPartialTranscript]);
+  }, [conversation, agentPartialTranscript, draftMessage]);
 
-  // Handle AI Transcriptions
   useEffect(() => {
     if (agentTranscriptions && agentTranscriptions.length > 0) {
       const latest = agentTranscriptions[agentTranscriptions.length - 1];
@@ -509,13 +666,15 @@ function InterviewInterface({ onEndCall, userId }) {
             text: latest.text,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }]);
+          
+          // Check if AI said the concluding phrase
+          checkInterviewEnd(latest.text);
           setAgentPartialTranscript("");
         }
       }
     }
   }, [agentTranscriptions]);
 
-  // Fallback chat messages
   useEffect(() => {
     if (chatMessages && chatMessages.length > 0) {
       const lastMessage = chatMessages[chatMessages.length - 1];
@@ -527,11 +686,13 @@ function InterviewInterface({ onEndCall, userId }) {
           text: lastMessage.message,
           timestamp: new Date(lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }]);
+
+        // Check if AI sent the concluding phrase via chat
+        checkInterviewEnd(lastMessage.message);
       }
     }
   }, [chatMessages]);
 
-  // Speech recognition setup
   useEffect(() => {
     if (typeof window !== 'undefined' && (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window))) {
       console.error("Speech recognition not supported");
@@ -566,11 +727,7 @@ function InterviewInterface({ onEndCall, userId }) {
       if (interimTranscript) setPartialTranscript(interimTranscript);
 
       if (finalTranscript) {
-        setConversation(prev => [...prev, {
-          speaker: "user",
-          text: finalTranscript,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
+        setDraftMessage(prev => prev ? prev + " " + finalTranscript : finalTranscript);
         setPartialTranscript("");
         setIsSpeaking(false);
       }
@@ -625,11 +782,10 @@ function InterviewInterface({ onEndCall, userId }) {
   return (
     <div className="h-screen flex">
       {/* Left Section - Main Video Area */}
-      <div className="flex-1 flex flex-col relative p-6">
+      <div className="flex-1 flex flex-col relative p-6 overflow-y-auto custom-scrollbar">
         
         {/* Top Bar */}
-        <div className="flex items-center justify-between mb-6">
-          {/* Session Info */}
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <div className="flex items-center gap-4">
             <div className="glass rounded-full px-4 py-2 flex items-center gap-3">
               <div className={`w-2 h-2 rounded-full ${state === 'listening' ? 'bg-green-400 animate-pulse' : state === 'speaking' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-500'}`} />
@@ -639,7 +795,6 @@ function InterviewInterface({ onEndCall, userId }) {
             </div>
           </div>
           
-          {/* Timer */}
           <div className="glass rounded-full px-5 py-2.5 flex items-center gap-3">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <span className="text-white text-sm mono font-medium tracking-wider">{formatTime(interviewTime)}</span>
@@ -647,22 +802,19 @@ function InterviewInterface({ onEndCall, userId }) {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-4xl">
-            {/* Video Container with Neon Border */}
+            {/* Video Container */}
             <div className="relative rounded-3xl overflow-hidden neon-border">
               <div className="flex bg-[#080c14]">
                 {/* AI Avatar Panel */}
                 <div className="w-1/2 aspect-[4/3] relative flex items-center justify-center bg-gradient-to-br from-[#0a1628] to-[#05080f] border-r border-cyan-500/10">
-                  {/* Ambient Effects */}
                   <div className="absolute inset-0">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px]" />
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-violet-500/5 rounded-full blur-[60px]" />
                   </div>
                   
-                  {/* AI Avatar */}
                   <div className="relative float-anim">
-                    {/* Audio Visualization Rings */}
                     {isSpeaking && (
                       <>
                         <div className="absolute inset-0 scale-[2.5] flex items-center justify-center">
@@ -677,7 +829,6 @@ function InterviewInterface({ onEndCall, userId }) {
                       </>
                     )}
                     
-                    {/* Main Avatar Circle */}
                     <div className="relative w-24 h-24">
                       <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-cyan-500 p-[2px] ${isSpeaking ? 'glow-pulse' : ''}`}>
                         <div className="w-full h-full rounded-full bg-[#0a1628] flex items-center justify-center">
@@ -687,14 +838,12 @@ function InterviewInterface({ onEndCall, userId }) {
                         </div>
                       </div>
                       
-                      {/* Status Dot */}
                       <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[#0a1628] ${isSpeaking ? 'bg-cyan-400' : 'bg-green-400'}`}>
                         {isSpeaking && <div className="w-full h-full rounded-full bg-cyan-400 animate-ping" />}
                       </div>
                     </div>
                   </div>
                   
-                  {/* AI Label */}
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
                     <div className="glass-dark rounded-full px-4 py-1.5 flex items-center gap-2">
                       <span className="text-cyan-400 text-xs mono font-medium tracking-wider">AI INTERVIEWER</span>
@@ -715,7 +864,6 @@ function InterviewInterface({ onEndCall, userId }) {
                     </div>
                   </div>
                   
-                  {/* Scanning Line Effect when Speaking */}
                   {isSpeaking && (
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
                       <div 
@@ -728,6 +876,8 @@ function InterviewInterface({ onEndCall, userId }) {
 
                 {/* User Video Panel */}
                 <div className="w-1/2 aspect-[4/3] bg-[#0a1018] relative overflow-hidden">
+                  <canvas ref={canvasRef} className="hidden" />
+
                   {isCameraOn ? (
                     <>
                       <video
@@ -738,30 +888,41 @@ function InterviewInterface({ onEndCall, userId }) {
                         className="absolute inset-0 w-full h-full object-cover"
                         style={{ transform: 'scaleX(-1)' }}
                       />
-                      {/* Video Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       
-                      {/* User Label */}
-                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                        <div className="glass-dark rounded-full px-4 py-1.5 flex items-center gap-2">
-                          <span className="text-amber-400 text-xs mono font-medium tracking-wider">YOU</span>
-                          {isListening && (
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                      {/* Emotion Display */}
+                      <div className="absolute top-6 right-6">
+                        <div className={`glass-dark backdrop-blur-md border border-white/10 rounded-2xl p-4 transition-all duration-300 ${emotionData ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
+                          {emotionData && (
+                            <div className="flex flex-col items-end">
+                              <span className="text-xs text-slate-400 font-medium tracking-wider mb-1">DETECTED EMOTION</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-3xl">{getEmoji(emotionData.emotion)}</span>
+                                <div className="text-right">
+                                  <p className="text-white font-bold text-xl uppercase tracking-wide">
+                                    {emotionData.emotion}
+                                  </p>
+                                  <p className="text-emerald-400 text-xs font-mono">
+                                    {Math.round(emotionData.confidence * 100)}% CONFIDENCE
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           )}
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                        <div className="glass-dark bg-black/40 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2">
+                          <span className="text-amber-400 text-xs mono font-medium tracking-wider">YOU</span>
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <div className="w-20 h-20 rounded-full bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-700/50">
-                        <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <p className="text-slate-500 text-xs">{isCameraLoading ? 'Initializing camera...' : 'Camera unavailable'}</p>
-                      {cameraError && (
-                        <p className="text-red-400/80 text-xs mt-2">{cameraError}</p>
-                      )}
+                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                      {cameraError || (isCameraLoading ? "Initializing camera..." : "Camera unavailable")}
                     </div>
                   )}
                 </div>
@@ -770,42 +931,81 @@ function InterviewInterface({ onEndCall, userId }) {
 
             {/* Control Buttons */}
             <div className="mt-8 flex items-center justify-center gap-4">
-              {/* Mic Status */}
               <div className={`glass rounded-full p-4 transition-all duration-300 ${isListening ? 'bg-green-500/10 border-green-500/30' : ''}`}>
                 <svg className={`w-5 h-5 transition-colors ${isListening ? 'text-green-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>
               
-              {/* End Call Button */}
-              <button
-                onClick={onEndCall}
-                className="group relative px-10 py-3.5 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-300 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300 group-hover:scale-105" />
-                <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
-                <span className="relative flex items-center gap-2 text-white">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
-                  </svg>
-                  End Interview
-                </span>
-              </button>
+              {/* Conditionally Rendered End Button */}
+              {showEndButton && (
+                <button
+                  onClick={handleEndCall}
+                  className="group relative px-10 py-3.5 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300 group-hover:scale-105" />
+                  <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
+                  <span className="relative flex items-center gap-2 text-white">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
+                    </svg>
+                    End Interview
+                  </span>
+                </button>
+              )}
               
-              {/* Camera Status */}
               <div className={`glass rounded-full p-4 transition-all duration-300 ${isCameraOn ? 'bg-cyan-500/10 border-cyan-500/30' : ''}`}>
                 <svg className={`w-5 h-5 transition-colors ${isCameraOn ? 'text-cyan-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
+
+            {/* --- NEW UI FOR DISPLAYING TASK AND CODE --- */}
+            {taskData && (
+              <div className="mt-8 mb-8 w-full glass rounded-3xl p-6 border border-white/10 text-left">
+                {/* Task Header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                    <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium text-lg">Current Challenge Details</h3>
+                    <div className="flex gap-2 text-xs font-mono text-slate-400 mt-1">
+                      <span className="bg-slate-800/80 px-2 py-0.5 rounded text-cyan-400">Level: {taskData.taskLevel}</span>
+                      <span className="bg-slate-800/80 px-2 py-0.5 rounded text-violet-400">Skill: {taskData.skillLevel}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Task Context */}
+                <p className="text-slate-300 text-sm mb-6 leading-relaxed bg-black/30 p-4 rounded-xl border border-white/5">
+                  {taskData.task}
+                </p>
+                
+                {/* Submitted Code View */}
+                <h4 className="text-slate-400 text-xs font-mono mb-2 uppercase tracking-wider flex items-center gap-2">
+                  <svg className="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+                  Submitted Code Payload
+                </h4>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-violet-500/10 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-300"></div>
+                  <pre className="relative bg-[#05080f] p-4 rounded-xl overflow-x-auto text-xs font-mono text-slate-300 border border-white/10 custom-scrollbar max-h-64">
+                    <code>{taskData.codeSubmission}</code>
+                  </pre>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Right Section - Chat Panel */}
-      <div className="w-[400px] glass-dark flex flex-col border-l border-white/5">
-        {/* Chat Header */}
+      <div className="w-[400px] glass-dark flex flex-col border-l border-white/5 flex-shrink-0">
         <div className="p-5 border-b border-white/5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -822,7 +1022,6 @@ function InterviewInterface({ onEndCall, userId }) {
           </div>
         </div>
         
-        {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
           {conversation.length === 0 && !partialTranscript && !agentPartialTranscript ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -837,12 +1036,8 @@ function InterviewInterface({ onEndCall, userId }) {
           ) : (
             <>
               {conversation.map((msg, index) => (
-                <div 
-                  key={index} 
-                  className={`flex ${msg.speaker === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+                <div key={index} className={`flex ${msg.speaker === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] ${msg.speaker === 'user' ? 'order-1' : ''}`}>
-                    {/* Avatar & Label */}
                     <div className={`flex items-center gap-2 mb-2 ${msg.speaker === 'user' ? 'flex-row-reverse' : ''}`}>
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                         msg.speaker === "ai" 
@@ -859,15 +1054,15 @@ function InterviewInterface({ onEndCall, userId }) {
                           </svg>
                         )}
                       </div>
-                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
-                        msg.speaker === "ai" ? "text-cyan-400/70" : "text-amber-400/70"
-                      }`}>
-                        {msg.speaker === "ai" ? "AI" : "You"}
+                      
+                      {/* UPDATED: Now displays the emotion next to the 'You' label */}
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${msg.speaker === "ai" ? "text-cyan-400/70" : "text-amber-400/70"}`}>
+                        {msg.speaker === "ai" ? "AI" : `You - ${msg.emotion || 'Neutral'}`}
                       </span>
+                      
                       <span className="text-slate-600 text-[10px]">{msg.timestamp}</span>
                     </div>
                     
-                    {/* Message Bubble */}
                     <div className={`rounded-2xl px-4 py-3 ${
                       msg.speaker === "ai" 
                         ? "bg-slate-800/50 border border-slate-700/50 rounded-tl-sm" 
@@ -879,7 +1074,6 @@ function InterviewInterface({ onEndCall, userId }) {
                 </div>
               ))}
 
-              {/* AI Partial */}
               {agentPartialTranscript && (
                 <div className="flex justify-start">
                   <div className="max-w-[85%]">
@@ -898,7 +1092,6 @@ function InterviewInterface({ onEndCall, userId }) {
                 </div>
               )}
 
-              {/* User Partial */}
               {partialTranscript && (
                 <div className="flex justify-end">
                   <div className="max-w-[85%]">
@@ -917,7 +1110,6 @@ function InterviewInterface({ onEndCall, userId }) {
                 </div>
               )}
 
-              {/* Thinking Indicator */}
               {state === "thinking" && !agentPartialTranscript && (
                 <div className="flex justify-start">
                   <div className="max-w-[85%]">
@@ -949,11 +1141,29 @@ function InterviewInterface({ onEndCall, userId }) {
           )}
         </div>
         
-        {/* Chat Footer */}
-        <div className="p-4 border-t border-white/5">
-          <div className="flex items-center gap-2 text-slate-500 text-xs">
-            <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
-            <span>{isListening ? 'Listening to your voice...' : 'Waiting for speech...'}</span>
+        <div className="p-4 border-t border-white/5 bg-[#0a1018]">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-slate-500 text-xs">
+              <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
+              <span>{isListening ? 'Dictating...' : 'Ready for dictation...'}</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={draftMessage}
+                onChange={(e) => setDraftMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Speak to type, then edit..."
+                className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-slate-600"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!draftMessage.trim()}
+                className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-cyan-500/20 disabled:shadow-none"
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>

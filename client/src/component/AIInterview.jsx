@@ -126,7 +126,7 @@ const AIInterview = () => {
       startListening();
     }
   };
-
+   
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
