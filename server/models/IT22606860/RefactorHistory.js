@@ -42,8 +42,8 @@ const RefactorHistorySchema = new mongoose.Schema({
     },
     modelUsed: {
         type: String,
-        enum: ['trained', 'huggingface', 'rules', 'ensemble'],
-        default: 'trained'
+        enum: ['trained', 'huggingface', 'rules', 'ensemble', 'ast', 'hybrid', 'ml', 'llm'],
+        default: 'ast'
     },
     processingTime: {
         type: Number, // in milliseconds
@@ -71,8 +71,9 @@ const RefactorHistorySchema = new mongoose.Schema({
         }
     },
     
-    // Risk Analysis
+    // Risk Analysis - Extended with detailed information
     riskAnalysis: {
+        // Original risk counts (before/after)
         before: {
             totalRisks: Number,
             critical: Number,
@@ -89,7 +90,66 @@ const RefactorHistorySchema = new mongoose.Schema({
             low: Number,
             riskScore: Number
         },
-        risksFixed: Number
+        risksFixed: Number,
+        
+        // Detailed AI-powered risk assessment
+        detailed: {
+            riskScore: Number,         // 0-100 overall risk score
+            riskLevel: String,         // 'low', 'medium', 'high'
+            riskColor: String,         // Color code for UI
+            explanation: String,       // Detailed explanation of risk assessment
+            recommendation: String,    // Recommendation text
+            processingTime: Number,    // Time taken for analysis in ms
+            
+            // Individual risk factors with scores
+            riskFactors: [{
+                factor: String,        // e.g., 'Side effects', 'Performance'
+                score: Number,         // 0-100 score for this factor
+                description: String    // Description of the risk factor
+            }],
+            
+            // Suggestions for improvement
+            suggestions: [String],
+            
+            // Potential issues identified
+            potentialIssues: [String],
+            
+            // Side effects to watch for
+            sideEffects: [String],
+            
+            // Code comparison metrics
+            comparisonMetrics: {
+                lineCount: {
+                    original: Number,
+                    refactored: Number,
+                    change: Number
+                },
+                characterCount: {
+                    original: Number,
+                    refactored: Number,
+                    change: Number
+                },
+                complexity: {
+                    originalLoops: Number,
+                    refactoredLoops: Number,
+                    originalConditionals: Number,
+                    refactoredConditionals: Number,
+                    originalNesting: Number,
+                    refactoredNesting: Number
+                },
+                readabilityScore: {
+                    original: Number,
+                    refactored: Number
+                }
+            },
+            
+            // Chart data for visualization
+            chartData: {
+                gaugeChart: [mongoose.Schema.Types.Mixed],
+                pieChart: [mongoose.Schema.Types.Mixed],
+                barChart: [mongoose.Schema.Types.Mixed]
+            }
+        }
     },
     
     // User Feedback
@@ -121,6 +181,17 @@ const RefactorHistorySchema = new mongoose.Schema({
             executionTime: Number
         },
         testsPassed: Boolean
+    },
+    
+    // Changes Applied (from AST refactoring)
+    changesApplied: [{
+        type: String
+    }],
+    
+    // Refactoring Summary
+    summary: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
     }
 }, {
     timestamps: true,

@@ -23,6 +23,7 @@ import historyRoutes from './routers/IT22606860/historyRoutes.js';
 import riskRoutes from './routers/IT22606860/riskRoutes.js';
 import bestPracticesRoutes from './routers/IT22606860/bestPracticesRoutes.js';
 import analyticsRoutes from './routers/IT22606860/analyticsRoutes.js';
+import dashboardRoutes from './routers/IT22606860/dashboardRoutes.js';
 
 // IT22601360 Routes
 import conceptExtractorRouter from './routers/IT22601360/conceptExtractor.js';
@@ -97,6 +98,7 @@ app.use('/api/IT22606860/history', historyRoutes);
 app.use('/api/IT22606860/risks', riskRoutes);
 app.use('/api/IT22606860/best-practices', bestPracticesRoutes);
 app.use('/api/IT22606860/analytics', analyticsRoutes);
+app.use('/api/IT22606860/dashboard', dashboardRoutes);
 
 // LiveKit and Question routes
 app.use('/api/livekit', livekitRouter);

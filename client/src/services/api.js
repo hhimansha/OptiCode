@@ -1,16 +1,15 @@
 // ============================================
 // OPTICODE/client/src/services/api.js
-// API service with Two-Stage Refactoring Support
-// Stage 1: Local Trained Model
-// Stage 2: DeepSeek API
+// API service with Advanced Refactoring Features
+// Includes: Priority Patterns, Advanced AST, Architecture Analysis, etc.
 // ============================================
 
 import axios from 'axios';
 
 // API URLs
 const EXPRESS_API_URL = 'http://localhost:5000/api';  // Primary Express backend
-const ML_API_URL = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000';  // Python ML Service
-const RISK_API_URL = 'http://localhost:8001';  // Risk Analysis Service
+const ML_API_URL = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000';  // Python Refactoring Service
+const RISK_API_URL = import.meta.env.VITE_RISK_API_URL || 'http://localhost:8001';  // Risk Analysis Service
 
 // Create axios instance for primary Express backend
 const expressApi = axios.create({
@@ -19,15 +18,16 @@ const expressApi = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 30000, // 30 seconds
+    withCredentials: true, // Send cookies for auth
 });
 
-// Create axios instance for ML service (Python backend with two-stage refactoring)
+// Create axios instance for ML/Refactoring service
 const mlApi = axios.create({
     baseURL: ML_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 120000, // 120 seconds for two-stage process (local model + DeepSeek)
+    timeout: 120000, // 120 seconds for comprehensive analysis
 });
 
 // Create axios instance for Risk Analysis service
@@ -36,86 +36,340 @@ const riskApi = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 60000, // 60 seconds for risk analysis
+    timeout: 60000, // 60 seconds
 });
 
 // ============================================
-// REFACTORING ENDPOINTS (TWO-STAGE)
+// 🚀 UNIFIED COMPREHENSIVE REFACTORING (RECOMMENDED)
 // ============================================
 
 /**
- * Refactor code using two-stage process:
- * Stage 1: Local trained model (if available)
- * Stage 2: DeepSeek API for final polish
+ * Apply ALL refactoring patterns in one call (RECOMMENDED)
+ * Combines: Basic AST + Priority + Advanced + Performance
  * 
  * @param {string} code - Code to refactor
- * @param {string} instruction - Refactoring instruction (optional)
- * @param {string} language - Programming language (default: 'python')
- * @returns {Promise} Response with refactored code and pipeline info
+ * @param {Object} options - Optional configuration:
+ *   - apply_basic: bool (default true)
+ *   - apply_priority: bool (default true) 
+ *   - apply_advanced: bool (default true)
+ *   - apply_performance: bool (default true)
+ *   - categories: Array<string> (optional filter for advanced)
+ * @returns {Promise} Comprehensive refactoring results
  */
-export const refactorCode = async (code, instruction = null, language = 'python') => {
+export const applyCompleteRefactoring = async (code, options = {}) => {
     try {
-        console.log('[API] Calling Python ML service for two-stage refactoring...');
-        console.log('[API] Stage 1: Local trained model');
-        console.log('[API] Stage 2: DeepSeek API');
-        
+        console.log('[API] 🚀 Calling UNIFIED comprehensive refactoring...');
+
         const requestData = {
             code: code,
-            language: language
+            apply_basic: options.apply_basic !== false,
+            apply_priority: options.apply_priority !== false,
+            apply_advanced: options.apply_advanced !== false,
+            apply_performance: options.apply_performance !== false,
+            categories: options.categories || null
         };
-        
-        // Add instruction if provided
-        if (instruction) {
-            requestData.instruction = instruction;
-        }
-        
-        const response = await mlApi.post('/api/refactor', requestData);
-        
-        console.log('[API] Refactoring response:', response.data);
-        
-        // Log pipeline information
-        if (response.data.pipeline_info) {
-            const info = response.data.pipeline_info;
-            console.log(`[API] Pipeline: ${info.stages} stage(s)`);
-            console.log(`[API] Local model used: ${info.local_model_used ? 'Yes' : 'No'}`);
-            console.log(`[API] DeepSeek used: ${info.deepseek_used ? 'Yes' : 'No'}`);
-        }
-        
-        // Log warning if present
-        if (response.data.warning) {
-            console.warn('[API] Warning:', response.data.warning);
-        }
-        
+
+        const response = await mlApi.post('/api/refactor-full', requestData);
+
+        console.log('[API] ✅ Unified refactoring response:', response.data);
+        console.log(`[API] Total changes: ${response.data.summary?.total_changes || 0}`);
+        console.log(`[API] Processing time: ${response.data.summary?.processing_time_ms || 0}ms`);
+        console.log('[API] Stages applied:', Object.keys(response.data.stages || {}));
+
         return response.data;
-        
+
     } catch (error) {
-        console.error('[API] Refactoring error:', error);
-        
-        if (error.response) {
-            // Server responded with error
-            const errorMessage = error.response.data.message || 'Failed to refactor code';
-            
-            // Provide helpful error messages
-            if (error.response.status === 500) {
-                throw new Error(`Refactoring failed: ${errorMessage}. Please check if the Python backend is properly configured.`);
-            } else {
-                throw new Error(errorMessage);
-            }
-        } else if (error.request) {
-            // Request made but no response
-            throw new Error(
-                `Cannot connect to ML service at ${ML_API_URL}. ` +
-                'Please ensure:\n' +
-                '1. Python backend is running (python refactor_api.py)\n' +
-                '2. LOCAL_MODEL_PATH environment variable is set (if using local model)\n' +
-                '3. All dependencies are installed (pip install -r requirements.txt)'
-            );
-        } else {
-            // Something else went wrong
-            throw new Error(error.message || 'An unexpected error occurred during refactoring');
-        }
+        console.error('[API] Unified refactoring error:', error);
+        handleApiError(error, 'unified refactoring');
     }
 };
+
+/**
+ * Get ALL available refactoring patterns from all modules
+ * @returns {Promise} Response with all patterns from all modules
+ */
+export const getAllAvailablePatterns = async () => {
+    try {
+        const response = await mlApi.get('/api/patterns/all');
+        console.log('[API] All available patterns:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[API] Get all available patterns error:', error);
+        handleApiError(error, 'fetching all patterns');
+    }
+};
+
+// ============================================
+// PRIORITY REFACTORING ENDPOINTS (FASTEST)
+// ============================================
+
+/**
+ * Apply top 15 priority refactoring patterns (FASTEST option)
+ * Includes: Dead code removal, duplicates, comprehensions, guard clauses, etc.
+ * 
+ * @param {string} code - Code to refactor
+ * @returns {Promise} Response with detected patterns and refactored code
+ */
+export const applyPriorityRefactoring = async (code) => {
+    try {
+        console.log('[API] Calling priority refactoring (15 patterns)...');
+
+        const response = await mlApi.post('/api/priority-refactor', {
+            code: code
+        });
+
+        console.log('[API] Priority refactoring response:', response.data);
+        console.log(`[API] Patterns applied: ${response.data.patterns_applied}`);
+        console.log(`[API] Changes detected: ${response.data.changes?.length || 0}`);
+
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Priority refactoring error:', error);
+        handleApiError(error, 'priority refactoring');
+    }
+};
+
+/**
+ * Get list of all 20 priority patterns
+ * @returns {Promise} Response with pattern list
+ */
+export const getPriorityPatterns = async () => {
+    try {
+        const response = await mlApi.get('/api/priority-patterns');
+        console.log('[API] Priority patterns:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[API] Get priority patterns error:', error);
+        handleApiError(error, 'fetching priority patterns');
+    }
+};
+
+// ============================================
+// ADVANCED REFACTORING ENDPOINTS
+// ============================================
+
+/**
+ * Apply comprehensive refactoring with 100+ patterns across 12 categories
+ * 
+ * @param {string} code - Code to refactor
+ * @param {Array<string>} categories - Optional category filters
+ *   Available: 'Naming & Readability', 'Function Refactoring', 
+ *              'Conditional Simplification', 'Variable Management',
+ *              'Class & Object', 'Module Organization', 'Python-Specific',
+ *              'Performance Optimization', 'Error Handling', 'Architecture Patterns',
+ *              'Testing & Testability', 'Code Style'
+ * @returns {Promise} Response with comprehensive refactoring results
+ */
+export const applyAdvancedRefactoring = async (code, categories = null) => {
+    try {
+        console.log('[API] Calling advanced refactoring (100+ patterns)...');
+
+        const requestData = { code: code };
+        if (categories && categories.length > 0) {
+            requestData.categories = categories;
+        }
+
+        const response = await mlApi.post('/api/advanced-refactor', requestData);
+
+        console.log('[API] Advanced refactoring response:', response.data);
+        console.log(`[API] Changes applied: ${response.data.metrics?.changes_applied || 0}`);
+        console.log(`[API] Improvement score: ${response.data.metrics?.improvement_score || 0}%`);
+
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Advanced refactoring error:', error);
+        handleApiError(error, 'advanced refactoring');
+    }
+};
+
+/**
+ * Get list of all available refactoring patterns
+ * @returns {Promise} Response with all patterns grouped by category
+ */
+export const getAllPatterns = async () => {
+    try {
+        const response = await mlApi.get('/api/list-patterns');
+        console.log('[API] All patterns:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[API] Get all patterns error:', error);
+        handleApiError(error, 'fetching patterns');
+    }
+};
+
+/**
+ * Basic AST refactoring (simpler than advanced)
+ * @param {string} code - Code to refactor
+ * @returns {Promise} Response with basic refactoring
+ */
+export const refactorCode = async (code) => {
+    try {
+        console.log('[API] Calling basic AST refactoring...');
+
+        const response = await mlApi.post('/api/refactor', {
+            code: code
+        });
+
+        console.log('[API] Basic refactoring response:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Basic refactoring error:', error);
+        handleApiError(error, 'basic refactoring');
+    }
+};
+
+// ============================================
+// CODE ANALYSIS ENDPOINTS
+// ============================================
+
+/**
+ * Comprehensive code analysis with quality metrics
+ * Includes: complexity, maintainability, security, style compliance
+ * 
+ * @param {string} code - Code to analyze
+ * @returns {Promise} Response with analysis metrics
+ */
+export const analyzeCode = async (code) => {
+    try {
+        console.log('[API] Calling code analysis...');
+
+        const response = await mlApi.post('/api/analyze', {
+            code: code
+        });
+
+        console.log('[API] Code analysis response:', response.data);
+
+        if (response.data.analysis) {
+            const { complexity, maintainability, security } = response.data.analysis;
+            console.log(`[API] Cyclomatic complexity: ${complexity?.cyclomatic || 'N/A'}`);
+            console.log(`[API] Maintainability index: ${maintainability?.index || 'N/A'}`);
+            console.log(`[API] Security issues: ${security?.vulnerabilities || 0}`);
+        }
+
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Code analysis error:', error);
+        handleApiError(error, 'code analysis');
+    }
+};
+
+/**
+ * Check code against Python best practices
+ * @param {string} code - Code to check
+ * @returns {Promise} Response with best practice violations
+ */
+export const checkBestPractices = async (code) => {
+    try {
+        console.log('[API] Checking best practices...');
+
+        const response = await mlApi.post('/api/best-practices', {
+            code: code
+        });
+
+        console.log('[API] Best practices response:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Best practices error:', error);
+        handleApiError(error, 'best practices check');
+    }
+};
+
+/**
+ * Analyze code architecture and detect anti-patterns
+ * Detects: God classes, long methods, high coupling, design pattern opportunities
+ * 
+ * @param {string} code - Code to analyze
+ * @returns {Promise} Response with architecture analysis
+ */
+export const analyzeArchitecture = async (code) => {
+    try {
+        console.log('[API] Calling architecture analysis...');
+
+        const response = await mlApi.post('/api/architecture-analyze', {
+            code: code
+        });
+
+        console.log('[API] Architecture analysis response:', response.data);
+
+        if (response.data.anti_patterns) {
+            console.log(`[API] Anti-patterns found: ${response.data.anti_patterns.length}`);
+        }
+        if (response.data.design_patterns) {
+            console.log(`[API] Design pattern suggestions: ${response.data.design_patterns.length}`);
+        }
+
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Architecture analysis error:', error);
+        handleApiError(error, 'architecture analysis');
+    }
+};
+
+// ============================================
+// CODE GENERATION ENDPOINTS
+// ============================================
+
+/**
+ * Generate unit tests for the provided code
+ * @param {string} code - Code to generate tests for
+ * @param {string} framework - Test framework ('pytest', 'unittest')
+ * @returns {Promise} Response with generated test code
+ */
+export const generateTests = async (code, framework = 'pytest') => {
+    try {
+        console.log('[API] Generating unit tests...');
+
+        const response = await mlApi.post('/api/generate-tests', {
+            code: code,
+            framework: framework
+        });
+
+        console.log('[API] Test generation response:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Test generation error:', error);
+        handleApiError(error, 'test generation');
+    }
+};
+
+// ============================================
+// PERFORMANCE OPTIMIZATION ENDPOINTS
+// ============================================
+
+/**
+ * Analyze and optimize code performance
+ * Detects: inefficient loops, data structure issues, algorithm improvements
+ * 
+ * @param {string} code - Code to optimize
+ * @returns {Promise} Response with performance optimizations
+ */
+export const optimizePerformance = async (code) => {
+    try {
+        console.log('[API] Calling performance optimizer...');
+
+        const response = await mlApi.post('/api/optimize-performance', {
+            code: code
+        });
+
+        console.log('[API] Performance optimization response:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('[API] Performance optimization error:', error);
+        handleApiError(error, 'performance optimization');
+    }
+};
+
+// ============================================
+// RISK ANALYSIS ENDPOINTS (Port 8001)
+// ============================================
 
 /**
  * Analyze refactoring risk between original and refactored code
@@ -127,77 +381,52 @@ export const refactorCode = async (code, instruction = null, language = 'python'
 export const analyzeRefactoringRisk = async (originalCode, refactoredCode, language = 'python') => {
     try {
         console.log('[API] Calling Risk Analysis service...');
-        console.log('[API] Original code length:', originalCode.length);
-        console.log('[API] Refactored code length:', refactoredCode.length);
-        
-        const requestData = {
+
+        const response = await riskApi.post('/api/risk-analyze', {
             original_code: originalCode,
             refactored_code: refactoredCode,
             language: language
-        };
-        
-        // Note: Risk analysis runs on port 8001
-        const response = await riskApi.post('/api/risk-analyze', requestData);
-        
+        });
+
         console.log('[API] Risk analysis response:', response.data);
-        
-        // Log risk details
+
         if (response.data.risk_analysis) {
             const risk = response.data.risk_analysis;
             console.log(`[API] Risk Score: ${risk.risk_score} (${risk.risk_level})`);
             console.log(`[API] Recommendation: ${risk.recommendation}`);
         }
-        
+
         return response.data;
-        
+
     } catch (error) {
         console.error('[API] Risk analysis error:', error);
-        
-        if (error.response) {
-            throw new Error(error.response.data.message || 'Failed to analyze risk');
-        } else if (error.request) {
-            throw new Error(
-                `Cannot connect to Risk Analysis service. ` +
-                'Please ensure:\n' +
-                '1. Risk analysis backend is running (python risk_analysis_api.py)\n' +
-                '2. Port 8001 is available\n' +
-                '3. OpenRouter API key is valid'
-            );
-        } else {
-            throw new Error(error.message || 'An unexpected error occurred during risk analysis');
-        }
+        handleApiError(error, 'risk analysis', RISK_API_URL);
     }
 };
 
+// ============================================
+// CODE EXECUTION ENDPOINTS
+// ============================================
+
 /**
- * Execute code and get output
+ * Execute Python code and get output
  * @param {string} code - Code to execute
  * @returns {Promise} Response with execution output/error
  */
 export const executeCode = async (code) => {
     try {
-        console.log('[API] Calling Python ML service for code execution...');
-        
+        console.log('[API] Executing code...');
+
         const response = await mlApi.post('/api/execute', {
             code: code
         });
-        
+
         console.log('[API] Execution response:', response.data);
         return response.data;
-        
+
     } catch (error) {
         console.error('[API] Execution error:', error);
-        
-        if (error.response) {
-            throw new Error(error.response.data.message || 'Failed to execute code');
-        } else if (error.request) {
-            throw new Error(
-                `Cannot connect to ML service at ${ML_API_URL}. ` +
-                'Make sure Python backend is running on port 8000.'
-            );
-        } else {
-            throw new Error(error.message || 'An unexpected error occurred during execution');
-        }
+        handleApiError(error, 'code execution');
     }
 };
 
@@ -206,25 +435,21 @@ export const executeCode = async (code) => {
 // ============================================
 
 /**
- * Check ML service health and pipeline status
- * @returns {Promise} Health status with pipeline information
+ * Check refactoring service health and available features
+ * @returns {Promise} Health status with feature availability
  */
 export const checkMLHealth = async () => {
     try {
         const response = await mlApi.get('/health');
-        
-        console.log('[API] ML Service Health:', response.data);
-        
-        // Check if local model is available
-        if (response.data.local_model && !response.data.local_model.loaded) {
-            console.warn('[API] Local model is not loaded. Only DeepSeek API will be used.');
-            console.warn('[API] To enable two-stage refactoring, set LOCAL_MODEL_PATH environment variable.');
-        }
-        
+
+        console.log('[API] Refactoring Service Health:', response.data);
+        console.log(`[API] Version: ${response.data.version || 'N/A'}`);
+        console.log(`[API] Mode: ${response.data.mode || 'N/A'}`);
+
         return response.data;
-        
+
     } catch (error) {
-        throw new Error(`ML service is not available at ${ML_API_URL}`);
+        throw new Error(`Refactoring service is not available at ${ML_API_URL}`);
     }
 };
 
@@ -255,9 +480,96 @@ export const checkRiskAnalysisHealth = async () => {
     }
 };
 
+/**
+ * Check all services health
+ * @returns {Promise<Object>} Status of all services
+ */
+export const checkAllServicesHealth = async () => {
+    const results = {
+        express: { status: 'unknown', error: null },
+        refactoring: { status: 'unknown', error: null, features: [] },
+        riskAnalysis: { status: 'unknown', error: null }
+    };
+
+    // Check Express backend
+    try {
+        await checkBackendHealth();
+        results.express.status = 'healthy';
+    } catch (error) {
+        results.express.status = 'unhealthy';
+        results.express.error = error.message;
+    }
+
+    // Check Refactoring service
+    try {
+        const health = await checkMLHealth();
+        results.refactoring.status = 'healthy';
+        results.refactoring.features = [
+            'Priority Refactoring (15 patterns)',
+            'Advanced Refactoring (100+ patterns)',
+            'Code Analysis',
+            'Architecture Analysis',
+            'Test Generation',
+            'Performance Optimization',
+            'Best Practices Check'
+        ];
+        results.refactoring.version = health.version;
+        results.refactoring.mode = health.mode;
+    } catch (error) {
+        results.refactoring.status = 'unhealthy';
+        results.refactoring.error = error.message;
+    }
+
+    // Check Risk Analysis service
+    try {
+        await checkRiskAnalysisHealth();
+        results.riskAnalysis.status = 'healthy';
+    } catch (error) {
+        results.riskAnalysis.status = 'unhealthy';
+        results.riskAnalysis.error = error.message;
+    }
+
+    return results;
+};
+
 // ============================================
 // HISTORY ENDPOINTS (EXPRESS BACKEND)
 // ============================================
+
+/**
+ * Save refactoring history to backend
+ * @param {Object} data - History data to save
+ * @param {string} data.originalCode - Original code before refactoring
+ * @param {string} data.refactoredCode - Refactored code
+ * @param {string} data.language - Programming language
+ * @param {string} data.instruction - Refactoring instruction/description
+ * @param {string} data.modelUsed - Model/method used (ast, ml, llm, etc.)
+ * @param {number} data.processingTime - Processing time in ms
+ * @param {Array} data.changesApplied - List of changes applied
+ * @param {Object} data.summary - Refactoring summary
+ * @returns {Promise} Response with saved history item
+ */
+export const saveRefactorHistory = async (data) => {
+    try {
+        console.log('[API] Saving refactoring to history...');
+        const response = await expressApi.post('/IT22606860/history', {
+            originalCode: data.originalCode,
+            refactoredCode: data.refactoredCode,
+            language: data.language || 'python',
+            instruction: data.instruction || 'Unified comprehensive refactoring',
+            modelUsed: data.modelUsed || 'ast',
+            processingTime: data.processingTime || 0,
+            changesApplied: data.changesApplied || [],
+            summary: data.summary || {}
+        });
+        console.log('[API] History saved:', response.data.historyId);
+        return response.data;
+    } catch (error) {
+        console.error('[API] Error saving history:', error);
+        // Don't throw - history saving is non-critical
+        return { success: false, error: error.message };
+    }
+};
 
 /**
  * Get refactoring history with pagination
@@ -272,7 +584,7 @@ export const getHistory = async (page = 1, limit = 10, modelUsed = null, sortBy 
         const params = { page, limit, sortBy };
         if (modelUsed) params.modelUsed = modelUsed;
 
-        const response = await expressApi.get('/history', { params });
+        const response = await expressApi.get('/IT22606860/history', { params });
         return response.data;
     } catch (error) {
         console.error('Error fetching history:', error);
@@ -287,7 +599,7 @@ export const getHistory = async (page = 1, limit = 10, modelUsed = null, sortBy 
  */
 export const getHistoryById = async (id) => {
     try {
-        const response = await expressApi.get(`/history/${id}`);
+        const response = await expressApi.get(`/IT22606860/history/${id}`);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -301,10 +613,31 @@ export const getHistoryById = async (id) => {
  */
 export const deleteHistory = async (id) => {
     try {
-        const response = await expressApi.delete(`/history/${id}`);
+        const response = await expressApi.delete(`/IT22606860/history/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting history:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Update history item (rename, add risk analysis, etc.)
+ * @param {string} id - History item ID
+ * @param {Object} data - Data to update
+ * @param {string} data.instruction - New instruction/name
+ * @param {Object} data.riskAnalysis - Risk analysis data
+ * @param {number} data.userRating - User rating (1-5)
+ * @param {string} data.userFeedback - User feedback text
+ * @param {boolean} data.accepted - Whether refactoring was accepted
+ * @returns {Promise} Response
+ */
+export const updateHistory = async (id, data) => {
+    try {
+        const response = await expressApi.put(`/IT22606860/history/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating history:', error);
         throw new Error(error.response?.data?.message || error.message);
     }
 };
@@ -315,7 +648,7 @@ export const deleteHistory = async (id) => {
  */
 export const clearAllHistory = async () => {
     try {
-        const response = await expressApi.delete('/history/clear');
+        const response = await expressApi.delete('/IT22606860/history/clear');
         return response.data;
     } catch (error) {
         console.error('Error clearing history:', error);
@@ -329,7 +662,7 @@ export const clearAllHistory = async () => {
  */
 export const getHistoryStats = async () => {
     try {
-        const response = await expressApi.get('/history/stats');
+        const response = await expressApi.get('/IT22606860/history/stats');
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -343,7 +676,7 @@ export const getHistoryStats = async () => {
  */
 export const getRecentHistory = async (limit = 5) => {
     try {
-        const response = await expressApi.get('/history/recent', {
+        const response = await expressApi.get('/IT22606860/history/recent', {
             params: { limit }
         });
         return response.data;
@@ -367,7 +700,7 @@ export const searchHistory = async (query, language = null, modelUsed = null, pa
         if (language) params.language = language;
         if (modelUsed) params.modelUsed = modelUsed;
 
-        const response = await expressApi.get('/history/search', { params });
+        const response = await expressApi.get('/IT22606860/history/search', { params });
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message);
@@ -384,7 +717,7 @@ export const searchHistory = async (query, language = null, modelUsed = null, pa
  */
 export const saveFeedback = async (historyId, rating, feedback, accepted) => {
     try {
-        const response = await expressApi.post('/refactor/feedback', {
+        const response = await expressApi.post('/IT22606860/refactor/feedback', {
             historyId,
             rating,
             feedback,
@@ -401,43 +734,369 @@ export const saveFeedback = async (historyId, rating, feedback, accepted) => {
 // ============================================
 
 /**
- * Check if two-stage refactoring is available
- * @returns {Promise<boolean>} True if local model is loaded
+ * Get available refactoring categories
+ * @returns {Array<string>} List of category names
  */
-export const isTwoStageAvailable = async () => {
+export const getRefactoringCategories = () => {
+    return [
+        'Naming & Readability',
+        'Function Refactoring',
+        'Conditional Simplification',
+        'Variable Management',
+        'Class & Object',
+        'Module Organization',
+        'Python-Specific',
+        'Performance Optimization',
+        'Error Handling',
+        'Architecture Patterns',
+        'Testing & Testability',
+        'Code Style'
+    ];
+};
+
+/**
+ * Get refactoring service features
+ * @returns {Promise<Object>} Available features and their status
+ */
+export const getServiceFeatures = async () => {
     try {
         const health = await checkMLHealth();
-        return health.local_model?.loaded === true;
+
+        return {
+            priorityRefactoring: {
+                available: true,
+                patterns: 15,
+                speed: 'fastest',
+                endpoint: '/api/priority-refactor'
+            },
+            advancedRefactoring: {
+                available: true,
+                patterns: 100,
+                categories: 12,
+                endpoint: '/api/advanced-refactor'
+            },
+            codeAnalysis: {
+                available: true,
+                features: ['complexity', 'maintainability', 'security', 'style'],
+                endpoint: '/api/analyze'
+            },
+            architectureAnalysis: {
+                available: true,
+                detects: ['anti-patterns', 'design-patterns', 'coupling', 'cohesion'],
+                endpoint: '/api/architecture-analyze'
+            },
+            testGeneration: {
+                available: true,
+                frameworks: ['pytest', 'unittest'],
+                endpoint: '/api/generate-tests'
+            },
+            performanceOptimization: {
+                available: true,
+                optimizations: ['loops', 'data-structures', 'algorithms', 'caching'],
+                endpoint: '/api/optimize-performance'
+            }
+        };
     } catch (error) {
-        console.error('[API] Failed to check two-stage availability:', error);
-        return false;
+        console.error('[API] Failed to get service features:', error);
+        return null;
     }
 };
 
 /**
- * Get pipeline configuration information
- * @returns {Promise<Object>} Pipeline configuration details
+ * Error handler helper
+ * @param {Error} error - Error object
+ * @param {string} operation - Operation name
+ * @param {string} serviceUrl - Service URL
  */
-export const getPipelineConfig = async () => {
+const handleApiError = (error, operation, serviceUrl = ML_API_URL) => {
+    if (error.response) {
+        // Server responded with error
+        const errorMessage = error.response.data.error ||
+            error.response.data.message ||
+            `Failed to ${operation}`;
+
+        if (error.response.status === 500) {
+            throw new Error(`${operation} failed: ${errorMessage}. Please check if the Python backend is properly configured.`);
+        } else {
+            throw new Error(errorMessage);
+        }
+    } else if (error.request) {
+        // Request made but no response
+        throw new Error(
+            `Cannot connect to service at ${serviceUrl}. ` +
+            `Please ensure:\n` +
+            `1. Python backend is running (python run_backend.py)\n` +
+            `2. All dependencies are installed (pip install -r requirements.txt)\n` +
+            `3. Port ${serviceUrl.split(':')[2]} is available`
+        );
+    } else {
+        // Something else went wrong
+        throw new Error(error.message || `An unexpected error occurred during ${operation}`);
+    }
+};
+
+// ============================================
+// AI CHATBOT ASSISTANT ENDPOINTS (Port 8001 - LLM Backend)
+// ============================================
+
+// Create axios instance for LLM Chatbot service
+const llmApi = axios.create({
+    baseURL: RISK_API_URL,  // Using port 8001 for LLM
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 90000, // 90 seconds for LLM responses
+});
+
+/**
+ * Send a chat message to the AI assistant
+ * @param {string} message - User's message
+ * @param {Array} history - Previous chat messages for context
+ * @returns {Promise} Response with AI assistant's reply
+ */
+export const sendChatMessage = async (message, history = []) => {
     try {
-        const health = await checkMLHealth();
-        
+        const response = await llmApi.post('/chat', {
+            message,
+            history: history.slice(-10) // Send last 10 messages for context
+        });
         return {
-            twoStageEnabled: health.two_stage_refactoring || false,
-            localModel: {
-                enabled: health.local_model?.enabled || false,
-                loaded: health.local_model?.loaded || false,
-                path: health.local_model?.path || null,
-                device: health.local_model?.device || null
-            },
-            deepseekApi: {
-                enabled: health.deepseek_api?.enabled || false,
-                model: health.deepseek_api?.model || 'unknown'
-            }
+            success: true,
+            message: response.data.response || response.data.message,
+            metadata: response.data.metadata || {}
         };
     } catch (error) {
-        console.error('[API] Failed to get pipeline config:', error);
-        return null;
+        console.error('Chat API error:', error);
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message || 'Failed to get chat response'
+        };
+    }
+};
+
+/**
+ * Get chat history from backend
+ * @returns {Promise} Response with chat history
+ */
+export const getChatHistory = async () => {
+    try {
+        const response = await llmApi.get('/chat/history');
+        return {
+            success: true,
+            history: response.data.history || []
+        };
+    } catch (error) {
+        console.error('Get chat history error:', error);
+        return {
+            success: false,
+            history: [],
+            error: error.message
+        };
+    }
+};
+
+/**
+ * Clear chat history
+ * @returns {Promise} Response indicating success
+ */
+export const clearChatHistory = async () => {
+    try {
+        await llmApi.delete('/chat/history');
+        return { success: true };
+    } catch (error) {
+        console.error('Clear chat history error:', error);
+        throw new Error(error.response?.data?.error || 'Failed to clear chat history');
+    }
+};
+
+/**
+ * Analyze code comparison (before/after) with memory and performance insights
+ * @param {string} beforeCode - Original code
+ * @param {string} afterCode - Refactored code
+ * @param {string} language - Programming language (default: javascript)
+ * @returns {Promise} Response with detailed analysis
+ */
+export const analyzeCodeComparison = async (beforeCode, afterCode, language = 'javascript') => {
+    try {
+        const response = await llmApi.post('/analyze/comparison', {
+            before: beforeCode,
+            after: afterCode,
+            language
+        });
+        return {
+            success: true,
+            analysis: response.data.analysis || response.data
+        };
+    } catch (error) {
+        console.error('Code comparison analysis error:', error);
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message || 'Failed to analyze code comparison'
+        };
+    }
+};
+
+/**
+ * Get refactoring insights and recommendations
+ * @param {string} code - Code to analyze
+ * @param {string} focusArea - Specific area to focus on (memory, performance, quality, etc.)
+ * @returns {Promise} Response with insights
+ */
+export const getRefactoringInsights = async (code, focusArea = 'general') => {
+    try {
+        const response = await llmApi.post('/insights', {
+            code,
+            focus: focusArea
+        });
+        return {
+            success: true,
+            insights: response.data.insights || response.data
+        };
+    } catch (error) {
+        console.error('Get refactoring insights error:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
+/**
+ * Check LLM service health
+ * @returns {Promise} Health status
+ */
+export const checkLLMHealth = async () => {
+    try {
+        const response = await llmApi.get('/health');
+        return {
+            status: 'online',
+            ...response.data
+        };
+    } catch (error) {
+        return {
+            status: 'offline',
+            error: error.message
+        };
+    }
+};
+
+// ============================================
+// DASHBOARD ANALYTICS ENDPOINTS (Authenticated)
+// ============================================
+
+/**
+ * Get dashboard overview - summary metrics for the authenticated user
+ * @returns {Promise} Response with overview data
+ */
+export const getDashboardOverview = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/overview');
+        return response.data;
+    } catch (error) {
+        console.error('Dashboard overview error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get code evolution timeline
+ * @param {number} days - Number of days to look back
+ * @returns {Promise} Response with timeline data
+ */
+export const getEvolutionTimeline = async (days = 90) => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/timeline', {
+            params: { days }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Timeline error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get session comparison details
+ * @param {string} sessionId - History item ID
+ * @returns {Promise} Response with comparison data
+ */
+export const getSessionComparison = async (sessionId) => {
+    try {
+        const response = await expressApi.get(`/IT22606860/dashboard/comparison/${sessionId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Comparison error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get performance analytics
+ * @returns {Promise} Response with performance data
+ */
+export const getPerformanceAnalytics = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/performance');
+        return response.data;
+    } catch (error) {
+        console.error('Performance analytics error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get risk & security analytics
+ * @returns {Promise} Response with risk data
+ */
+export const getRiskSecurityAnalytics = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/risk-security');
+        return response.data;
+    } catch (error) {
+        console.error('Risk analytics error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get best practice compliance data
+ * @returns {Promise} Response with compliance data
+ */
+export const getBestPracticeCompliance = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/best-practices');
+        return response.data;
+    } catch (error) {
+        console.error('Best practices error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get technical debt tracker data
+ * @returns {Promise} Response with technical debt data
+ */
+export const getTechnicalDebtTracker = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/technical-debt');
+        return response.data;
+    } catch (error) {
+        console.error('Technical debt error:', error);
+        throw new Error(error.response?.data?.message || error.message);
+    }
+};
+
+/**
+ * Get developer growth score and recommendations
+ * @returns {Promise} Response with growth data
+ */
+export const getDeveloperGrowth = async () => {
+    try {
+        const response = await expressApi.get('/IT22606860/dashboard/growth');
+        return response.data;
+    } catch (error) {
+        console.error('Growth error:', error);
+        throw new Error(error.response?.data?.message || error.message);
     }
 };
 
@@ -446,4 +1105,4 @@ export const getPipelineConfig = async () => {
 // ============================================
 
 export default expressApi;
-export { mlApi, riskApi };
+export { mlApi, riskApi, llmApi };

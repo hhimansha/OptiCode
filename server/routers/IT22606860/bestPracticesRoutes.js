@@ -1,25 +1,23 @@
 import express from 'express';
-import { analyzeBestPractices, getPracticesBySession, markPracticeApplied, getBestPracticesStats } from '../../controllers/IT22606860/bestPracticesController.js';
-import { validateRequest } from '../../middelwares/IT22606860/validateRequest.js';
+import {
+    analyzeBestPractices,
+    getPracticesBySession,
+    markPracticeApplied,
+    getBestPracticesStats
+} from '../../controllers/IT22606860/bestPracticesController.js';
 
 const router = express.Router();
 
-// Best practices endpoints
-router.post('/analyze', 
-    validateRequest(['code']), 
-    analyzeBestPractices
-);
+// Analyze best practices for code
+router.post('/analyze', analyzeBestPractices);
 
-router.get('/session/:sessionId', 
-    getPracticesBySession
-);
+// Get practices by session ID
+router.get('/session/:sessionId', getPracticesBySession);
 
-router.patch('/:practiceId/apply', 
-    markPracticeApplied
-);
+// Mark a practice as applied
+router.patch('/:practiceId/apply', markPracticeApplied);
 
-router.get('/stats', 
-    getBestPracticesStats
-);
+// Get best practices statistics
+router.get('/stats', getBestPracticesStats);
 
 export default router;
