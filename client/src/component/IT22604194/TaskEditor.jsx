@@ -184,6 +184,60 @@ useEffect(() => {
               </p>
             ))}
         </div>
+
+<div style={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}>
+
+  <div className="hint-panel">
+    <h4>Live Hints</h4>
+
+    {loadingHints && <p className="hint-loading">Analyzing…</p>}
+
+    {!loadingHints && hints.length === 0 && !isCorrect && (
+      <p className="hint-ok">✔ No issues detected</p>
+    )}
+
+    {!loadingHints &&
+      (hints || [])
+        .filter((hint) => hint != null && hint !== "")
+        .map((hint, index) => {
+          const text = String(hint);
+          const isCorrectHint = text.includes("correct");
+          return (
+            <p
+              key={index}
+              className={isCorrectHint ? "hint-correct" : "hint-item"}
+            >
+              {isCorrectHint ? "" : "⚠ "}
+              {text}
+            </p>
+          );
+        })}
+
+    {/* ✅ Button sits inside hint panel — no overlap */}
+    {isCorrect && (
+      <button
+        onClick={handleAnotherTask}
+        type="button"
+        style={{
+          marginTop: "12px",
+          width: "100%",
+          padding: "10px",
+          background: "linear-gradient(90deg, #16a34a, #22c55e)",
+          color: "#fff",
+          border: "none",
+          borderRadius: "8px",
+          fontSize: "15px",
+          fontWeight: "bold",
+          cursor: "pointer",
+          letterSpacing: "0.5px"
+        }}
+      >
+        Next Task →
+      </button>
+    )}
+  </div>
+
+</div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
