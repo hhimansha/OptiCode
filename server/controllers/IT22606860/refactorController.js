@@ -3,8 +3,9 @@ import RefactorHistory from '../../models/IT22606860/RefactorHistory.js';
 import CodeRisk from '../../models/IT22606860/CodeRisk.js';
 import BestPractice from '../../models/IT22606860/BestPractice.js';
 
-// Python ML API URL
+// Python ML API URLs
 const ML_API_URL = process.env.ML_API_URL || 'http://localhost:8000';
+const RISK_API_URL = process.env.RISK_API_URL || 'http://localhost:8001';
 
 // Helper to compute basic quality metrics from code
 const computeBasicMetrics = (code) => {
@@ -24,6 +25,58 @@ const computeBasicMetrics = (code) => {
         171 - 5.2 * Math.log(Math.max(1, complexity)) - 0.23 * complexity - 16.2 * Math.log(Math.max(1, loc))
     ));
     return { loc, complexity, maintainabilityIndex: parseFloat(maintainabilityIndex.toFixed(2)) };
+};
+
+// Helper to call risk analysis API and get comprehensive risk assessment
+const analyzeRisksDetailed = async (originalCode, refactoredCode, language = 'javascript') => {
+    try {
+        console.log('[RISK] Calling risk analysis API...');
+        const response = await axios.post(`${RISK_API_URL}/api/risk-analyze`, {
+            original_code: originalCode,
+            refactored_code: refactoredCode,
+            language: language,
+            include_ast_analysis: true
+        }, {
+            timeout: 30000
+        });
+
+        if (response.data && response.data.success) {
+            console.log('[RISK] Risk analysis completed successfully');
+            console.log('[RISK] Full response.data:', JSON.stringify(response.data, null, 2));
+            
+            const riskData = response.data.risk_analysis;
+            const comparisonMetrics = response.data.comparison_metrics;
+            const chartData = response.data.chart_data;
+            
+            console.log('[RISK] Extracted riskData keys:', Object.keys(riskData || {}));
+            console.log('[RISK] Extracted comparisonMetrics:', JSON.stringify(comparisonMetrics, null, 2));
+            console.log('[RISK] Extracted chartData:', JSON.stringify(chartData, null, 2));
+
+            return {
+                success: true,
+                detailed: {
+                    riskScore: riskData?.risk_score || 0,
+                    riskLevel: riskData?.risk_level || 'medium',
+                    riskColor: riskData?.risk_color || '#F59E0B',
+                    explanation: riskData?.explanation || '',
+                    recommendation: riskData?.recommendation || '',
+                    processingTime: riskData?.processing_time || 0,
+                    riskFactors: riskData?.risk_factors || [],
+                    suggestions: riskData?.suggestions || [],
+                    potentialIssues: riskData?.potential_issues || [],
+                    sideEffects: riskData?.side_effects || [],
+                    comparisonMetrics: comparisonMetrics || {},
+                    chartData: chartData || {}
+                }
+            };
+        } else {
+            console.warn('[RISK] Risk analysis returned unsuccessful');
+            return { success: false };
+        }
+    } catch (error) {
+        console.error('[RISK] Risk analysis failed:', error.message);
+        return { success: false, error: error.message };
+    }
 };
 
 // Refactor code endpoint
@@ -73,8 +126,27 @@ export const refactorCode = async (req, res, next) => {
                     overallScore: parseFloat((((afterMetrics.maintainabilityIndex - beforeMetrics.maintainabilityIndex) + ((beforeMetrics.complexity - afterMetrics.complexity) / Math.max(beforeMetrics.complexity, 1) * 100)) / 2).toFixed(2))
                 };
 
-                // Save to history with userId and quality metrics
-                const history = await RefactorHistory.create({
+                // Perform risk analysis (async, don't block refactoring response)
+                let riskAnalysisData = null;
+                try {
+                    console.log('[REFACTOR] Starting risk analysis...');
+                    const riskResult = await analyzeRisksDetailed(code, response.data.refactored_code, language || 'javascript');
+                    if (riskResult.success) {
+                        riskAnalysisData = riskResult.detailed;
+                        console.log('[REFACTOR] Risk analysis completed successfully');
+                        console.log('[REFACTOR] Risk Score:', riskAnalysisData.riskScore);
+                        console.log('[REFACTOR] Risk Level:', riskAnalysisData.riskLevel);
+                        console.log('[REFACTOR] Risk Factors:', riskAnalysisData.riskFactors?.length || 0);
+                        console.log('[REFACTOR] Full risk data:', JSON.stringify(riskAnalysisData, null, 2));
+                    } else {
+                        console.warn('[REFACTOR] Risk analysis returned unsuccessful');
+                    }
+                } catch (riskError) {
+                    console.warn('[REFACTOR] Risk analysis failed, continuing without it:', riskError.message);
+                }
+
+                // Prepare history data
+                const historyData = {
                     userId: req.userId || null,
                     inputCode: code,
                     originalCode: code,
@@ -89,7 +161,24 @@ export const refactorCode = async (req, res, next) => {
                         after: afterMetrics,
                         improvement
                     }
-                });
+                };
+
+                // Add risk analysis if available
+                if (riskAnalysisData) {
+                    historyData.riskAnalysis = {
+                        detailed: riskAnalysisData
+                    };
+                    console.log('[REFACTOR] Saving with risk analysis data');
+                    console.log('[REFACTOR] riskAnalysisData.comparisonMetrics:', JSON.stringify(riskAnalysisData.comparisonMetrics, null, 2));
+                    console.log('[REFACTOR] riskAnalysisData.chartData:', JSON.stringify(riskAnalysisData.chartData, null, 2));
+                } else {
+                    console.log('[REFACTOR] Saving without risk analysis data');
+                }
+
+                // Save to history
+                const history = await RefactorHistory.create(historyData);
+                console.log('[REFACTOR] History saved with ID:', history._id);
+                console.log('[REFACTOR] Saved riskAnalysis structure:', JSON.stringify(history.riskAnalysis, null, 2));
 
                 return res.status(200).json({
                     success: true,

@@ -13,6 +13,7 @@ import {
 import { Toaster, toast } from 'sonner';
 import { getHistory, deleteHistory, clearAllHistory, updateHistory, getHistoryById } from '../../services/api';
 import CodeEditor from '../../component/IT22606860/CodeEditor';
+import RiskAnalysisView from '../../component/IT22606860/RiskAnalysisView';
 
 const History = () => {
     const navigate = useNavigate();
@@ -57,10 +58,12 @@ const History = () => {
         try {
             const response = await getHistoryById(id);
             if (response.success) {
+                console.log('[HISTORY] Full item loaded:', response.data);
+                console.log('[HISTORY] Risk analysis data:', response.data.riskAnalysis);
                 setSelectedFullItem(response.data);
             }
-        } catch {
-            console.error('Failed to fetch full history item');
+        } catch (error) {
+            console.error('Failed to fetch full history item:', error);
         }
     };
 
@@ -484,7 +487,7 @@ const History = () => {
                                                 <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full">
                                                     {item.language || 'python'}
                                                 </span>
-                                                {item.riskAnalysis && (
+                                                {(item.riskAnalysis?.detailed || item.riskAnalysis?.before) && (
                                                     <span className="flex items-center gap-1 text-green-400" title="Risk analyzed">
                                                         <FaShieldAlt className="text-[10px]" />
                                                     </span>
@@ -628,7 +631,7 @@ const History = () => {
                                         >
                                             <FaShieldAlt />
                                             Risk Analysis
-                                            {selectedFullItem.riskAnalysis && (
+                                            {(selectedFullItem.riskAnalysis?.detailed || selectedFullItem.riskAnalysis?.before) && (
                                                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                                             )}
                                         </button>
@@ -760,7 +763,7 @@ const History = () => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <RiskSummary riskAnalysis={selectedFullItem.riskAnalysis} />
+                                            <RiskAnalysisView riskAnalysis={selectedFullItem.riskAnalysis} />
                                         )}
                                     </div>
                                 </div>

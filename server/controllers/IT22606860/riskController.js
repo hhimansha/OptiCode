@@ -89,7 +89,62 @@ export const compareRisks = async (req, res) => {
 
         console.log('[RISK] Comparing risks...');
 
-        // Analyze original code risks
+        // Use the centralized Risk Analysis API (Port 8001) for detailed analysis
+        const RISK_API_URL = process.env.RISK_API_URL || 'http://localhost:8001';
+        
+        try {
+            const detailedResponse = await axios.post(`${RISK_API_URL}/api/risk-analyze`, {
+                original_code: originalCode,
+                refactored_code: refactoredCode,
+                language: 'javascript',
+                include_ast_analysis: true
+            }, {
+                timeout: 30000
+            });
+
+            if (detailedResponse.data && detailedResponse.data.success) {
+                const riskData = detailedResponse.data.risk_analysis;
+                const comparisonMetrics = detailedResponse.data.comparison_metrics;
+                const chartData = detailedResponse.data.chart_data;
+
+                const comparison = {
+                    before: { riskScore: 0 },
+                    after: { riskScore: riskData?.risk_score || 0 },
+                    risksFixed: 0,
+                    detailed: {
+                        riskScore: riskData?.risk_score || 0,
+                        riskLevel: riskData?.risk_level || 'medium',
+                        riskColor: riskData?.risk_color || '#F59E0B',
+                        explanation: riskData?.explanation || '',
+                        recommendation: riskData?.recommendation || '',
+                        processingTime: riskData?.processing_time || 0,
+                        riskFactors: riskData?.risk_factors || [],
+                        suggestions: riskData?.suggestions || [],
+                        potentialIssues: riskData?.potential_issues || [],
+                        sideEffects: riskData?.side_effects || [],
+                        comparisonMetrics: comparisonMetrics || {},
+                        chartData: chartData || {}
+                    }
+                };
+
+                // Update history if provided
+                if (historyId) {
+                    await RefactorHistory.findByIdAndUpdate(historyId, {
+                        'riskAnalysis.detailed': comparison.detailed
+                    });
+                }
+
+                return res.json({
+                    success: true,
+                    comparison,
+                    message: 'Risk analysis completed'
+                });
+            }
+        } catch (riskApiError) {
+            console.warn('[RISK] Detailed API failed, falling back to basic analysis:', riskApiError.message);
+        }
+
+        // Fallback: Analyze original code risks
         const beforeResponse = await axios.post(`${ML_API_URL}/api/analyze-risks`, {
             code: originalCode
         });

@@ -156,36 +156,35 @@ const RefactorPage = () => {
             const response = await analyzeRefactoringRisk(inputCode, refactoredCode, language);
 
             if (response.success) {
+                console.log('[RISK] Full response:', response);
                 setRiskData(response);
                 toast.success('Risk analysis completed!');
                 
-                // Save risk analysis to history if we have a history ID
-                if (currentHistoryId) {
+                // Save detailed risk analysis to history if we have a history ID
+                if (currentHistoryId && response.risk_analysis) {
                     try {
                         const riskAnalysisData = {
-                            before: {
-                                totalRisks: response.original?.risks?.length || 0,
-                                critical: response.original?.risks?.filter(r => r.severity === 'critical').length || 0,
-                                high: response.original?.risks?.filter(r => r.severity === 'high').length || 0,
-                                medium: response.original?.risks?.filter(r => r.severity === 'medium').length || 0,
-                                low: response.original?.risks?.filter(r => r.severity === 'low').length || 0,
-                                riskScore: response.original?.risk_score || 0
-                            },
-                            after: {
-                                totalRisks: response.refactored?.risks?.length || 0,
-                                critical: response.refactored?.risks?.filter(r => r.severity === 'critical').length || 0,
-                                high: response.refactored?.risks?.filter(r => r.severity === 'high').length || 0,
-                                medium: response.refactored?.risks?.filter(r => r.severity === 'medium').length || 0,
-                                low: response.refactored?.risks?.filter(r => r.severity === 'low').length || 0,
-                                riskScore: response.refactored?.risk_score || 0
-                            },
-                            risksFixed: (response.original?.risks?.length || 0) - (response.refactored?.risks?.length || 0)
+                            detailed: {
+                                riskScore: response.risk_analysis?.risk_score || 0,
+                                riskLevel: response.risk_analysis?.risk_level || 'medium',
+                                riskColor: response.risk_analysis?.risk_color || '#F59E0B',
+                                explanation: response.risk_analysis?.explanation || '',
+                                recommendation: response.risk_analysis?.recommendation || '',
+                                processingTime: response.risk_analysis?.processing_time || 0,
+                                riskFactors: response.risk_analysis?.risk_factors || [],
+                                suggestions: response.risk_analysis?.suggestions || [],
+                                potentialIssues: response.risk_analysis?.potential_issues || [],
+                                sideEffects: response.risk_analysis?.side_effects || [],
+                                comparisonMetrics: response.comparison_metrics || {},
+                                chartData: response.chart_data || {}
+                            }
                         };
                         
+                        console.log('[RISK] Saving risk analysis to history:', riskAnalysisData);
                         await updateHistory(currentHistoryId, { riskAnalysis: riskAnalysisData });
-                        console.log('[RISK] Risk analysis saved to history');
+                        console.log('[RISK] Risk analysis saved to history successfully');
                     } catch (err) {
-                        console.warn('[RISK] Failed to save risk analysis to history:', err);
+                        console.error('[RISK] Failed to save risk analysis to history:', err);
                     }
                 }
             } else {
