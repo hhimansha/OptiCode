@@ -298,6 +298,7 @@ const CodeConceptExtractor = () => {
       setError(err.message || 'Comparison failed.');
     } finally {
       setCompareLoading(false);
+      setIsFolderAnalyzing(false); // FolderImportPanel skips onAnalyzing(false) in compare mode — we clear it here
     }
   }, [extractionMode]);
 
