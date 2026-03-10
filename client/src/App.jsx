@@ -17,6 +17,7 @@ import Home from './pages/IT22606860/Home'
 import RefactorPage from './pages/IT22606860/RefactorPage'
 import History from './pages/IT22606860/History'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
+import ScoreDisplay from './component/IT22639226/ScoreDisplay';
 
 // // Components
 // import Header from './components/IT22606860/Header'
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="/code" element={<CodeConceptExtractor />} />
         <Route path="/livekit"element={<LiveInterview/>}/>  
         <Route path="/interview" element={<Interviewquestion/>} />
+        <Route path="/my-results" element={<ScoreDisplay />} /> {/* New route for displaying user's interview results */}
       </Routes>
   );
 }
