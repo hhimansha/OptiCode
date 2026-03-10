@@ -1,11 +1,30 @@
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
+//import { useEffect, useState } from "react";
+
+//export default function StudentProfile() {
+  //const [profile, setProfile] = useState(null);
+  //const userId = localStorage.getItem("userId");
+  //const userName = localStorage.getItem("userName");
+  
+  //const navigate = useNavigate();
+  import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function StudentProfile() {
   const [profile, setProfile] = useState(null);
-  const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isDemoProfile = location.pathname === "/profile-demo";
+  const demoUserId = sessionStorage.getItem("demoUserId");
+
+  const userId = isDemoProfile
+    ? demoUserId
+    : localStorage.getItem("userId");
+
+  const userName = isDemoProfile
+    ? "Demo Student"
+    : localStorage.getItem("userName");
 
   useEffect(() => {
     if (!userId) {
@@ -39,7 +58,7 @@ export default function StudentProfile() {
           levelUpProgress: null
         })
       );
-  }, []);
+  }, [userId]);
 
   if (!profile) {
     return <p style={{ color: "white", textAlign: "center" }}>Loading profile...</p>;
@@ -124,7 +143,9 @@ export default function StudentProfile() {
       }}
     >
       <button
-        onClick={() => navigate("/exercise")}
+        //onClick={() => navigate("/exercise")}
+        //onClick={() => navigate(demoUserId ? "/demo" : "/exercise")}
+        onClick={() => navigate(isDemoProfile ? "/demo" : "/exercise")}
         style={{
           display: "inline-flex",
           alignItems: "center",

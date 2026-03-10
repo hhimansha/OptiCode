@@ -422,4 +422,48 @@ router.post("/reset-level", async (req, res) => {
   }
 });
 
+router.post("/reset-demo", async (req, res) => {
+  try {
+    const { userId, skillLevel } = req.body;
+
+    if (!userId || !skillLevel) {
+      return res.status(400).json({ error: "userId and skillLevel are required" });
+    }
+
+    if (userId !== "000000000000000000000001") {
+      return res.status(403).json({ error: "Demo reset allowed only for demo user" });
+    }
+
+    const resetData = {
+      userId,
+      skillLevel,
+      bktMastery: BKT.pKnown[skillLevel] || 0.2,
+      totalSolved: 0,
+      totalXP: 0,
+      avgSolveTime: 0,
+      consecutiveCleanSolves: 0,
+      solvedAtCurrentLevel: 0,
+      preferredLearningMode: "level_up",
+      targetConcept: null,
+      zpd_boost: false,
+      sessions: [],
+      weaknessHistory: {},
+      conceptProgress: {}
+    };
+
+    await studentProgress.findOneAndUpdate(
+      { userId },
+      { $set: resetData },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    console.log(`🔄 Full demo reset: userId=${userId} → ${skillLevel}`);
+    res.json({ success: true, skillLevel });
+
+  } catch (err) {
+    console.error("Reset demo error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
