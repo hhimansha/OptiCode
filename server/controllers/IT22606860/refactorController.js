@@ -79,6 +79,205 @@ const analyzeRisksDetailed = async (originalCode, refactoredCode, language = 'ja
     }
 };
 
+// Helper to analyze and save best practices & security data
+const saveBestPracticesAndSecurity = async (originalCode, refactoredCode, historyId, language) => {
+    try {
+        console.log('\n========================================');
+        console.log('[BP&SEC] 🚀 STARTING ANALYSIS');
+        console.log('[BP&SEC] History ID:', historyId);
+        console.log('[BP&SEC] Code length:', originalCode.length);
+        console.log('[BP&SEC] ML API URL:', ML_API_URL);
+        console.log('========================================\n');
+
+        // 1. Call Python best practices API
+        let bestPracticesData = null;
+        try {
+            console.log('[BP&SEC] 📞 Calling best practices API...');
+            const bpResponse = await axios.post(`${ML_API_URL}/api/best-practices`, {
+                code: originalCode
+            }, { timeout: 15000 });
+
+            console.log('[BP&SEC] 📥 Response status:', bpResponse.status);
+            if (bpResponse.data && bpResponse.data.success) {
+                bestPracticesData = bpResponse.data;
+                console.log('[BP&SEC] ✅ Best practices analysis completed');
+                console.log('[BP&SEC] Violations found:', bestPracticesData.violations?.length || 0);
+                console.log('[BP&SEC] Recommendations found:', bestPracticesData.recommendations?.length || 0);
+            } else {
+                console.log('[BP&SEC] ⚠️ Response success=false');
+            }
+        } catch (bpError) {
+            console.error('[BP&SEC] ❌ Best practices API FAILED:', bpError.message);
+            if (bpError.code === 'ECONNREFUSED') {
+                console.error('[BP&SEC] 💡 Python backend is NOT RUNNING on port 8000!');
+                console.error('[BP&SEC] 💡 Run: python run_backend.py');
+            }
+        }
+
+        // 2. Call Python code analysis API (includes security via Bandit)
+        let securityData = null;
+        try {
+            console.log('[BP&SEC] 📞 Calling security analysis API...');
+            const secResponse = await axios.post(`${ML_API_URL}/api/analyze`, {
+                code: originalCode
+            }, { timeout: 15000 });
+
+            console.log('[BP&SEC] 📥 Response status:', secResponse.status);
+            if (secResponse.data && secResponse.data.success) {
+                securityData = secResponse.data.security;
+                console.log('[BP&SEC] ✅ Security analysis completed');
+                console.log('[BP&SEC] Security issues found:', securityData?.total_issues || 0);
+            } else {
+                console.log('[BP&SEC] ⚠️ Security response success=false');
+            }
+        } catch (secError) {
+            console.error('[BP&SEC] ❌ Security API FAILED:', secError.message);
+            if (secError.code === 'ECONNREFUSED') {
+                console.error('[BP&SEC] 💡 Python backend is NOT RUNNING on port 8000!');
+            }
+        }
+
+        // 3. Save Best Practices violations to database
+        let savedBPCount = 0;
+        if (bestPracticesData && bestPracticesData.violations) {
+            const violations = bestPracticesData.violations;
+            console.log(`[BP&SEC] 💾 Saving ${violations.length} best practice violations...`);
+
+            for (const violation of violations) {
+                try {
+                    // Map severity: high/medium -> error, low -> warning
+                    let mappedSeverity = 'warning';
+                    if (violation.severity === 'high') mappedSeverity = 'error';
+                    else if (violation.severity === 'medium') mappedSeverity = 'warning';
+                    else if (violation.severity === 'low') mappedSeverity = 'info';
+
+                    // Map category to allowed values
+                    let mappedCategory = 'pythonic';
+                    const principle = (violation.principle || '').toLowerCase();
+                    if (principle.includes('pep8') || principle.includes('pep 8')) mappedCategory = 'pep8';
+                    else if (principle.includes('security')) mappedCategory = 'security';
+                    else if (principle.includes('performance')) mappedCategory = 'performance';
+                    else if (principle.includes('anti')) mappedCategory = 'anti-pattern';
+
+                    await BestPractice.create({
+                        sessionId: historyId.toString(),
+                        historyId: historyId,
+                        category: mappedCategory,
+                        severity: mappedSeverity,
+                        line: violation.line || 1,
+                        code: violation.code || originalCode.split('\n')[0] || 'N/A',
+                        message: violation.description || violation.principle || 'Best practice violation',
+                        recommendation: violation.recommendation || 'Follow Python best practices',
+                        goodExample: violation.example || '# Good: Follow best practices',
+                        badExample: violation.badExample || violation.code || '# Bad: Current code',
+                        reference: violation.reference || 'PEP 8 Style Guide',
+                        applied: false
+                    });
+                    savedBPCount++;
+                } catch (saveError) {
+                    console.error('[BP&SEC] ❌ Failed to save best practice:', saveError.message);
+                }
+            }
+            console.log(`[BP&SEC] ✅ Saved ${savedBPCount}/${violations.length} violations to DB`);
+        } else {
+            console.log('[BP&SEC] ℹ️ No best practice violations to save');
+        }
+
+        // Also save recommendations
+        if (bestPracticesData && bestPracticesData.recommendations) {
+            const recommendations = bestPracticesData.recommendations;
+            console.log(`[BP&SEC] 💾 Saving ${recommendations.length} recommendations...`);
+
+            let savedRecCount = 0;
+            for (const rec of recommendations) {
+                try {
+                    // Map severity: high/medium -> error, low -> info
+                    let mappedSeverity = 'info';
+                    if (rec.severity === 'high') mappedSeverity = 'error';
+                    else if (rec.severity === 'medium') mappedSeverity = 'warning';
+                    else if (rec.severity === 'low') mappedSeverity = 'info';
+
+                    // Map category to allowed values
+                    let mappedCategory = 'pythonic';
+                    const principle = (rec.principle || '').toLowerCase();
+                    if (principle.includes('pep8') || principle.includes('pep 8')) mappedCategory = 'pep8';
+                    else if (principle.includes('security')) mappedCategory = 'security';
+                    else if (principle.includes('performance')) mappedCategory = 'performance';
+                    else if (principle.includes('anti')) mappedCategory = 'anti-pattern';
+
+                    await BestPractice.create({
+                        sessionId: historyId.toString(),
+                        historyId: historyId,
+                        category: mappedCategory,
+                        severity: mappedSeverity,
+                        line: rec.line || 1,
+                        code: rec.code || originalCode.split('\n')[0] || 'N/A',
+                        message: rec.description || rec.principle || 'Improvement suggestion',
+                        recommendation: rec.recommendation || 'Consider improving this code',
+                        goodExample: rec.example || '# Good: Follow best practices',
+                        badExample: rec.badExample || rec.code || '# Current code',
+                        reference: rec.reference || 'Python Best Practices',
+                        applied: false
+                    });
+                    savedRecCount++;
+                } catch (saveError) {
+                    console.error('[BP&SEC] ❌ Failed to save recommendation:', saveError.message);
+                }
+            }
+            console.log(`[BP&SEC] ✅ Saved ${savedRecCount}/${recommendations.length} recommendations to DB`);
+        } else {
+            console.log('[BP&SEC] ℹ️ No recommendations to save');
+        }
+
+        // 4. Save Security issues to database
+        let savedSecCount = 0;
+        if (securityData && securityData.issues) {
+            const issues = securityData.issues;
+            console.log(`[BP&SEC] 💾 Saving ${issues.length} security issues...`);
+
+            for (const issue of issues) {
+                try {
+                    // Map severity: HIGH -> high, MEDIUM -> medium, LOW -> low
+                    let mappedSeverity = (issue.issue_severity || 'medium').toLowerCase();
+                    if (!['critical', 'high', 'medium', 'low'].includes(mappedSeverity)) {
+                        mappedSeverity = 'medium';
+                    }
+
+                    await CodeRisk.create({
+                        sessionId: historyId.toString(),
+                        historyId: historyId,
+                        category: 'security',
+                        severity: mappedSeverity,
+                        line: issue.line_number || 1,
+                        code: issue.code || originalCode.split('\n')[(issue.line_number || 1) - 1] || 'N/A',
+                        message: issue.issue_text || 'Security vulnerability detected',
+                        explanation: issue.issue_text || 'This code contains a potential security vulnerability',
+                        fixSuggestion: issue.more_info || 'Review and fix this security issue',
+                        impact: issue.issue_confidence || 'HIGH',
+                        fixed: false
+                    });
+                    savedSecCount++;
+                } catch (saveError) {
+                    console.error('[BP&SEC] ❌ Failed to save security issue:', saveError.message);
+                }
+            }
+            console.log(`[BP&SEC] ✅ Saved ${savedSecCount}/${issues.length} security issues to DB`);
+        } else {
+            console.log('[BP&SEC] ℹ️ No security issues to save');
+        }
+
+        console.log('\n========================================');
+        console.log('[BP&SEC] 🎉 ANALYSIS COMPLETE');
+        console.log(`[BP&SEC] Summary: ${savedBPCount} BP + ${savedSecCount} Security = ${savedBPCount + savedSecCount} total saved`);
+        console.log('========================================\n');
+        return true;
+
+    } catch (error) {
+        console.error('[BP&SEC] Error in saveBestPracticesAndSecurity:', error.message);
+        return false;
+    }
+};
+
 // Refactor code endpoint
 export const refactorCode = async (req, res, next) => {
     try {
@@ -179,6 +378,11 @@ export const refactorCode = async (req, res, next) => {
                 const history = await RefactorHistory.create(historyData);
                 console.log('[REFACTOR] History saved with ID:', history._id);
                 console.log('[REFACTOR] Saved riskAnalysis structure:', JSON.stringify(history.riskAnalysis, null, 2));
+
+                // ========== NEW: Analyze and save Best Practices & Security data ==========
+                // Run these async without blocking the response
+                saveBestPracticesAndSecurity(code, response.data.refactored_code, history._id, language || 'javascript')
+                    .catch(err => console.error('[REFACTOR] Best practices/security save error:', err.message));
 
                 return res.status(200).json({
                     success: true,

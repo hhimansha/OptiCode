@@ -8,6 +8,7 @@ import conceptChatRoutes from "./routers/IT22604194/conceptChatRoutes.js";
 import livekitRouter from "./routers/livekitRouter.js";
 //import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 // import AiInterviewRouter from "./routers/Ai_interviewrouter.js"; // Uncomment if needed and export matches
+import interviewRoutes from "./routers/IT22639226/interviewRoutes.js"; // Assuming this is the correct router for the analyze endpoint
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -33,6 +34,7 @@ import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
 import Questionrouter from './routers/IT22639226/Questionrouter.js';
 import studentProgressRoutes from './routers/IT22639226/StudentProgressRoutes.js';
+import scoremarkrouter from './routers/IT22639226/scoremarkrouter.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const result = dotenv.config({ path: path.join(__dirname, '.env') });
@@ -106,6 +108,8 @@ app.use('/api/question', Questionrouter);
 app.use("/api/interview", Ai_interviewrouter);
 app.use('/api/student-progress', studentProgressRoutes);
 app.use('/api/IT22601360', conceptExtractorRouter);
+app.use("/api/score", interviewRoutes); // Assuming this is the correct router for the analyze endpoint
+app.use("/api/score", scoremarkrouter); // Assuming this is the correct router for the score display endpoint
 
 // 404 handler
 app.use((req, res) => {

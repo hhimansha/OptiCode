@@ -76,6 +76,9 @@ export const getDashboardOverview = async (req, res) => {
         const riskDist = { low: 0, medium: 0, high: 0 };
         riskDistribution.forEach(r => { riskDist[r._id] = r.count; });
 
+        console.log('[DASHBOARD] Risk Distribution:', riskDist);
+        console.log('[DASHBOARD] Total docs with risk analysis:', riskDistribution.reduce((sum, r) => sum + r.count, 0));
+
         return res.json({
             success: true,
             overview: {
@@ -159,6 +162,9 @@ export const getEvolutionTimeline = async (req, res) => {
             },
             { $sort: { _id: 1 } }
         ]);
+
+        console.log('[DASHBOARD] Daily Trends Count:', dailyTrends.length);
+        console.log('[DASHBOARD] Daily Trends Sample:', dailyTrends.slice(0, 2));
 
         return res.json({
             success: true,
@@ -286,6 +292,13 @@ export const getRiskSecurityAnalytics = async (req, res) => {
         const userId = req.userId;
         const userObjectId = new mongoose.Types.ObjectId(userId);
 
+        // Get user's refactor history IDs
+        const historyIds = await RefactorHistory.find(
+            { userId: userObjectId },
+            { _id: 1 }
+        ).lean();
+        const historyIdArray = historyIds.map(h => h._id);
+
         // Risk trends from refactor history
         const riskTrends = await RefactorHistory.aggregate([
             {
@@ -305,7 +318,7 @@ export const getRiskSecurityAnalytics = async (req, res) => {
             { $sort: { date: 1 } }
         ]);
 
-        // Total risk stats
+        // Total risk stats from RefactorHistory
         const riskSummary = await RefactorHistory.aggregate([
             {
                 $match: {
@@ -336,7 +349,7 @@ export const getRiskSecurityAnalytics = async (req, res) => {
             }
         ]);
 
-        // Severity distribution
+        // Severity distribution from RefactorHistory
         const severityDist = await RefactorHistory.aggregate([
             {
                 $match: {
@@ -355,12 +368,89 @@ export const getRiskSecurityAnalytics = async (req, res) => {
             }
         ]);
 
+        // ====== NEW: Query CodeRisk collection for actual security issues ======
+        const securityIssues = await CodeRisk.aggregate([
+            {
+                $match: {
+                    historyId: { $in: historyIdArray }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSecurityIssues: { $sum: 1 },
+                    criticalCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'critical'] }, 1, 0] }
+                    },
+                    highCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'high'] }, 1, 0] }
+                    },
+                    mediumCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'medium'] }, 1, 0] }
+                    },
+                    lowCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'low'] }, 1, 0] }
+                    },
+                    fixedCount: {
+                        $sum: { $cond: ['$fixed', 1, 0] }
+                    }
+                }
+            }
+        ]);
+
+        // Security issues by category
+        const securityByCategory = await CodeRisk.aggregate([
+            {
+                $match: {
+                    historyId: { $in: historyIdArray }
+                }
+            },
+            {
+                $group: {
+                    _id: '$category',
+                    count: { $sum: 1 },
+                    criticalCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'critical'] }, 1, 0] }
+                    },
+                    highCount: {
+                        $sum: { $cond: [{ $eq: ['$severity', 'high'] }, 1, 0] }
+                    }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        // Recent security issues
+        const recentSecurityIssues = await CodeRisk.find({
+            historyId: { $in: historyIdArray }
+        })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate('historyId', 'instruction createdAt')
+        .lean();
+
+        // Merge severity data from both sources
+        const mergedSeverity = severityDist[0] || {};
+        const securityStats = securityIssues[0] || {};
+        
+        // Add security issue counts to severity distribution
+        mergedSeverity.totalCritical = (mergedSeverity.totalCritical || 0) + (securityStats.criticalCount || 0);
+        mergedSeverity.totalHigh = (mergedSeverity.totalHigh || 0) + (securityStats.highCount || 0);
+        mergedSeverity.totalMedium = (mergedSeverity.totalMedium || 0) + (securityStats.mediumCount || 0);
+        mergedSeverity.totalLow = (mergedSeverity.totalLow || 0) + (securityStats.lowCount || 0);
+
+        const summary = riskSummary[0] || {};
+        summary.totalSecurityIssues = securityStats.totalSecurityIssues || 0;
+        summary.securityIssuesFixed = securityStats.fixedCount || 0;
+
         return res.json({
             success: true,
             riskSecurity: {
                 trends: riskTrends,
-                summary: riskSummary[0] || {},
-                severityDistribution: severityDist[0] || {}
+                summary: summary,
+                severityDistribution: mergedSeverity,
+                securityByCategory: securityByCategory,
+                recentSecurityIssues: recentSecurityIssues
             }
         });
     } catch (error) {

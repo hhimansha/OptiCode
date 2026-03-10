@@ -26,231 +26,293 @@ const DEMO_TASKS = [
   // ── BEGINNER TASKS 1-10 ─────────────────────────────────────────────────
   {
     scene: 1,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "loops",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "📘 Beginner — loops",
     task: "Print even numbers from 2 to 8 using a for loop.",
     expectedOutput: "2\n4\n6\n8",
-    starterCode: "for i in range(2, 10, 2):\n    print(i)\n",
+    starterCode: " ",
   },
   {
     scene: 2,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "math",
-    weakness: null,   // null — hardcoded_value shown VISUALLY by live detector only
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "math",
+    weakness: null,
     label: "🔒 Beginner — hardcoded_value detected (fix it!)",
     task: "Calculate 10 - 4 and print the result.",
     expectedOutput: "6",
-    starterCode: "print(6)\n",   // wrong → detector fires ⚠ hardcoded_value
+    starterCode: " ",
   },
   {
     scene: 3,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "math",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "math",
     weakness: null,
-    label: "✅ Beginner — hardcoded fixed",
-    task: "Calculate 10 - 4 and print the result.",
-    expectedOutput: "6",
-    starterCode: "print(10 - 4)\n",
+    label: "📘 Beginner — multiplication",
+    task: "Print the result of 3 multiplied by 4.",
+    expectedOutput: "12",
+    starterCode: " ",
   },
   {
     scene: 4,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "loops",
-    weakness: null,   // null — logic_error shown VISUALLY by live detector only
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "loops",
+    weakness: null,
     label: "❌ Beginner — logic_error detected (fix it!)",
     task: "Print even numbers from 2 to 8 using a for loop.",
     expectedOutput: "2\n4\n6\n8",
-    starterCode: "for i in range(1, 9):\n    print(i)\n",  // wrong → fires ⚠ logic_error
+    starterCode: " ",
   },
   {
-    scene: 5,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "variables",
-    weakness: null,   // null — syntax_error shown VISUALLY by live detector only
-    label: "⚠️ Beginner — syntax_error detected (fix it!)",
-    task: "Create a variable x = 7 and print it.",
-    expectedOutput: "7",
-    starterCode: "x = 7\nprint(x\n",   // wrong → fires ⚠ syntax_error
+  scene: 5,
+  skillLevel: "Beginner",
+  learningMode: "level_up",
+  concept: "variables",
+  weakness: null,
+  label: "📘 Beginner — variables",
+  task: "Create two variables x = 5 and y = 3 and print their sum.",
+  expectedOutput: "8",
+  starterCode: " ",
   },
   {
     scene: 6,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "loops",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "🎯 Beginner — weakness remediation",
     task: "Print numbers from 1 to 5 using a for loop.",
     expectedOutput: "1\n2\n3\n4\n5",
-    starterCode: "for i in range(1, 6):\n    print(i)\n",
+    starterCode: " ",
   },
   {
     scene: 7,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "variables",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "variables",
     weakness: null,
     label: "📘 Beginner — variables",
     task: "Create a variable name = 'Alice' and print it.",
     expectedOutput: "Alice",
-    starterCode: "name = 'Alice'\nprint(name)\n",
+    starterCode: " ",
   },
   {
     scene: 8,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "functions",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "functions",
     weakness: null,
     label: "📘 Beginner — functions",
     task: "Write a function square(n) that returns n*n. Print square(6).",
     expectedOutput: "36",
-    starterCode: "def square(n):\n    return n * n\n\nprint(square(6))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 9,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "math",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "math",
     weakness: null,
     label: "📘 Beginner — math",
     task: "Print the sum of 5 and 10.",
     expectedOutput: "15",
-    starterCode: "print(5 + 10)\n",
+    starterCode: " ",
   },
   {
     scene: 10,
-    skillLevel: "Beginner", learningMode: "level_up", concept: "loops",
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "📘 Beginner — task 10 (🚀 Level Up trigger!)",
     task: "Print numbers from 5 down to 1 using a for loop.",
     expectedOutput: "5\n4\n3\n2\n1",
-    starterCode: "for i in range(5, 0, -1):\n    print(i)\n",
+    starterCode: " ",
   },
 
   // ── INTERMEDIATE TASKS 11-25 ────────────────────────────────────────────
-  // Scene 11 shows missing_base_case visually (wrong starter) but saves null.
   {
     scene: 11,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "recursion",
-    weakness: null,   // null — missing_base_case shown VISUALLY only
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "recursion",
+    weakness: null,
     label: "📗 Intermediate — missing_base_case detected (fix it!)",
     task: "Write a function factorial(n) that returns n! recursively. Print factorial(5).",
     expectedOutput: "120",
-    starterCode: "def factorial(n):\n    return n * factorial(n - 1)\n\nprint(factorial(5))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 12,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "recursion",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "recursion",
     weakness: null,
     label: "📗 Intermediate — recursion correct",
     task: "Write a function factorial(n) that returns n! recursively. Print factorial(5).",
     expectedOutput: "120",
-    starterCode: "def factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 13,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "loops",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "📗 Intermediate — loops",
     task: "Print the sum of all numbers from 1 to 10.",
     expectedOutput: "55",
-    starterCode: "print(sum(range(1, 11)))\n",
+    starterCode: " ",
   },
   {
     scene: 14,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "functions",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "functions",
     weakness: null,
     label: "📗 Intermediate — functions",
     task: "Write a function is_even(n) that returns True if n is even. Print is_even(4).",
     expectedOutput: "True",
-    starterCode: "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(4))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 15,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "lists",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "lists",
     weakness: null,
     label: "📗 Intermediate — lists",
     task: "Sort the list [5,2,8,1,9] and print it.",
     expectedOutput: "[1, 2, 5, 8, 9]",
-    starterCode: "lst = [5,2,8,1,9]\nlst.sort()\nprint(lst)\n",
+    starterCode:
+      " ",
   },
   {
     scene: 16,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "loops",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "📗 Intermediate — while loop",
     task: "Use a while loop to print numbers from 5 down to 1.",
     expectedOutput: "5\n4\n3\n2\n1",
-    starterCode: "i = 5\nwhile i >= 1:\n    print(i)\n    i -= 1\n",
+    starterCode:
+      " ",
   },
   {
     scene: 17,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "functions",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "functions",
     weakness: null,
     label: "📗 Intermediate — function",
     task: "Write a function multiply(a,b) that returns a*b. Print multiply(6,7).",
     expectedOutput: "42",
-    starterCode: "def multiply(a, b):\n    return a * b\n\nprint(multiply(6, 7))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 18,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "lists",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "lists",
     weakness: null,
     label: "📗 Intermediate — list comprehension",
     task: "Write a list comprehension returning squares of 1 to 4 and print it.",
     expectedOutput: "[1, 4, 9, 16]",
-    starterCode: "print([x**2 for x in range(1, 5)])\n",
+    starterCode: " ",
   },
   {
     scene: 19,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "dictionaries",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "dictionaries",
     weakness: null,
     label: "📗 Intermediate — dictionaries",
     task: "Create a dictionary with keys 'name' and 'age' with values 'Alice' and 25. Print the name value.",
     expectedOutput: "Alice",
-    starterCode: "d = {'name': 'Alice', 'age': 25}\nprint(d['name'])\n",
+    starterCode:
+      " ",
   },
   {
-    scene: 20,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "exception_handling",
-    weakness: null,
-    label: "📗 Intermediate — exception handling",
-    task: "Write a try/except block that catches a ZeroDivisionError when dividing 10 by 0 and prints Cannot divide by zero.",
-    expectedOutput: "Cannot divide by zero",
-    starterCode: "try:\n    print(10 / 0)\nexcept ZeroDivisionError:\n    print('Cannot divide by zero')\n",
+  scene: 20,
+  skillLevel: "Intermediate",
+  learningMode: "level_up",
+  concept: "strings",
+  weakness: null,
+  label: "📗 Intermediate — string methods",
+  task: "Convert the string 'python' to uppercase and print it.",
+  expectedOutput: "PYTHON",
+  starterCode: " ",
   },
   {
     scene: 21,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "loops",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "loops",
     weakness: null,
     label: "📗 Intermediate — even numbers",
     task: "Print even numbers from 2 to 10 using a loop.",
     expectedOutput: "2\n4\n6\n8\n10",
-    starterCode: "for i in range(2, 11, 2):\n    print(i)\n",
+    starterCode:
+      " ",
   },
   {
     scene: 22,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "recursion",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "recursion",
     weakness: null,
     label: "📗 Intermediate — recursion countdown",
     task: "Write a recursive countdown(n) that prints each number. Call countdown(4).",
     expectedOutput: "4\n3\n2\n1",
-    starterCode: "def countdown(n):\n    if n == 0:\n        return\n    print(n)\n    countdown(n - 1)\n\ncountdown(4)\n",
+    starterCode:
+      " ",
   },
   {
     scene: 23,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "sets",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "sets",
     weakness: null,
     label: "📗 Intermediate — sets",
     task: "Create two sets {1,2,3} and {3,4,5} and print their union.",
     expectedOutput: "{1, 2, 3, 4, 5}",
-    starterCode: "a = {1,2,3}\nb = {3,4,5}\nprint(a | b)\n",
+    starterCode:
+      " ",
   },
   {
     scene: 24,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "functions",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "functions",
     weakness: null,
     label: "📗 Intermediate — palindrome",
     task: "Write a function is_palindrome(s) that returns True if palindrome. Print is_palindrome('madam').",
     expectedOutput: "True",
-    starterCode: "def is_palindrome(s):\n    return s == s[::-1]\n\nprint(is_palindrome('madam'))\n",
+    starterCode:
+      " ",
   },
   {
     scene: 25,
-    skillLevel: "Intermediate", learningMode: "level_up", concept: "algorithm",
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "algorithm",
     weakness: null,
     label: "📗 Intermediate — task 25 (🚀 Level Up to Advanced!)",
     task: "Print whether 17 is prime — True or False.",
     expectedOutput: "True",
-    starterCode: "n = 17\nis_prime = all(n % i != 0 for i in range(2, n))\nprint(is_prime)\n",
+    starterCode:
+      " ",
   },
 ];
 
@@ -464,63 +526,76 @@ doReset();
   };
 
   // ── Live weakness detection ───────────────────────────────────────────
-  useEffect(() => {
-    if (!code || code.trim().length < 3) { setHints([]); return; }
-    if (isCorrectRef.current) return;
+// ── Live weakness detection ───────────────────────────────────────────
+useEffect(() => {
+  if (!code || code.trim().length < 3) {
+    setHints([]);
+    return;
+  }
 
-    const timeout = setTimeout(async () => {
-      try {
-        setLoadingHints(true);
-        const idleSeconds = Math.floor((Date.now() - lastTypedAt) / 1000);
-        const requiresFunction =
-          generatedTaskRef.current.toLowerCase().includes("function") ||
-          generatedTaskRef.current.toLowerCase().includes("def ");
+  if (isCorrectRef.current) return;
 
-        const result = await analyzeWeakness(
-          code, skillLevelRef.current, idleSeconds,
-          expectedOutputRef.current, "", requiresFunction
-        );
+  const timeout = setTimeout(async () => {
+    try {
+      setLoadingHints(true);
 
-        const correct = result.hints?.some((h) => h.includes("correct"));
+      const idleSeconds = Math.floor((Date.now() - lastTypedAt) / 1000);
+      const requiresFunction =
+        generatedTaskRef.current.toLowerCase().includes("function") ||
+        generatedTaskRef.current.toLowerCase().includes("def ");
 
-        if (correct) {
-          setIsCorrect(true);
-          isCorrectRef.current = true;
-          setHints(["✅ Your answer is correct!"]);
-          saveProgress(true);
-        } else {
-          if (result.primary) {
-            try {
-              const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  weakness:     result.primary,
-                  skill:        skillLevelRef.current,
-                  code,
-                  task:         generatedTaskRef.current,
-                  concept:      sceneRef.current.concept,
-                  learningMode: sceneRef.current.learningMode,
-                }),
-              });
-              const tutorData = await tutor.json();
-              setHints([tutorData.hint]);
-            } catch {
-              setHints(result.hints || []);
-            }
-          } else {
-            setHints(result.hints || []);
-          }
+      const result = await analyzeWeakness(
+        code,
+        skillLevelRef.current,
+        idleSeconds,
+        expectedOutputRef.current,
+        "",
+        requiresFunction
+      );
+
+      const correct = result.hints?.some((h) =>
+        h.toLowerCase().includes("correct")
+      );
+
+      if (correct) {
+        setIsCorrect(true);
+        isCorrectRef.current = true;
+        setHints(["✅ Your answer is correct!"]);
+        saveProgress(true);
+      } else if (!result.primary && !correct) {
+        setHints(["✔ No issues detected"]);
+      } else if (result.primary) {
+        try {
+          const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              weakness: result.primary,
+              skill: skillLevelRef.current,
+              code,
+              task: generatedTaskRef.current,
+              concept: sceneRef.current.concept,
+              learningMode: sceneRef.current.learningMode,
+            }),
+          });
+
+          const tutorData = await tutor.json();
+          setHints([tutorData.hint]);
+        } catch {
+          setHints(result.hints || []);
         }
-      } catch (err) {
-        console.error("Demo hint error:", err);
-      } finally {
-        setLoadingHints(false);
+      } else {
+        setHints(result.hints || []);
       }
-    }, 1200);
+    } catch (err) {
+      console.error("Demo hint error:", err);
+    } finally {
+      setLoadingHints(false);
+    }
+  }, 1200);
 
-    return () => clearTimeout(timeout);
-  }, [code, lastTypedAt]);
+  return () => clearTimeout(timeout);
+}, [code, lastTypedAt]);
 
   // ── Navigation ────────────────────────────────────────────────────────
   // Use sceneIndexRef for current value — avoids stale closure in callbacks

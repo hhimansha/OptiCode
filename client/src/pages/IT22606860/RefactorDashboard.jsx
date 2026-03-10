@@ -140,8 +140,14 @@ const RefactorDashboard = () => {
                 getDeveloperGrowth()
             ]);
 
-            if (overviewRes.status === 'fulfilled' && overviewRes.value.success) setOverview(overviewRes.value.overview);
-            if (timelineRes.status === 'fulfilled' && timelineRes.value.success) setTimeline(timelineRes.value);
+            if (overviewRes.status === 'fulfilled' && overviewRes.value.success) {
+                console.log('[DASHBOARD] Overview Risk Distribution:', overviewRes.value.overview.riskDistribution);
+                setOverview(overviewRes.value.overview);
+            }
+            if (timelineRes.status === 'fulfilled' && timelineRes.value.success) {
+                console.log('[DASHBOARD] Timeline Daily Trends:', timelineRes.value.dailyTrends);
+                setTimeline(timelineRes.value);
+            }
             if (perfRes.status === 'fulfilled' && perfRes.value.success) setPerformance(perfRes.value.performance);
             if (riskRes.status === 'fulfilled' && riskRes.value.success) setRiskSecurity(riskRes.value.riskSecurity);
             if (bpRes.status === 'fulfilled' && bpRes.value.success) setBestPractices(bpRes.value.bestPractices);
@@ -229,24 +235,38 @@ const RefactorDashboard = () => {
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <FaChartPie className="text-purple-400" /> Risk Level Distribution
                         </h3>
-                        {overview.riskDistribution && (
-                            <Doughnut
-                                data={{
-                                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
-                                    datasets: [{
-                                        data: [overview.riskDistribution.low || 0, overview.riskDistribution.medium || 0, overview.riskDistribution.high || 0],
-                                        backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)'],
-                                        borderColor: ['rgb(34, 197, 94)', 'rgb(245, 158, 11)', 'rgb(239, 68, 68)'],
-                                        borderWidth: 2
-                                    }]
-                                }}
-                                options={{
-                                    responsive: true,
-                                    plugins: {
-                                        legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 15 } }
-                                    }
-                                }}
-                            />
+                        {overview.riskDistribution ? (
+                            (overview.riskDistribution.low + overview.riskDistribution.medium + overview.riskDistribution.high > 0) ? (
+                                <Doughnut
+                                    data={{
+                                        labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                                        datasets: [{
+                                            data: [overview.riskDistribution.low || 0, overview.riskDistribution.medium || 0, overview.riskDistribution.high || 0],
+                                            backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                                            borderColor: ['rgb(34, 197, 94)', 'rgb(245, 158, 11)', 'rgb(239, 68, 68)'],
+                                            borderWidth: 2
+                                        }]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        plugins: {
+                                            legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 15 } }
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-48 text-center">
+                                    <FaExclamationTriangle className="text-slate-600 text-4xl mb-3" />
+                                    <p className="text-slate-400 text-sm">No risk analysis data available</p>
+                                    <p className="text-slate-500 text-xs mt-2">Click "Analyze Risk" on your refactored code to see risk distribution</p>
+                                </div>
+                            )
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-48 text-center">
+                                <FaExclamationTriangle className="text-slate-600 text-4xl mb-3" />
+                                <p className="text-slate-400 text-sm">No risk analysis data available</p>
+                                <p className="text-slate-500 text-xs mt-2">Click "Analyze Risk" on your refactored code to see risk distribution</p>
+                            </div>
                         )}
                     </div>
 
@@ -346,24 +366,32 @@ const RefactorDashboard = () => {
                     <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <FaChartArea className="text-green-400" /> Risk Reduction Trend
                     </h3>
-                    <Bar
-                        data={{
-                            labels: timeline.dailyTrends.map(t => t._id),
-                            datasets: [{
-                                label: 'Risk Reduction',
-                                data: timeline.dailyTrends.map(t => t.avgRiskReduction || 0),
-                                backgroundColor: timeline.dailyTrends.map(t =>
-                                    (t.avgRiskReduction || 0) >= 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(239, 68, 68, 0.6)'
-                                ),
-                                borderColor: timeline.dailyTrends.map(t =>
-                                    (t.avgRiskReduction || 0) >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
-                                ),
-                                borderWidth: 2,
-                                borderRadius: 6
-                            }]
-                        }}
-                        options={darkChartOptions}
-                    />
+                    {timeline.dailyTrends && timeline.dailyTrends.some(t => t.avgRiskReduction !== undefined && t.avgRiskReduction !== 0) ? (
+                        <Bar
+                            data={{
+                                labels: timeline.dailyTrends.map(t => t._id),
+                                datasets: [{
+                                    label: 'Risk Reduction',
+                                    data: timeline.dailyTrends.map(t => t.avgRiskReduction || 0),
+                                    backgroundColor: timeline.dailyTrends.map(t =>
+                                        (t.avgRiskReduction || 0) >= 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(239, 68, 68, 0.6)'
+                                    ),
+                                    borderColor: timeline.dailyTrends.map(t =>
+                                        (t.avgRiskReduction || 0) >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                                    ),
+                                    borderWidth: 2,
+                                    borderRadius: 6
+                                }]
+                            }}
+                            options={darkChartOptions}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-48 text-center">
+                            <FaExclamationTriangle className="text-slate-600 text-4xl mb-3" />
+                            <p className="text-slate-400 text-sm">No risk reduction data tracked</p>
+                            <p className="text-slate-500 text-xs mt-2">Click "Analyze Risk" on refactored code to track risk reduction over time</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Session Count */}
@@ -525,6 +553,15 @@ const RefactorDashboard = () => {
                     <StatCard icon={FaShieldAlt} label="Avg Risk Reduction" value={`${(s.avgRiskReduction || 0).toFixed(1)}`} color="blue" />
                 </div>
 
+                {/* Security Issues Cards */}
+                {s.totalSecurityIssues > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <StatCard icon={FaShieldAlt} label="Security Issues" value={s.totalSecurityIssues || 0} color="red" />
+                        <StatCard icon={FaCheckCircle} label="Issues Fixed" value={s.securityIssuesFixed || 0} color="green" />
+                        <StatCard icon={FaChartBar} label="Fix Rate" value={`${s.totalSecurityIssues > 0 ? ((s.securityIssuesFixed / s.totalSecurityIssues) * 100).toFixed(0) : 0}%`} color="blue" />
+                    </div>
+                )}
+
                 {/* Severity Distribution */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-700/50 rounded-2xl p-6">
@@ -586,6 +623,106 @@ const RefactorDashboard = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Security Issues by Category */}
+                {riskSecurity.securityByCategory && riskSecurity.securityByCategory.length > 0 && (
+                    <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-700/50 rounded-2xl p-6">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <FaBug className="text-red-400" /> Security Issues by Category
+                        </h3>
+                        <Bar
+                            data={{
+                                labels: riskSecurity.securityByCategory.map(c => c._id || 'Unknown'),
+                                datasets: [
+                                    {
+                                        label: 'Critical',
+                                        data: riskSecurity.securityByCategory.map(c => c.criticalCount || 0),
+                                        backgroundColor: 'rgba(220, 38, 38, 0.7)',
+                                        borderColor: 'rgb(220, 38, 38)',
+                                        borderWidth: 2
+                                    },
+                                    {
+                                        label: 'High',
+                                        data: riskSecurity.securityByCategory.map(c => c.highCount || 0),
+                                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                                        borderColor: 'rgb(239, 68, 68)',
+                                        borderWidth: 2
+                                    },
+                                    {
+                                        label: 'All Issues',
+                                        data: riskSecurity.securityByCategory.map(c => c.count || 0),
+                                        backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                                        borderColor: 'rgb(245, 158, 11)',
+                                        borderWidth: 1
+                                    }
+                                ]
+                            }}
+                            options={{
+                                ...darkChartOptions,
+                                scales: {
+                                    ...darkChartOptions.scales,
+                                    x: {
+                                        ...darkChartOptions.scales.x,
+                                        stacked: false
+                                    },
+                                    y: {
+                                        ...darkChartOptions.scales.y,
+                                        stacked: false
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* Recent Security Issues */}
+                {riskSecurity.recentSecurityIssues && riskSecurity.recentSecurityIssues.length > 0 && (
+                    <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-700/50 rounded-2xl p-6">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <FaBug className="text-amber-400" /> Recent Security Issues
+                        </h3>
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                            {riskSecurity.recentSecurityIssues.map((issue, idx) => (
+                                <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <FaBug className={`${
+                                                issue.severity === 'critical' ? 'text-red-600' :
+                                                issue.severity === 'high' ? 'text-red-400' :
+                                                issue.severity === 'medium' ? 'text-amber-400' :
+                                                'text-green-400'
+                                            }`} />
+                                            <span className={`text-xs font-bold px-2 py-1 rounded ${
+                                                issue.severity === 'critical' ? 'bg-red-600/20 text-red-300' :
+                                                issue.severity === 'high' ? 'bg-red-500/20 text-red-300' :
+                                                issue.severity === 'medium' ? 'bg-amber-500/20 text-amber-300' :
+                                                'bg-green-500/20 text-green-300'
+                                            }`}>
+                                                {issue.severity?.toUpperCase()}
+                                            </span>
+                                            <span className="text-xs text-slate-500">Line {issue.line}</span>
+                                        </div>
+                                        {issue.fixed && (
+                                            <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">
+                                                <FaCheckCircle className="inline mr-1" />
+                                                Fixed
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-white font-medium mb-1">{issue.message}</p>
+                                    <p className="text-xs text-slate-400 mb-2">{issue.explanation}</p>
+                                    <div className="text-xs text-slate-500 bg-slate-900/50 p-2 rounded font-mono">
+                                        {issue.code}
+                                    </div>
+                                    <p className="text-xs text-blue-400 mt-2">
+                                        <FaLightbulb className="inline mr-1" />
+                                        {issue.fixSuggestion}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         );
     };

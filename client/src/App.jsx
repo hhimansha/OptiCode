@@ -22,6 +22,7 @@ import History from './pages/IT22606860/History'
 import RefactorAssistant from './pages/IT22606860/RefactorAssistant'
 import RefactorDashboard from './pages/IT22606860/RefactorDashboard'
 import Interviewquestion from './component/IT22639226/Interviewquestion'
+import ScoreDisplay from './component/IT22639226/ScoreDisplay';
 
 // // Components
 // import Header from './components/IT22606860/Header'
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/code" element={<CodeConceptExtractor />} />
         <Route path="/livekit"element={<LiveInterview/>}/>  
         <Route path="/interview" element={<Interviewquestion/>} />
+        <Route path="/my-results" element={<ScoreDisplay />} /> {/* New route for displaying user's interview results */}
         <Route path="/profile" element={<StudentProfile />} />
         <Route path="/profile-demo" element={<StudentProfile />} />
         <Route path="/concept-tutor" element={<ConceptChatbot />} />
