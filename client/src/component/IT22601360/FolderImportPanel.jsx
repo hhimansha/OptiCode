@@ -4,6 +4,10 @@
  *
  * Handles local project folder import via webkitdirectory.
  * Reads file contents in-browser, sends to backend, returns results + fileContents map.
+ *
+ * Props (new):
+ *   onFilesReady(files)  — called in compare mode so parent runs both API calls
+ *   extractionMode       — 'hybrid' | 'llm_only' | 'compare'  (default: 'hybrid')
  */
 
 import React, { useState, useRef, useCallback } from 'react';
@@ -31,6 +35,31 @@ const LANG_COLORS = {
   rust: '#ef4444',
   ruby: '#ec4899',
   csharp: '#8b5cf6',
+};
+
+// ── Mode config (mirrors ExtractionModeToggle styles) ────────────────────────
+const MODE_CONFIG = {
+  hybrid: {
+    label:       'AST + LLM Hybrid',
+    icon:        '🔬',
+    color:       '#22c55e',
+    btnClass:    'from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-blue-500/20',
+    description: 'AST analysis + Gemini AI',
+  },
+  llm_only: {
+    label:       'LLM Only',
+    icon:        '🤖',
+    color:       '#f59e0b',
+    btnClass:    'from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/20',
+    description: 'Gemini AI, no AST context',
+  },
+  compare: {
+    label:       'Compare Both',
+    icon:        '📊',
+    color:       '#6366f1',
+    btnClass:    'from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-indigo-500/20',
+    description: 'Runs hybrid + LLM-only in parallel',
+  },
 };
 
 function getExt(filename) {
@@ -61,7 +90,12 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const FolderImportPanel = ({ onResult, onAnalyzing }) => {
+const FolderImportPanel = ({
+  onResult,
+  onAnalyzing,
+  onFilesReady,              // NEW — parent uses this in compare mode
+  extractionMode = 'hybrid', // NEW — 'hybrid' | 'llm_only' | 'compare'
+}) => {
   const inputRef = useRef(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [folderName, setFolderName] = useState('');
@@ -69,6 +103,8 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
   const [progress, setProgress] = useState({ phase: '', current: 0, total: 0 });
   const [error, setError] = useState(null);
   const [langFilter, setLangFilter] = useState(new Set());
+
+  const modeCfg = MODE_CONFIG[extractionMode] || MODE_CONFIG.hybrid;
 
   const handleFolderSelect = useCallback((e) => {
     const all = Array.from(e.target.files);
@@ -98,7 +134,7 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
     setError(null);
 
     try {
-      // Phase 1: Read file contents into browser memory
+      // Phase 1: Read file contents into browser memory (all modes need this)
       setProgress({ phase: 'Reading files…', current: 0, total: selectedFiles.length });
       const fileContentsMap = {};
 
@@ -113,21 +149,50 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
         setProgress({ phase: 'Reading files…', current: i + 1, total: selectedFiles.length });
       }
 
-      // Phase 2: Send to backend
-      setProgress({ phase: 'Sending to AI service…', current: 0, total: 1 });
-      const result = await conceptExtractorApi.uploadProjectFiles(selectedFiles);
+      // Phase 2: Upload + extract — behaviour depends on mode
+      if (extractionMode === 'compare') {
+        // Compare: hand files to parent, it calls uploadProjectFilesCompare()
+        // and owns the two parallel API calls + sets compareResult
+        setProgress({ phase: 'Handing off to compare runner…', current: 1, total: 1 });
+        onFilesReady?.(selectedFiles);
+        // parent will call onAnalyzing(false) when both calls finish
 
-      // Phase 3: Done
-      setProgress({ phase: 'Complete', current: 1, total: 1 });
-      onResult(result, fileContentsMap);
+      } else {
+        // Single mode: hybrid or llm_only
+        const modeLabel = extractionMode === 'llm_only' ? 'LLM only…' : 'AST + AI…';
+        setProgress({ phase: `Analyzing with ${modeLabel}`, current: 0, total: 1 });
+
+        const result = await conceptExtractorApi.uploadProjectFiles(
+          selectedFiles,
+          null,            // onUploadProgress
+          extractionMode,  // passed as ?extraction_mode= query param
+        );
+
+        // Quota exhausted in llm_only — warn but still show AST fallback results
+        if (result.quota_exhausted && extractionMode === 'llm_only') {
+          setError(
+            '⚠️ Gemini quota exhausted — showing AST fallback results. ' +
+            'LLM-only results available after quota resets (~24h).'
+          );
+        }
+
+        // Phase 3: Done
+        setProgress({ phase: 'Complete', current: 1, total: 1 });
+        onResult(result, fileContentsMap);
+      }
 
     } catch (err) {
       setError(err.message || 'Analysis failed. Please try again.');
     } finally {
-      setIsAnalyzing(false);
-      onAnalyzing?.(false);
+      // Only clear our local loading; for compare mode the parent clears its own
+      if (extractionMode !== 'compare') {
+        setIsAnalyzing(false);
+        onAnalyzing?.(false);
+      } else {
+        setIsAnalyzing(false);
+      }
     }
-  }, [selectedFiles, onResult, onAnalyzing]);
+  }, [selectedFiles, onResult, onAnalyzing, onFilesReady, extractionMode]);
 
   // Compute language distribution
   const langDist = selectedFiles.reduce((acc, f) => {
@@ -141,6 +206,32 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
   const visibleFiles = langFilter.size > 0
     ? selectedFiles.filter(f => langFilter.has(detectLang(f.name)))
     : selectedFiles;
+
+  // ── Analyze button label ──────────────────────────────────────────────────
+
+  const analyzeButtonContent = () => {
+    if (isAnalyzing) {
+      return (
+        <>
+          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          {extractionMode === 'compare' ? 'Running both modes…' : 'Analyzing…'}
+        </>
+      );
+    }
+    return (
+      <>
+        <span>{modeCfg.icon}</span>
+        {extractionMode === 'compare'
+          ? `Compare ${selectedFiles.length} Files`
+          : `Analyze ${selectedFiles.length} Files`}
+        {/* small mode label so user knows what they're running */}
+        <span className="ml-1 text-xs opacity-60 font-normal">({modeCfg.label})</span>
+      </>
+    );
+  };
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
@@ -165,6 +256,20 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
               </p>
             </div>
           </button>
+
+          {/* Active mode indicator — shows which mode is currently set */}
+          <div
+            className="mt-5 flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium"
+            style={{
+              background:  `${modeCfg.color}12`,
+              borderColor: `${modeCfg.color}35`,
+              color:       modeCfg.color,
+            }}
+          >
+            <span>{modeCfg.icon}</span>
+            {modeCfg.label}
+            <span className="text-xs opacity-60 font-normal">— {modeCfg.description}</span>
+          </div>
 
           <p className="mt-4 text-xs text-gray-600 text-center max-w-xs">
             Supports Python, JavaScript, TypeScript, Java, C/C++, Go, Rust and more.
@@ -193,15 +298,29 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => { setSelectedFiles([]); setFolderName(''); setError(null); }}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-gray-500 hover:text-gray-300 transition-colors"
-                title="Remove folder"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+
+              {/* Mode pill — visible once folder is loaded */}
+              <div className="flex items-center gap-2">
+                <span
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium border"
+                  style={{
+                    background:  `${modeCfg.color}18`,
+                    borderColor: `${modeCfg.color}40`,
+                    color:       modeCfg.color,
+                  }}
+                >
+                  {modeCfg.icon} {modeCfg.label}
+                </span>
+                <button
+                  onClick={() => { setSelectedFiles([]); setFolderName(''); setError(null); }}
+                  className="p-1.5 rounded-lg hover:bg-slate-800 text-gray-500 hover:text-gray-300 transition-colors"
+                  title="Remove folder"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Language breakdown */}
@@ -262,8 +381,13 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
 
           {/* Progress / Analyze button */}
           <div className="px-5 py-4 bg-slate-900 border-t border-slate-800">
+            {/* Quota warning (amber) or hard error (red) */}
             {error && (
-              <div className="mb-3 px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-xs">
+              <div className={`mb-3 px-3 py-2 rounded-lg text-xs border ${
+                error.startsWith('⚠️')
+                  ? 'bg-amber-900/20 border-amber-500/30 text-amber-400'
+                  : 'bg-red-900/20 border-red-500/30 text-red-400'
+              }`}>
                 {error}
               </div>
             )}
@@ -277,33 +401,32 @@ const FolderImportPanel = ({ onResult, onAnalyzing }) => {
                   )}
                 </div>
                 <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  {/* Progress bar colour matches the active mode */}
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-300"
-                    style={{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '60%' }}
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: progress.total > 0
+                        ? `${(progress.current / progress.total) * 100}%`
+                        : '60%',
+                      background: `linear-gradient(to right, ${modeCfg.color}, ${modeCfg.color}99)`,
+                    }}
                   />
                 </div>
+                {extractionMode === 'compare' && (
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Running AST+LLM and LLM-only in parallel — 2 API calls total
+                  </p>
+                )}
               </div>
             )}
 
+            {/* Analyze button — gradient changes with mode */}
             <button
               onClick={handleAnalyze}
               disabled={isAnalyzing || selectedFiles.length === 0}
-              className="w-full px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+              className={`w-full px-5 py-3 bg-gradient-to-r ${modeCfg.btnClass} text-white rounded-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg flex items-center justify-center gap-2`}
             >
-              {isAnalyzing ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Analyzing…
-                </>
-              ) : (
-                <>
-                  <span>🔬</span>
-                  Analyze {selectedFiles.length} Files
-                </>
-              )}
+              {analyzeButtonContent()}
             </button>
           </div>
         </div>

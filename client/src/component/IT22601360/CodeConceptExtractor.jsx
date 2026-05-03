@@ -8,12 +8,18 @@
  *  - Paste  : single code snippet analysis
  *  - Folder : local project folder import via webkitdirectory
  *
+ * Extraction modes (new):
+ *  - hybrid   : AST preprocessing + Gemini AI (default)
+ *  - llm_only : Gemini only, no AST context (research baseline)
+ *  - compare  : runs both and shows ComparisonPanel side-by-side
+ *
  * Features:
  *  - Concept list with inline code-reference panel
  *  - Distribution chart & relationship graph
  *  - AI-generated project purpose
  *  - PDF export (research grade)
  *  - Auto-save to MongoDB
+ *  - Research comparison panel with real P/R/F1 metrics
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -24,6 +30,8 @@ import DistributionChart from './DistributionChart';
 import ConceptDetails from './ConceptDetails';
 import FolderImportPanel from './FolderImportPanel';
 import PDFExportButton from './PDFExportButton';
+import ExtractionModeToggle from './ExtractionModeToggle';
+import ComparisonPanel from './ComparisonPanel';
 import { conceptExtractorApi, conceptHistoryApi } from '../../modules/IT22601360/conceptExtractorApi';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -68,10 +76,6 @@ const TABS = [
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Build a flat concepts array with sourceFile attached,
- * from a multi-file project result.
- */
 function flattenProjectConcepts(projectResult) {
   const out = [];
   (projectResult.files || []).forEach(fileResult => {
@@ -96,35 +100,40 @@ function primaryLanguage(projectResult) {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const CodeConceptExtractor = () => {
-  // ─ Mode
+  // ─ Input mode
   const [mode, setMode] = useState('paste'); // 'paste' | 'folder'
+
+  // ─ Extraction mode (new)
+  const [extractionMode, setExtractionMode] = useState('hybrid'); // 'hybrid' | 'llm_only' | 'compare'
 
   // ─ Paste mode state
   const [code, setCode]         = useState(SAMPLE_CODE);
   const [language, setLanguage] = useState('python');
 
   // ─ Analysis state
-  const [isLoading, setIsLoading]           = useState(false);
-  const [isFolderAnalyzing, setIsFolderAnalyzing] = useState(false);
-  const [error, setError]                   = useState(null);
-  const [extractionResult, setExtractionResult] = useState(null);
-  const [projectSummary, setProjectSummary] = useState(null);
+  const [isLoading, setIsLoading]                   = useState(false);
+  const [isFolderAnalyzing, setIsFolderAnalyzing]   = useState(false);
+  const [error, setError]                           = useState(null);
+  const [extractionResult, setExtractionResult]     = useState(null);
+  const [projectSummary, setProjectSummary]         = useState(null);
 
-  // ─ File contents map (for code navigation in folder mode)
-  const [fileContents, setFileContents]     = useState({});
+  // ─ Compare state (new)
+  const [compareLoading, setCompareLoading]   = useState(false);
+  const [compareResult, setCompareResult]     = useState(null); // { hybrid, llm_only }
+
+  // ─ File contents map
+  const [fileContents, setFileContents] = useState({});
 
   // ─ UI state
-  const [activeTab, setActiveTab]           = useState('list');
-  const [selectedConcept, setSelectedConcept] = useState(null);
-  const [supportedLanguages, setSupportedLanguages] = useState([
+  const [activeTab, setActiveTab]                     = useState('list');
+  const [selectedConcept, setSelectedConcept]         = useState(null);
+  const [supportedLanguages, setSupportedLanguages]   = useState([
     'python', 'javascript', 'typescript', 'java', 'cpp', 'c', 'go', 'rust',
   ]);
-  const [serviceStatus, setServiceStatus]   = useState('checking');
+  const [serviceStatus, setServiceStatus] = useState('checking');
+  const [saveStatus, setSaveStatus]       = useState('idle');
 
-  // ─ Save state
-  const [saveStatus, setSaveStatus] = useState('idle');
-
-  // Flattened concepts list (different shape in paste vs folder mode)
+  // ─ Derived
   const allConcepts = useMemo(() => {
     if (!extractionResult) return [];
     if (mode === 'folder') return flattenProjectConcepts(extractionResult);
@@ -134,6 +143,8 @@ const CodeConceptExtractor = () => {
   const resultLanguage = mode === 'folder'
     ? primaryLanguage(extractionResult || {})
     : language;
+
+  const isAnyLoading = isLoading || isFolderAnalyzing || compareLoading;
 
 
   // ─ Init ──────────────────────────────────────────────────────────────────
@@ -178,14 +189,50 @@ const CodeConceptExtractor = () => {
   const handleAnalyzePaste = useCallback(async () => {
     if (!code.trim()) { setError('Please enter some code to analyze'); return; }
 
-    setIsLoading(true);
     setError(null);
     setSelectedConcept(null);
     setSaveStatus('idle');
     setFileContents({});
+    setCompareResult(null);
 
+    // Compare mode — run both in parallel
+    if (extractionMode === 'compare') {
+      setCompareLoading(true);
+      try {
+        const res = await conceptExtractorApi.extractConceptsCompare(code, language);
+        setCompareResult(res);
+        // Also populate main results panel with hybrid output
+        setExtractionResult(res.hybrid);
+        setProjectSummary(null);
+        setActiveTab('list');
+      } catch (err) {
+        setError(err.message || 'Comparison failed.');
+      } finally {
+        setCompareLoading(false);
+      }
+      return;
+    }
+
+    // Single mode (hybrid or llm_only)
+    setIsLoading(true);
     try {
-      const result = await conceptExtractorApi.extractConcepts(code, language);
+      const result = await conceptExtractorApi.extractConcepts(code, language, extractionMode);
+
+      // Quota exhausted in llm_only mode — Gemini unavailable, AST fallback was used
+      if (result.quota_exhausted && extractionMode === 'llm_only') {
+        setError(
+          '⚠️ Gemini daily quota exhausted (50 RPD free tier). ' +
+          'LLM-only mode needs Gemini to work. Showing AST fallback results below. ' +
+          'Quota resets in ~24h, or add GEMINI_USE_PAID_TIER=true to .env.'
+        );
+        // Still show AST fallback results — don't block the user
+        if (result.concepts?.length) {
+          setExtractionResult(result);
+          setActiveTab('list');
+        }
+        return;
+      }
+
       if (!result.concepts?.length) {
         setError('No concepts detected. Try adding more code or different code.');
         setExtractionResult(null);
@@ -201,10 +248,12 @@ const CodeConceptExtractor = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [code, language]);
+  }, [code, language, extractionMode]);
 
 
   // ─ Folder mode: receive result from FolderImportPanel ───────────────────
+  // FolderImportPanel calls onResult(result, fileContentsMap)
+  // For compare mode: FolderImportPanel passes the raw files via onFilesReady
 
   const handleFolderResult = useCallback((result, fileContentsMap) => {
     const concepts = flattenProjectConcepts(result);
@@ -219,7 +268,6 @@ const CodeConceptExtractor = () => {
     setFileContents(fileContentsMap || {});
     setActiveTab('list');
 
-    // Save a representative subset
     const fakeResult = {
       concepts: concepts.slice(0, 50),
       metrics: result.project_summary || {},
@@ -228,8 +276,47 @@ const CodeConceptExtractor = () => {
     autoSave(fakeResult, '// Project folder analysis', primaryLanguage(result));
   }, []);
 
+  // Called by FolderImportPanel when files are ready — used for compare mode
+  const handleFolderFilesReady = useCallback(async (files) => {
+    if (extractionMode !== 'compare') return;
 
-  // ─ Mode switch ───────────────────────────────────────────────────────────
+    setError(null);
+    setCompareResult(null);
+    setCompareLoading(true);
+
+    try {
+      const res = await conceptExtractorApi.uploadProjectFilesCompare(files);
+      setCompareResult(res);
+      // Populate main panel with hybrid output
+      const concepts = flattenProjectConcepts(res.hybrid);
+      if (concepts.length > 0) {
+        setExtractionResult(res.hybrid);
+        setProjectSummary(res.hybrid.project_summary || null);
+        setActiveTab('list');
+      }
+    } catch (err) {
+      setError(err.message || 'Comparison failed.');
+    } finally {
+      setCompareLoading(false);
+      setIsFolderAnalyzing(false); // FolderImportPanel skips onAnalyzing(false) in compare mode — we clear it here
+    }
+  }, [extractionMode]);
+
+
+  // ─ Extraction mode change — clear results ────────────────────────────────
+
+  const handleExtractionModeChange = useCallback((newMode) => {
+    setExtractionMode(newMode);
+    setExtractionResult(null);
+    setProjectSummary(null);
+    setCompareResult(null);
+    setError(null);
+    setSelectedConcept(null);
+    setSaveStatus('idle');
+  }, []);
+
+
+  // ─ Input mode switch ──────────────────────────────────────────────────────
 
   const switchMode = (newMode) => {
     setMode(newMode);
@@ -239,6 +326,7 @@ const CodeConceptExtractor = () => {
     setError(null);
     setSelectedConcept(null);
     setSaveStatus('idle');
+    setCompareResult(null);
   };
 
 
@@ -252,6 +340,7 @@ const CodeConceptExtractor = () => {
     setError(null);
     setSaveStatus('idle');
     setFileContents({});
+    setCompareResult(null);
   }, []);
 
   const handleLoadSample = useCallback(() => {
@@ -277,6 +366,19 @@ const CodeConceptExtractor = () => {
         {cfg.label}
       </span>
     );
+  };
+
+  // ─ Analyze button label ───────────────────────────────────────────────────
+
+  const analyzeButtonLabel = () => {
+    if (isAnyLoading) {
+      return extractionMode === 'compare'
+        ? <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Running both modes…</>
+        : <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Analyzing…</>;
+    }
+    if (extractionMode === 'compare')  return <><span>📊</span> Compare Both Modes</>;
+    if (extractionMode === 'llm_only') return <><span>🤖</span> Analyze (LLM Only)</>;
+    return <><span>🚀</span> Analyze Code</>;
   };
 
 
@@ -308,7 +410,7 @@ const CodeConceptExtractor = () => {
             {serviceStatus === 'online' ? 'AI Online' : 'AI Offline'}
           </div>
 
-          {/* Mode toggle */}
+          {/* Input mode toggle */}
           <div className="ml-auto flex items-center gap-1 p-1 bg-slate-800 rounded-xl border border-slate-700">
             {[
               { id: 'paste',  icon: '📝', label: 'Paste Code' },
@@ -343,18 +445,25 @@ const CodeConceptExtractor = () => {
               {mode === 'paste' ? <><span>📝</span> Code Input</> : <><span>📁</span> Project Folder</>}
             </h2>
             {mode === 'paste' && (
-              <div className="flex items-center gap-2">
-                <select
-                  value={language}
-                  onChange={e => setLanguage(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs font-medium text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {supportedLanguages.map(l => (
-                    <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={language}
+                onChange={e => setLanguage(e.target.value)}
+                className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs font-medium text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {supportedLanguages.map(l => (
+                  <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>
+                ))}
+              </select>
             )}
+          </div>
+
+          {/* Extraction mode toggle — sits between header and input area */}
+          <div className="px-5 py-2 bg-slate-900/60 border-b border-slate-800/60 flex-shrink-0">
+            <ExtractionModeToggle
+              mode={extractionMode}
+              onChange={handleExtractionModeChange}
+              disabled={isAnyLoading}
+            />
           </div>
 
           {/* Input area */}
@@ -365,6 +474,8 @@ const CodeConceptExtractor = () => {
               <FolderImportPanel
                 onResult={handleFolderResult}
                 onAnalyzing={setIsFolderAnalyzing}
+                onFilesReady={handleFolderFilesReady}
+                extractionMode={extractionMode}
               />
             )}
           </div>
@@ -374,14 +485,10 @@ const CodeConceptExtractor = () => {
             <div className="px-5 py-3 bg-slate-900/80 border-t border-slate-800 flex gap-2 flex-shrink-0">
               <button
                 onClick={handleAnalyzePaste}
-                disabled={isLoading || !code.trim()}
+                disabled={isAnyLoading || !code.trim()}
                 className="flex-1 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Analyzing…</>
-                ) : (
-                  <><span>🚀</span> Analyze Code</>
-                )}
+                {analyzeButtonLabel()}
               </button>
               <button onClick={handleLoadSample} className="px-4 py-2.5 bg-slate-800 text-gray-400 hover:text-gray-200 rounded-xl text-sm font-medium border border-slate-700 hover:border-slate-600 transition-all">
                 Sample
@@ -401,6 +508,18 @@ const CodeConceptExtractor = () => {
           <div className="px-5 py-3 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <span>📊</span> Analysis Results
+              {/* Mode badge */}
+              {extractionResult && (
+                <span className={`ml-2 px-2 py-0.5 rounded-md text-xs font-medium ${
+                  extractionMode === 'llm_only'
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    : extractionMode === 'compare'
+                      ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'
+                      : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                }`}>
+                  {extractionMode === 'llm_only' ? '🤖 LLM Only' : extractionMode === 'compare' ? '📊 Compare' : '🔬 Hybrid'}
+                </span>
+              )}
             </h2>
 
             <div className="flex items-center gap-2">
@@ -436,7 +555,6 @@ const CodeConceptExtractor = () => {
                   <p className="text-sm text-gray-300 leading-relaxed">{projectSummary.project_purpose}</p>
                 </div>
               </div>
-              {/* File stats */}
               {(projectSummary.successful_files != null || projectSummary.total_files != null) && (
                 <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-500">
                   {projectSummary.total_files != null && <span>📂 {projectSummary.total_files} files scanned</span>}
@@ -447,7 +565,25 @@ const CodeConceptExtractor = () => {
             </div>
           )}
 
-          {/* Tabs */}
+          {/* ── Compare panel — shown when compare mode has results ── */}
+          {compareResult && (
+            <div className="mx-5 mt-4 flex-shrink-0">
+              <ComparisonPanel
+                hybridData={compareResult.hybrid}
+                llmData={compareResult.llm_only}
+                loading={compareLoading}
+              />
+            </div>
+          )}
+
+          {/* Compare loading (before results arrive) */}
+          {compareLoading && !compareResult && (
+            <div className="mx-5 mt-4 flex-shrink-0">
+              <ComparisonPanel hybridData={null} llmData={null} loading={true} />
+            </div>
+          )}
+
+          {/* Result tabs — hidden in compare mode (ComparisonPanel is the main view) */}
           {extractionResult && allConcepts.length > 0 && (
             <div className="px-5 py-2 border-b border-slate-800 flex gap-1.5 flex-shrink-0">
               {TABS.map(tab => (
@@ -463,37 +599,62 @@ const CodeConceptExtractor = () => {
                   <span>{tab.icon}</span>{tab.label}
                 </button>
               ))}
+              {extractionMode === 'compare' && (
+                <span className="ml-2 text-xs text-gray-500 self-center italic">
+                  (showing hybrid results below)
+                </span>
+              )}
             </div>
           )}
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
-            {/* Error */}
+            {/* Error / Warning */}
             {error && (
-              <div className="m-5 p-4 bg-red-900/20 border border-red-500/30 rounded-xl flex items-start gap-3">
-                <span className="text-xl mt-0.5">⚠️</span>
+              <div className={
+                `m-5 p-4 rounded-xl flex items-start gap-3 ${
+                  error.startsWith('⚠️')
+                    ? 'bg-amber-900/20 border border-amber-500/30'
+                    : 'bg-red-900/20 border border-red-500/30'
+                }`
+              }>
+                <span className="text-xl mt-0.5">{error.startsWith('⚠️') ? '🔶' : '❌'}</span>
                 <div>
-                  <h3 className="font-semibold text-red-400 mb-0.5 text-sm">Error</h3>
-                  <p className="text-red-300 text-sm">{error}</p>
+                  <h3 className={
+                    `font-semibold mb-0.5 text-sm ${error.startsWith('⚠️') ? 'text-amber-400' : 'text-red-400'}`
+                  }>
+                    {error.startsWith('⚠️') ? 'Quota Warning' : 'Error'}
+                  </h3>
+                  <p className={
+                    `text-sm ${error.startsWith('⚠️') ? 'text-amber-300' : 'text-red-300'}`
+                  }>{error}</p>
                 </div>
               </div>
             )}
 
             {/* Loading */}
-            {(isLoading || isFolderAnalyzing) && (
+            {isAnyLoading && (
               <div className="flex flex-col items-center justify-center h-full gap-4">
                 <div className="w-14 h-14 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin" />
                 <div className="text-center">
                   <h3 className="text-base font-semibold text-white mb-1">
-                    {isFolderAnalyzing ? 'Analyzing Project…' : 'Analyzing Code…'}
+                    {compareLoading
+                      ? 'Running Both Modes…'
+                      : isFolderAnalyzing
+                        ? 'Analyzing Project…'
+                        : 'Analyzing Code…'}
                   </h3>
-                  <p className="text-sm text-gray-500">AI is extracting concepts</p>
+                  <p className="text-sm text-gray-500">
+                    {compareLoading
+                      ? 'Running AST+LLM hybrid and LLM-only in parallel'
+                      : 'AI is extracting concepts'}
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Empty state */}
-            {!isLoading && !isFolderAnalyzing && !extractionResult && !error && (
+            {!isAnyLoading && !extractionResult && !compareResult && !error && (
               <div className="flex flex-col items-center justify-center h-full px-8">
                 <div className="w-20 h-20 bg-slate-800/80 rounded-2xl flex items-center justify-center mb-5 border border-slate-700">
                   <span className="text-4xl">🔬</span>
@@ -504,11 +665,16 @@ const CodeConceptExtractor = () => {
                     ? 'Paste code on the left and click Analyze Code to extract CS concepts.'
                     : 'Import your project folder on the left to analyze the entire codebase.'}
                 </p>
+                {extractionMode === 'compare' && (
+                  <p className="text-xs text-indigo-400 text-center max-w-sm mt-3 bg-indigo-500/10 px-4 py-2 rounded-lg border border-indigo-500/20">
+                    📊 Compare mode will run both AST+LLM and LLM-only simultaneously and show the difference
+                  </p>
+                )}
               </div>
             )}
 
             {/* Results */}
-            {!isLoading && !isFolderAnalyzing && extractionResult && allConcepts.length > 0 && (
+            {!isAnyLoading && extractionResult && allConcepts.length > 0 && (
               <>
                 {activeTab === 'list' && (
                   <ConceptList

@@ -10,3 +10,5 @@ export { default as DistributionChart }    from './DistributionChart';
 export { default as ConceptDetails }       from './ConceptDetails';
 export { default as FolderImportPanel }    from './FolderImportPanel';
 export { default as PDFExportButton }      from './PDFExportButton';
+export { default as ComparisonPanel } from "./ComparisonPanel";
+export { default as ExtractionModeToggle } from "./ExtractionModeToggle";

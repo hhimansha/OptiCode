@@ -44,10 +44,13 @@ mernClient.interceptors.response.use(
 
 export const conceptExtractorApi = {
 
-  /** Single-snippet extraction (paste mode) */
-  extractConcepts: async (code, language = 'python') => {
+  /**
+   * Single-snippet extraction (paste mode).
+   * extraction_mode: 'hybrid' (default) | 'llm_only'
+   */
+  extractConcepts: async (code, language = 'python', extraction_mode = 'hybrid') => {
     try {
-      const { data } = await aiClient.post('/extract-enhanced', { code, language });
+      const { data } = await aiClient.post('/extract-enhanced', { code, language, extraction_mode });
       return data;
     } catch (err) {
       throw new Error(err.response?.data?.detail || 'Failed to extract concepts. Please try again.');
@@ -57,24 +60,28 @@ export const conceptExtractorApi = {
   /**
    * Upload a collection of File objects (from webkitdirectory input).
    * Sends multipart/form-data to /extract-files.
-   * Returns the full project extraction result including per-file concepts,
-   * aggregated_concepts, and project_summary (with project_purpose).
+   * extraction_mode: 'hybrid' (default) | 'llm_only'
    *
    * @param {File[]} files - Array of File objects from the folder input
    * @param {Function} [onUploadProgress] - Optional axios upload progress callback
+   * @param {string} [extraction_mode] - 'hybrid' or 'llm_only'
    */
-  uploadProjectFiles: async (files, onUploadProgress = null) => {
+  uploadProjectFiles: async (files, onUploadProgress = null, extraction_mode = 'hybrid') => {
     if (!files || files.length === 0) throw new Error('No files provided');
 
     const formData = new FormData();
     files.forEach(file => formData.append('files', file, file.webkitRelativePath || file.name));
 
     try {
-      const { data } = await aiClient.post('/extract-files', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 600_000, // 10 min for large projects
-        onUploadProgress,
-      });
+      const { data } = await aiClient.post(
+        `/extract-files?extraction_mode=${extraction_mode}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 600_000, // 10 min for large projects
+          onUploadProgress,
+        }
+      );
       return data;
     } catch (err) {
       throw new Error(err.response?.data?.detail || 'Failed to analyze project. Please try again.');
@@ -82,8 +89,50 @@ export const conceptExtractorApi = {
   },
 
   /**
+   * Run BOTH modes on the same file list and return side-by-side results.
+   * Used by the research Compare mode.
+   * Runs hybrid + llm_only in parallel (2 API calls total).
+   *
+   * @param {File[]} files
+   * @returns {{ hybrid: object, llm_only: object }}
+   */
+  uploadProjectFilesCompare: async (files) => {
+    if (!files || files.length === 0) throw new Error('No files provided');
+
+    const makeForm = () => {
+      const fd = new FormData();
+      files.forEach(f => fd.append('files', f, f.webkitRelativePath || f.name));
+      return fd;
+    };
+
+    const [hybridRes, llmRes] = await Promise.all([
+      aiClient.post('/extract-files?extraction_mode=hybrid',   makeForm(), {
+        headers: { 'Content-Type': 'multipart/form-data' }, timeout: 600_000,
+      }),
+      aiClient.post('/extract-files?extraction_mode=llm_only', makeForm(), {
+        headers: { 'Content-Type': 'multipart/form-data' }, timeout: 600_000,
+      }),
+    ]);
+
+    return { hybrid: hybridRes.data, llm_only: llmRes.data };
+  },
+
+  /**
+   * Run BOTH modes on the same code snippet and return side-by-side results.
+   * Used by the research Compare mode in paste mode.
+   *
+   * @returns {{ hybrid: object, llm_only: object }}
+   */
+  extractConceptsCompare: async (code, language = 'python') => {
+    const [hybridRes, llmRes] = await Promise.all([
+      aiClient.post('/extract-enhanced', { code, language, extraction_mode: 'hybrid' }),
+      aiClient.post('/extract-enhanced', { code, language, extraction_mode: 'llm_only' }),
+    ]);
+    return { hybrid: hybridRes.data, llm_only: llmRes.data };
+  },
+
+  /**
    * Generate a natural-language project purpose from concept metadata.
-   * Useful when you want to refresh the summary independently.
    */
   generateProjectPurpose: async (filenames, conceptNames) => {
     try {
