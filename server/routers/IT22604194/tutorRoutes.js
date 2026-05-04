@@ -1,9 +1,57 @@
 import express from "express";
 import { askGemini } from "../../services/IT22604194/geminiService.js";
+import { WeaknessHintEngine } from "../../services/IT22604194/WeaknessHintEngine.js";
+import { structuredTasks } from '../../data/structuredTasks.js';
 
 const router = express.Router();
+function findSolutionStages(task) {
+  for (const level of Object.values(structuredTasks)) {
+    for (const category of Object.values(level)) {
+      for (const t of category) {
+        if (t.task === task) {
+          return t.solution_stages || null;
+        }
+      }
+    }
+  }
+  return null;
+}
 
-// ─── WEAKNESS → CONCEPT LABEL ────────────────────────────────────────────
+// ─── SOLUTION STAGE HINT (NEW) ─────────────────────────────────────────
+function getSolutionStageHint(code, solution_stages, skill = "Beginner", weakness = null) {
+  if (!solution_stages || solution_stages.length === 0) return null;
+
+  const safeSkill = ["Beginner", "Intermediate", "Advanced"].includes(skill)
+    ? skill : "Beginner";
+
+  // Weakness context labels — tells student what error type they have
+  const weaknessContext = {
+    logic_error:       "Your code runs but gives wrong output (logic error).",
+    syntax_error:      "There is a syntax problem in your code.",
+    missing_print:     "Your answer is not being displayed (missing print).",
+    no_function:       "This task needs a function definition.",
+    missing_base_case: "Your recursion has no stopping condition (missing base case).",
+    infinite_loop:     "Your loop may never stop (infinite loop risk).",
+    hardcoded_value:   "You typed the answer directly instead of computing it (hardcoded value).",
+    idle_stuck:        "Take it one step at a time."
+  };
+
+  for (const stage of solution_stages) {
+    if (!stage.pattern.test(code)) {
+      const stageHint = stage.hint[safeSkill] || stage.hint["Beginner"];
+
+      // Combine weakness context + stage hint
+      const context = weakness && weaknessContext[weakness]
+        ? `${weaknessContext[weakness]} `
+        : "";
+
+      return `${context}${stageHint}`;
+    }
+  }
+  return null;
+}
+
+// ─── WEAKNESS → CONCEPT MAP ────────────────────────────────────────────
 const weaknessConceptMap = {
   syntax_error: "syntax",
   missing_base_case: "recursion",
@@ -15,161 +63,71 @@ const weaknessConceptMap = {
   idle_stuck: "general"
 };
 
-// ─── LOCAL SKILL-AWARE HINT TEMPLATES ────────────────────────────────────
-const LOCAL_HINTS = {
-  syntax_error: {
-    Beginner: ({ concept }) =>
-      `There is a syntax problem in your code. Check spelling, brackets, colons, and indentation${concept && concept !== "general" ? ` in this ${concept} task` : ""}.`,
-    Intermediate: ({ concept }) =>
-      `Review the syntax carefully${concept && concept !== "general" ? ` for this ${concept} task` : ""} — look for missing colons, brackets, or indentation issues.`,
-    Advanced: ({ concept }) =>
-      `Parser issue detected${concept && concept !== "general" ? ` in ${concept}` : ""}. Inspect syntax and indentation near the failing statement.`
-  },
-
-  missing_base_case: {
-    Beginner: () =>
-      "Your recursive solution needs a stopping condition. Add a base case so the function knows when to stop calling itself.",
-    Intermediate: () =>
-      "This recursion needs a valid base case. Make sure one condition returns directly without another recursive call.",
-    Advanced: () =>
-      "Add a terminating base case to guarantee recursion stops."
-  },
-
-  infinite_loop: {
-    Beginner: ({ concept }) =>
-      `Your loop may never stop. Check whether the loop condition changes each time${concept === "loops" ? " and whether your counter is updated" : ""}.`,
-    Intermediate: () =>
-      "Review the loop condition and update step. The controlling variable may not be moving toward termination.",
-    Advanced: () =>
-      "Ensure loop termination by fixing the invariant or update step."
-  },
-
-  logic_error: {
-    Beginner: ({ concept }) =>
-      `Your code runs, but the result is not correct. Break the problem into smaller steps and check the ${concept && concept !== "general" ? concept : "logic"} carefully.`,
-    Intermediate: ({ concept }) =>
-      `The output suggests a logic issue${concept && concept !== "general" ? ` in ${concept}` : ""}. Trace the values step by step and compare with the expected result.`,
-    Advanced: ({ concept }) =>
-      `Logic mismatch detected${concept && concept !== "general" ? ` in ${concept}` : ""}. Validate edge cases and intermediate values.`
-  },
-
-  hardcoded_value: {
-    Beginner: () =>
-      "Do not write the final answer directly. Use Python operations or logic to calculate it from the task requirements.",
-    Intermediate: () =>
-      "Avoid hardcoding the expected result. Compute it dynamically from the given values.",
-    Advanced: () =>
-      "Output appears hardcoded. Derive it programmatically."
-  },
-
-  missing_print: {
-    Beginner: () =>
-      "You may have found the answer, but Python will not show it unless you use print(). Print the final result so it appears in the output.",
-    Intermediate: () =>
-      "Print the final result.",
-    Advanced: () =>
-      "Emit the computed output."
-  },
-
-  no_function: {
-    Beginner: () =>
-      "This task needs a function. Start with def, give the function a name, add parameters if needed, and then put your logic inside it.",
-    Intermediate: () =>
-      "Define the required function using def and place the logic inside it.",
-    Advanced: () =>
-      "Encapsulate the logic in the required function."
-  },
-
-  idle_stuck: {
-    Beginner: ({ concept, task }) =>
-      `Start with one small step. ${concept === "print"
-        ? "Try writing print() first."
-        : concept === "functions"
-        ? "Try writing the function header first."
-        : concept === "loops"
-        ? "Try writing the loop structure first."
-        : "Write the first line that solves part of the task."
-      }${task ? " Then build from there." : ""}`,
-    Intermediate: ({ concept }) =>
-      `Break the problem into smaller parts${concept && concept !== "general" ? ` for this ${concept} task` : ""}. Start with the core step first.`,
-    Advanced: ({ concept }) =>
-      `Reframe the approach${concept && concept !== "general" ? ` for ${concept}` : ""} and implement the core step first.`
-  }
-};
-
-// ─── OPTIONAL MODE-AWARE PREFIX ──────────────────────────────────────────
-function modePrefix(learningMode, skill) {
-  if (learningMode !== "improve_concept") return "";
-
-  if (skill === "Beginner") return "You are practicing a weak concept area. ";
-  if (skill === "Intermediate") return "Focus on improving this weak concept. ";
-  return "Target the weak concept directly. ";
-}
-
-// ─── LOCAL HINT GENERATOR ────────────────────────────────────────────────
-function getLocalHint({ weakness, skill, code, task, concept, learningMode }) {
-  const safeSkill =
-    skill === "Beginner" || skill === "Intermediate" || skill === "Advanced"
-      ? skill
-      : "Beginner";
-
-  const resolvedConcept =
-    concept ||
-    weaknessConceptMap[weakness] ||
-    inferConceptFromTask(task) ||
-    "general";
-
-  const builder =
-    LOCAL_HINTS[weakness]?.[safeSkill] ||
-    (() =>
-      safeSkill === "Beginner"
-        ? "Look at the task carefully and fix one small part at a time."
-        : safeSkill === "Intermediate"
-        ? "Review the current approach and correct the key issue."
-        : "Refine the current approach and fix the main defect.");
-
-  const prefix = modePrefix(learningMode, safeSkill);
-
-  return prefix + builder({ code, task, concept: resolvedConcept, learningMode });
-}
-
-// ─── SIMPLE CONCEPT INFERENCE ────────────────────────────────────────────
+// ─── SIMPLE CONCEPT INFERENCE ─────────────────────────────────────────
 function inferConceptFromTask(task = "") {
   const text = task.toLowerCase();
 
   if (text.includes("recursion") || text.includes("recursive")) return "recursion";
-  if (text.includes("class") || text.includes("object") || text.includes("inherit")) return "oop";
-  if (text.includes("dictionary")) return "dictionaries";
-  if (text.includes("tuple")) return "tuples";
-  if (text.includes("list")) return "lists";
-  if (text.includes("string")) return "strings";
-  if (text.includes("loop") || text.includes("for ") || text.includes("while ")) return "loops";
-  if (text.includes("function") || text.includes("def ")) return "functions";
-  if (text.includes("print") || text.includes("output") || text.includes("display")) return "print";
-  if (text.includes("if ") || text.includes("else") || text.includes("condition")) return "conditionals";
-  if (
-    text.includes("sum") ||
-    text.includes("multiply") ||
-    text.includes("divide") ||
-    text.includes("subtract") ||
-    text.includes("factorial") ||
-    text.includes("power")
-  ) {
-    return "math";
-  }
-  if (
-    text.includes("search") ||
-    text.includes("sort") ||
-    text.includes("prime") ||
-    text.includes("fibonacci") ||
-    text.includes("algorithm")
-  ) {
-    return "algorithm";
-  }
+  if (text.includes("class") || text.includes("object")) return "oop";
+  if (text.includes("list") || text.includes("array")) return "lists";
+  if (text.includes("string") || text.includes("text")) return "strings";
+  if (text.includes("dict") || text.includes("dictionary")) return "dictionaries";
+  if (text.includes("set")) return "sets";
+  if (text.includes("for") || text.includes("while") || text.includes("loop")) return "loops";
+  if (text.includes("function") || text.includes("def")) return "functions";
+  if (text.includes("print")) return "print";
+  if (text.includes("if") || text.includes("condition")) return "conditionals";
+  if (text.includes("variable") || text.includes("assign")) return "variables";
+  if (text.includes("algorithm")) return "algorithm";
+  if (text.includes("sum") || text.includes("factorial") || text.includes("multiply") || text.includes("calculate")) return "math";
 
   return "general";
 }
 
+// ─── CODE-AWARE STAGE DETECTION ───────────────────────────────────────
+function getStageHint(code, task, weakness, concept) {
+
+  const hasDef = /def\s+\w+\s*\(/.test(code);
+  const hasReturn = /return\s+/.test(code);
+  const hasPrint = /print\s*\(/.test(code);
+  const hasLoop = /for\s+|while\s+/.test(code);
+  const hasIf = /if\s+/.test(code);
+
+  if (concept === "functions") {
+    if (!hasDef) return "Start by writing a function using def.";
+    if (!hasReturn) return "Add a return statement inside your function.";
+    if (!hasPrint) return "Call your function and print the result.";
+  }
+
+  if (concept === "loops") {
+    if (!hasLoop) return "Start by writing a loop (for or while).";
+    if (!hasPrint) return "Print values inside the loop.";
+  }
+
+  if (concept === "recursion") {
+    if (!hasDef) return "Start by writing the recursive function.";
+    if (!hasIf) return "Add a base case using if.";
+    if (!hasReturn) return "Return the recursive result.";
+  }
+
+  return null;
+}
+
+// ─── LOCAL FALLBACK HINT ──────────────────────────────────────────────
+function getLocalHint({ weakness }) {
+  const hints = {
+    syntax_error: "Check syntax: brackets, indentation, colons.",
+    logic_error: "Check your logic step by step.",
+    infinite_loop: "Ensure your loop condition changes.",
+    missing_print: "Use print() to display output.",
+    no_function: "Define a function using def.",
+    idle_stuck: "Start with a small step and build."
+  };
+
+  return hints[weakness] || "Review your code carefully.";
+}
+
+// ─── MAIN HINT ROUTE ──────────────────────────────────────────────────
 router.post("/hint", async (req, res) => {
   try {
     const {
@@ -177,31 +135,62 @@ router.post("/hint", async (req, res) => {
       skill,
       code,
       task,
-      concept = null,
-      learningMode = "level_up",
-      use_ai = false
+      concept,
+      learningMode,
+      use_ai = false,
+      solution_stages
     } = req.body;
 
-    // 1. Local hint first (default path)
-    const localHint = getLocalHint({
-      weakness,
-      skill,
-      code,
-      task,
-      concept,
-      learningMode
-    });
+    const resolvedConcept = concept || inferConceptFromTask(task);
+    
+    // ── DEBUG LOGGING ──────────────────────────────────────────────────
+    console.log("\n📝 HINT REQUEST:");
+    console.log(`  Weakness: ${weakness}`);
+    console.log(`  Concept: ${resolvedConcept}`);
+    console.log(`  Skill: ${skill}`);
+    console.log(`  Task: ${task.substring(0, 60)}...`);
+    console.log(`  Code preview: ${code.substring(0, 40)}...`);
 
-    // By default, return local hint immediately
-    if (!use_ai) {
-      return res.json({
-        hint: localHint,
-        source: "local_rules"
-      });
+    // ── STEP 1: SOLUTION STAGES (MOST ACCURATE) ─────────────────────
+const stages = findSolutionStages(task);
+const solutionHint = getSolutionStageHint(code, stages, skill, weakness);
+    if (solutionHint) {
+      console.log("✅ Hint from: solution_stages");
+      return res.json({ hint: solutionHint, source: "solution_stages" });
     }
 
-    // 2. Gemini fallback / richer hint only when explicitly requested
-    const reply = await askGemini({
+    // ── STEP 2: CODE PATTERN STAGE DETECTION ───────────────────────
+    const stageHint = getStageHint(code, task, weakness, resolvedConcept);
+    if (stageHint) {
+      console.log("✅ Hint from: stage_guidance");
+      return res.json({ hint: stageHint, source: "stage_guidance" });
+    }
+
+    // ── STEP 3: WEAKNESS ENGINE ────────────────────────────────────
+    const weakHint = WeaknessHintEngine.generateHint(
+      weakness,
+      resolvedConcept,
+      skill,
+      code,
+      task
+    );
+
+    if (weakHint) {
+      console.log("✅ Hint from: weakness_engine");
+      console.log(`   Hint: ${weakHint.substring(0, 60)}...`);
+      return res.json({ hint: weakHint, source: "weakness_engine" });
+    }
+
+    // ── STEP 4: LOCAL FALLBACK ─────────────────────────────────────
+    const localHint = getLocalHint({ weakness });
+
+    if (!use_ai) {
+      console.log("✅ Hint from: local");
+      return res.json({ hint: localHint, source: "local" });
+    }
+
+    // ── STEP 5: GEMINI AI ──────────────────────────────────────────
+    const aiHint = await askGemini({
       weakness,
       skill,
       code,
@@ -210,17 +199,17 @@ router.post("/hint", async (req, res) => {
       learningMode
     });
 
+    console.log("✅ Hint from:", aiHint ? "gemini" : "local");
     return res.json({
-      hint: reply || localHint,
-      source: reply ? "gemini" : "local_rules"
+      hint: aiHint || localHint,
+      source: aiHint ? "gemini" : "local"
     });
 
   } catch (err) {
-    console.error("Tutor hint error:", err);
-
+    console.error("❌ Hint error:", err);
     return res.status(500).json({
-      hint: "Review the task carefully and fix one issue at a time.",
-      source: "error_fallback"
+      hint: "Try solving step by step.",
+      source: "error"
     });
   }
 });

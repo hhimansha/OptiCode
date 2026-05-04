@@ -29,6 +29,9 @@ import dashboardRoutes from './routers/IT22606860/dashboardRoutes.js';
 // IT22601360 Routes
 import conceptExtractorRouter from './routers/IT22601360/conceptExtractor.js';
 
+// Task Submission Router (for code evaluation)
+import TaskSubmissionRouter from './routers/TaskSubmissionRouter.js';
+
 import errorHandler from './middlewares/errorHandler.js';
 import userRoutes from './routers/Userrouter.js';
 import Ai_interviewrouter from "./routers/Ai_interviewrouter.js";
@@ -101,6 +104,9 @@ app.use('/api/IT22606860/risks', riskRoutes);
 app.use('/api/IT22606860/best-practices', bestPracticesRoutes);
 app.use('/api/IT22606860/analytics', analyticsRoutes);
 app.use('/api/IT22606860/dashboard', dashboardRoutes);
+
+// Task Submission & Code Evaluation Routes
+app.use('/api/tasks-submit', TaskSubmissionRouter);
 
 // LiveKit and Question routes
 app.use('/api/livekit', livekitRouter);
