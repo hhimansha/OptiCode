@@ -4,6 +4,56 @@ import Editor from "@monaco-editor/react";
 import "../../styles/TaskEditor.css";
 import { analyzeWeakness } from "./weaknessApi";
 
+// ─── CODE PATTERN VALIDATION (sanity check on ML predictions) ──────────────
+function validateWeaknessDetection(code, predictedWeakness, requiresFunction, taskText = "") {
+  // If no prediction, return it as-is
+  if (!predictedWeakness) return null;
+
+  // Check for obvious contradictions
+  const hasPrint = /print\s*\(/.test(code);
+  const hasDef = /def\s+\w+\s*\(/.test(code);
+  const hasReturn = /return\s+/.test(code);
+  const hasLoop = /for\s+|while\s+/.test(code);
+  const hasIf = /if\s+/.test(code);
+
+  // If model says "missing_print" but code has print() → it's not missing_print
+  
+if (predictedWeakness === "missing_print" && hasPrint) {
+  console.warn("⚠️ Model said missing_print but code has print() — checking logic_error");
+  return "logic_error";
+}
+
+// If model says "hardcoded_value" but the task explicitly mentions a specific number → intentional
+
+// SINGLE clean hardcoded_value check using the passed taskText parameter
+if (predictedWeakness === "hardcoded_value" && /\b\d+\b/.test(taskText)) {
+  console.warn("⚠️ hardcoded_value suppressed — task specifies literal number");
+  return null;
+}
+
+  // If model says "no_function" but code has def → it's not no_function
+  if (predictedWeakness === "no_function" && hasDef) {
+    console.warn("⚠️ Model said no_function but code has def — checking logic_error");
+    return "logic_error";
+  }
+
+  // If model says "infinite_loop" but code is a for loop with range() → it's logic_error
+  if (predictedWeakness === "infinite_loop") {
+  if (/for\s+.*range\s*\(/.test(code)) {
+    return null; // definitely not infinite loop
+  }
+}
+
+  // If model says "missing_base_case" but code is not recursive → wrong
+  if (predictedWeakness === "missing_base_case" && !code.match(/\w+\s*\(\s*\w+\s*-\s*\d+/)) {
+    console.warn("⚠️ Model said missing_base_case but code is not recursive — checking logic_error");
+    return "logic_error";
+  }
+
+  // Otherwise trust the model's prediction
+  return predictedWeakness;
+}
+
 const DEMO_USER_ID = "000000000000000000000001";
 
 // ─── LEVEL-UP LOGIC (matches progressRoutes.js exactly) ──────────────────
@@ -34,6 +84,8 @@ const DEMO_TASKS = [
     task: "Print even numbers from 2 to 8 using a for loop.",
     expectedOutput: "2\n4\n6\n8",
     starterCode: " ",
+    solutionCode: "for i in range(2, 9, 2):\n    print(i)",
+    
   },
   {
     scene: 2,
@@ -44,7 +96,9 @@ const DEMO_TASKS = [
     label: "🔒 Beginner — hardcoded_value detected (fix it!)",
     task: "Calculate 10 - 4 and print the result.",
     expectedOutput: "6",
-    starterCode: " ",
+    starterCode: "",
+    solutionCode: "print(10 - 4)",
+    
   },
   {
     scene: 3,
@@ -56,28 +110,33 @@ const DEMO_TASKS = [
     task: "Print the result of 3 multiplied by 4.",
     expectedOutput: "12",
     starterCode: " ",
+    solutionCode: "print(3 * 4)",
+    
   },
   {
-    scene: 4,
-    skillLevel: "Beginner",
-    learningMode: "level_up",
-    concept: "loops",
-    weakness: null,
-    label: "❌ Beginner — logic_error detected (fix it!)",
-    task: "Print even numbers from 2 to 8 using a for loop.",
-    expectedOutput: "2\n4\n6\n8",
-    starterCode: " ",
-  },
-  {
-  scene: 5,
+  scene: 4,
   skillLevel: "Beginner",
   learningMode: "level_up",
-  concept: "variables",
+  concept: "conditions",
   weakness: null,
-  label: "📘 Beginner — variables",
-  task: "Create two variables x = 5 and y = 3 and print their sum.",
-  expectedOutput: "8",
-  starterCode: " ",
+  label: "📘 Beginner — conditions",
+  task: "Print the letters in the word cat each on a new line.",
+  expectedOutput: "c\na\nt",
+  starterCode: "",
+  solutionCode: "for ch in 'cat':\n    print(ch)",
+},
+  {
+    scene: 5,
+    skillLevel: "Beginner",
+    learningMode: "level_up",
+    concept: "variables",
+    weakness: null,
+    label: "📘 Beginner — variables",
+    task: "Create two variables x = 5 and y = 3 and print their sum.",
+    expectedOutput: "8",
+    starterCode: "",
+    solutionCode: "x = 5\ny = 3\nprint(x + y)",
+    
   },
   {
     scene: 6,
@@ -89,6 +148,8 @@ const DEMO_TASKS = [
     task: "Print numbers from 1 to 5 using a for loop.",
     expectedOutput: "1\n2\n3\n4\n5",
     starterCode: " ",
+    solutionCode: "for i in range(1, 6):\n    print(i)",
+    
   },
   {
     scene: 7,
@@ -100,6 +161,8 @@ const DEMO_TASKS = [
     task: "Create a variable name = 'Alice' and print it.",
     expectedOutput: "Alice",
     starterCode: " ",
+    solutionCode: "name = 'Alice'\nprint(name)",
+    
   },
   {
     scene: 8,
@@ -110,8 +173,9 @@ const DEMO_TASKS = [
     label: "📘 Beginner — functions",
     task: "Write a function square(n) that returns n*n. Print square(6).",
     expectedOutput: "36",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def square(n):\n    return n * n\n\nprint(square(6))",
+    
   },
   {
     scene: 9,
@@ -123,6 +187,8 @@ const DEMO_TASKS = [
     task: "Print the sum of 5 and 10.",
     expectedOutput: "15",
     starterCode: " ",
+    solutionCode: "print(5 + 10)",
+    
   },
   {
     scene: 10,
@@ -134,6 +200,8 @@ const DEMO_TASKS = [
     task: "Print numbers from 5 down to 1 using a for loop.",
     expectedOutput: "5\n4\n3\n2\n1",
     starterCode: " ",
+    solutionCode: "for i in range(5, 0, -1):\n    print(i)",
+    
   },
 
   // ── INTERMEDIATE TASKS 11-25 ────────────────────────────────────────────
@@ -146,21 +214,22 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — missing_base_case detected (fix it!)",
     task: "Write a function factorial(n) that returns n! recursively. Print factorial(5).",
     expectedOutput: "120",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))",
+    
   },
   {
-    scene: 12,
-    skillLevel: "Intermediate",
-    learningMode: "level_up",
-    concept: "recursion",
-    weakness: null,
-    label: "📗 Intermediate — recursion correct",
-    task: "Write a function factorial(n) that returns n! recursively. Print factorial(5).",
-    expectedOutput: "120",
-    starterCode:
-      " ",
-  },
+  scene: 12,
+  skillLevel: "Intermediate",
+  learningMode: "level_up",
+  concept: "strings",
+  weakness: null,
+  label: "📗 Intermediate — string reverse",
+  task: "Reverse the string 'hello' and print it.",
+  expectedOutput: "olleh",
+  starterCode: "",
+  solutionCode: "text = 'hello'\nprint(text[::-1])",
+},
   {
     scene: 13,
     skillLevel: "Intermediate",
@@ -171,6 +240,8 @@ const DEMO_TASKS = [
     task: "Print the sum of all numbers from 1 to 10.",
     expectedOutput: "55",
     starterCode: " ",
+    solutionCode: "total = 0\nfor i in range(1, 11):\n    total += i\nprint(total)",
+    
   },
   {
     scene: 14,
@@ -181,8 +252,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — functions",
     task: "Write a function is_even(n) that returns True if n is even. Print is_even(4).",
     expectedOutput: "True",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(4))",
+    
   },
   {
     scene: 15,
@@ -193,8 +265,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — lists",
     task: "Sort the list [5,2,8,1,9] and print it.",
     expectedOutput: "[1, 2, 5, 8, 9]",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "lst = [5, 2, 8, 1, 9]\nlst.sort()\nprint(lst)",
+    
   },
   {
     scene: 16,
@@ -205,8 +278,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — while loop",
     task: "Use a while loop to print numbers from 5 down to 1.",
     expectedOutput: "5\n4\n3\n2\n1",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "i = 5\nwhile i >= 1:\n    print(i)\n    i -= 1",
+    
   },
   {
     scene: 17,
@@ -217,8 +291,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — function",
     task: "Write a function multiply(a,b) that returns a*b. Print multiply(6,7).",
     expectedOutput: "42",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def multiply(a, b):\n    return a * b\n\nprint(multiply(6, 7))",
+    
   },
   {
     scene: 18,
@@ -230,6 +305,8 @@ const DEMO_TASKS = [
     task: "Write a list comprehension returning squares of 1 to 4 and print it.",
     expectedOutput: "[1, 4, 9, 16]",
     starterCode: " ",
+    solutionCode: "result = [x**2 for x in range(1, 5)]\nprint(result)",
+    
   },
   {
     scene: 19,
@@ -240,19 +317,22 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — dictionaries",
     task: "Create a dictionary with keys 'name' and 'age' with values 'Alice' and 25. Print the name value.",
     expectedOutput: "Alice",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "person = {'name': 'Alice', 'age': 25}\nprint(person['name'])",
+    
   },
   {
-  scene: 20,
-  skillLevel: "Intermediate",
-  learningMode: "level_up",
-  concept: "strings",
-  weakness: null,
-  label: "📗 Intermediate — string methods",
-  task: "Convert the string 'python' to uppercase and print it.",
-  expectedOutput: "PYTHON",
-  starterCode: " ",
+    scene: 20,
+    skillLevel: "Intermediate",
+    learningMode: "level_up",
+    concept: "strings",
+    weakness: null,
+    label: "📗 Intermediate — string methods",
+    task: "Convert the string 'python' to uppercase and print it.",
+    expectedOutput: "PYTHON",
+    starterCode: " ",
+    solutionCode: "text = 'python'\nprint(text.upper())",
+    
   },
   {
     scene: 21,
@@ -263,8 +343,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — even numbers",
     task: "Print even numbers from 2 to 10 using a loop.",
     expectedOutput: "2\n4\n6\n8\n10",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "for i in range(2, 11, 2):\n    print(i)",
+    
   },
   {
     scene: 22,
@@ -275,8 +356,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — recursion countdown",
     task: "Write a recursive countdown(n) that prints each number. Call countdown(4).",
     expectedOutput: "4\n3\n2\n1",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def countdown(n):\n    if n == 0:\n        return\n    print(n)\n    countdown(n - 1)\n\ncountdown(4)",
+    
   },
   {
     scene: 23,
@@ -287,8 +369,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — sets",
     task: "Create two sets {1,2,3} and {3,4,5} and print their union.",
     expectedOutput: "{1, 2, 3, 4, 5}",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "set_a = {1, 2, 3}\nset_b = {3, 4, 5}\nprint(set_a | set_b)",
+    
   },
   {
     scene: 24,
@@ -299,8 +382,9 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — palindrome",
     task: "Write a function is_palindrome(s) that returns True if palindrome. Print is_palindrome('madam').",
     expectedOutput: "True",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def is_palindrome(s):\n    return s == s[::-1]\n\nprint(is_palindrome('madam'))",
+    
   },
   {
     scene: 25,
@@ -311,38 +395,38 @@ const DEMO_TASKS = [
     label: "📗 Intermediate — task 25 (🚀 Level Up to Advanced!)",
     task: "Print whether 17 is prime — True or False.",
     expectedOutput: "True",
-    starterCode:
-      " ",
+    starterCode: " ",
+    solutionCode: "def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprint(is_prime(17))",
+    
   },
 ];
 
 // ─── SESSION STORAGE KEYS ────────────────────────────────────────────────
-const DEMO_SCENE_KEY  = "demoSceneIndex";
-const DEMO_RETURN_KEY = "demoReturn";
-const DEMO_USERID_KEY = "demoUserId";
-const DEMO_BKT_KEY    = "demoBkt";
+const DEMO_SCENE_KEY        = "demoSceneIndex";
+const DEMO_RETURN_KEY       = "demoReturn";
+const DEMO_USERID_KEY       = "demoUserId";
+const DEMO_BKT_KEY          = "demoBkt";
 const DEMO_RESTORE_LOCK_KEY = "demoRestoreLock";
-const DEMO_RESET_LOCK_KEY = "demoResetLock";
+const DEMO_RESET_LOCK_KEY   = "demoResetLock";
 
 export default function DemoPage() {
   const navigate = useNavigate();
-  
 
-  const [sceneIndex, setSceneIndex]         = useState(0);
-  const [transitioning, setTransitioning]   = useState(false);
-  const [liveBkt, setLiveBkt]               = useState(20);
-  const [generatedTask, setGeneratedTask]   = useState("");
-  const [skillLevel, setSkillLevel]         = useState("Beginner");
-  const [learningMode, setLearningMode]     = useState("level_up");
+  const [sceneIndex, setSceneIndex]       = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+  const [liveBkt, setLiveBkt]             = useState(20);
+  const [generatedTask, setGeneratedTask] = useState("");
+  const [skillLevel, setSkillLevel]       = useState("Beginner");
+  const [learningMode, setLearningMode]   = useState("level_up");
   const [currentConcept, setCurrentConcept] = useState(null);
   const [expectedOutput, setExpectedOutput] = useState("");
-  const [code, setCode]                     = useState("");
-  const [hints, setHints]                   = useState([]);
-  const [loadingHints, setLoadingHints]     = useState(false);
-  const [isCorrect, setIsCorrect]           = useState(false);
-  const [lastTypedAt, setLastTypedAt]       = useState(Date.now());
-  const [levelUpData, setLevelUpData]       = useState(null);
-  
+  const [code, setCode]                   = useState("");
+  const [hints, setHints]                 = useState([]);
+  const [loadingHints, setLoadingHints]   = useState(false);
+  const [isCorrect, setIsCorrect]         = useState(false);
+  const [lastTypedAt, setLastTypedAt]     = useState(Date.now());
+  const [levelUpData, setLevelUpData]     = useState(null);
+  const [showAnswerUsed, setShowAnswerUsed] = useState(false); // NEW
 
   const isCorrectRef      = useRef(false);
   const skillLevelRef     = useRef("Beginner");
@@ -351,23 +435,19 @@ export default function DemoPage() {
   const generatedTaskRef  = useRef("");
   const taskStartRef      = useRef(Date.now());
   const progressSavedRef  = useRef(false);
-  // tracks current scene index for use inside callbacks (avoids stale closure)
   const sceneIndexRef     = useRef(0);
 
-  // ── Read sessionStorage ONCE at component creation (before any effect runs)
-  // This survives React 18 Strict Mode double-invocation because refs are
-  // initialised only once even when effects fire twice.
   const initFromProfileRef = useRef(sessionStorage.getItem(DEMO_RETURN_KEY) === "true");
   const initSceneIdxRef    = useRef(() => {
     const raw = sessionStorage.getItem(DEMO_SCENE_KEY);
     return raw !== null ? (parseInt(raw, 10) || 0) : 0;
   });
-  const initBktRef         = useRef(() => {
+  const initBktRef = useRef(() => {
     const raw = sessionStorage.getItem(DEMO_BKT_KEY);
     return raw !== null ? (parseFloat(raw) || 20) : 20;
   });
 
-  // ── Navigate to profile — save exact scene + BKT ─────────────────────
+  // ── Navigate to profile ───────────────────────────────────────────────
   function goToDemoProfile() {
     sessionStorage.setItem(DEMO_USERID_KEY, DEMO_USER_ID);
     sessionStorage.setItem(DEMO_RETURN_KEY, "true");
@@ -380,15 +460,16 @@ export default function DemoPage() {
   function applyScene(idx) {
     setTransitioning(true);
     setLevelUpData(null);
+    setShowAnswerUsed(false); // reset on each new scene
     setTimeout(() => {
       const s = DEMO_TASKS[idx];
       sceneRef.current          = s;
       generatedTaskRef.current  = s.task;
       expectedOutputRef.current = s.expectedOutput;
       skillLevelRef.current     = s.skillLevel;
-      sceneIndexRef.current     = idx;   // keep ref in sync
+      sceneIndexRef.current     = idx;
 
-      setSceneIndex(idx);               // also update state
+      setSceneIndex(idx);
       setGeneratedTask(s.task);
       setSkillLevel(s.skillLevel);
       setLearningMode(s.learningMode);
@@ -405,84 +486,71 @@ export default function DemoPage() {
   }
 
   // ── Init ──────────────────────────────────────────────────────────────
-  // Read sessionStorage here (inside useEffect) — guaranteed reliable after mount.
   useEffect(() => {
-  const fromProfile = sessionStorage.getItem(DEMO_RETURN_KEY) === "true";
-  const restoreLock = sessionStorage.getItem(DEMO_RESTORE_LOCK_KEY) === "true";
-  const rawScene = sessionStorage.getItem(DEMO_SCENE_KEY);
-  const rawBkt = sessionStorage.getItem(DEMO_BKT_KEY);
+    const fromProfile = sessionStorage.getItem(DEMO_RETURN_KEY) === "true";
+    const restoreLock = sessionStorage.getItem(DEMO_RESTORE_LOCK_KEY) === "true";
+    const rawScene    = sessionStorage.getItem(DEMO_SCENE_KEY);
+    const rawBkt      = sessionStorage.getItem(DEMO_BKT_KEY);
 
-  const idx = rawScene !== null ? (parseInt(rawScene, 10) || 0) : 0;
-  const bkt = rawBkt !== null ? (parseFloat(rawBkt) || 20) : 20;
+    const idx = rawScene !== null ? (parseInt(rawScene, 10) || 0) : 0;
+    const bkt = rawBkt   !== null ? (parseFloat(rawBkt)    || 20) : 20;
 
-  console.log("🎬 DemoPage init — fromProfile:", fromProfile, "restoreLock:", restoreLock, "scene:", idx, "bkt:", bkt);
+    console.log("🎬 DemoPage init — fromProfile:", fromProfile, "restoreLock:", restoreLock, "scene:", idx, "bkt:", bkt);
 
-  // Case 1: returning from profile
-  if (fromProfile) {
-    sessionStorage.setItem(DEMO_RESTORE_LOCK_KEY, "true");
-    sessionStorage.removeItem(DEMO_RETURN_KEY);
-
-    console.log(`🔙 Restoring from profile — scene=${idx}, BKT=${bkt}`);
-    setLiveBkt(bkt);
-    applyScene(idx);
-    return;
-  }
-
-  // Case 2: second mount in Strict Mode right after restore
-  if (restoreLock) {
-    console.log("🔒 Restore lock active — skipping reset");
-    sessionStorage.removeItem(DEMO_RESTORE_LOCK_KEY);
-    setLiveBkt(bkt);
-    applyScene(idx);
-    return;
-  }
-
-  // Case 3: real fresh open
-  console.log("🆕 Fresh demo open — resetting MongoDB");
-
-if (sessionStorage.getItem(DEMO_RESET_LOCK_KEY) === "true") {
-  console.log("🔒 Fresh reset already running — skip duplicate");
-  return;
-}
-
-sessionStorage.setItem(DEMO_RESET_LOCK_KEY, "true");
-
-const doReset = async () => {
-  try {
-    const res = await fetch("http://localhost:5000/api/progress/reset-demo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: DEMO_USER_ID,
-        skillLevel: "Beginner"
-      })
-    });
-
-    if (!res.ok) {
-      throw new Error(`Reset failed: ${res.status}`);
+    if (fromProfile) {
+      sessionStorage.setItem(DEMO_RESTORE_LOCK_KEY, "true");
+      sessionStorage.removeItem(DEMO_RETURN_KEY);
+      console.log(`🔙 Restoring from profile — scene=${idx}, BKT=${bkt}`);
+      setLiveBkt(bkt);
+      applyScene(idx);
+      return;
     }
 
-    setLiveBkt(20);
-    sessionStorage.setItem(DEMO_BKT_KEY, "20");
-    sessionStorage.setItem(DEMO_SCENE_KEY, "0");
+    if (restoreLock) {
+      console.log("🔒 Restore lock active — skipping reset");
+      sessionStorage.removeItem(DEMO_RESTORE_LOCK_KEY);
+      setLiveBkt(bkt);
+      applyScene(idx);
+      return;
+    }
 
-  } catch (err) {
-    console.error("Demo reset failed:", err);
-  } finally {
-    sessionStorage.removeItem(DEMO_RESET_LOCK_KEY);
-  }
+    console.log("🆕 Fresh demo open — resetting MongoDB");
 
-  applyScene(0);
-};
+    if (sessionStorage.getItem(DEMO_RESET_LOCK_KEY) === "true") {
+      console.log("🔒 Fresh reset already running — skip duplicate");
+      return;
+    }
 
-doReset();
-}, []);
+    sessionStorage.setItem(DEMO_RESET_LOCK_KEY, "true");
+
+    const doReset = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/progress/reset-demo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: DEMO_USER_ID, skillLevel: "Beginner" })
+        });
+        if (!res.ok) throw new Error(`Reset failed: ${res.status}`);
+        setLiveBkt(20);
+        sessionStorage.setItem(DEMO_BKT_KEY,   "20");
+        sessionStorage.setItem(DEMO_SCENE_KEY,  "0");
+      } catch (err) {
+        console.error("Demo reset failed:", err);
+      } finally {
+        sessionStorage.removeItem(DEMO_RESET_LOCK_KEY);
+      }
+      applyScene(0);
+    };
+
+    doReset();
+  }, []);
+
   // ── Save progress ─────────────────────────────────────────────────────
   const saveProgress = async (solved) => {
     if (progressSavedRef.current) return;
     progressSavedRef.current = true;
 
-    const s = sceneRef.current;
+    const s        = sceneRef.current;
     const timeTaken = Math.floor((Date.now() - taskStartRef.current) / 1000);
 
     try {
@@ -492,7 +560,7 @@ doReset();
         body: JSON.stringify({
           userId:           DEMO_USER_ID,
           task:             s.task,
-          weakness:         s.weakness,     // always null → streak never breaks ✅
+          weakness:         s.weakness,
           concept:          s.concept,
           learningMode:     s.learningMode,
           skillLevel:       s.skillLevel,
@@ -503,7 +571,16 @@ doReset();
         }),
       });
 
+      if (!res.ok) {
+        throw new Error(`Save failed: ${res.status} ${res.statusText}`);
+      }
+
       const data = await res.json();
+      
+      if (!data || typeof data.bktMastery === 'undefined') {
+        throw new Error("Invalid response: missing bktMastery");
+      }
+
       const newBkt = (data.bktMastery || 0) * 100;
       setLiveBkt(newBkt);
       sessionStorage.setItem(DEMO_BKT_KEY, String(newBkt));
@@ -521,28 +598,49 @@ doReset();
         skillLevelRef.current = data.skillLevel;
       }
     } catch (err) {
-      console.error("Demo save error:", err);
+      console.error("❌ Demo save error:", err);
+      progressSavedRef.current = false; // Reset on error so retry is possible
     }
   };
 
-  // ── Live weakness detection ───────────────────────────────────────────
-// ── Live weakness detection ───────────────────────────────────────────
-useEffect(() => {
-  if (!code || code.trim().length < 3) {
-    setHints([]);
-    return;
+  // ── Show Answer handler ───────────────────────────────────────────────
+  // NEW: fills editor with solution and auto-marks correct after 2s
+  function handleShowAnswer() {
+    const solution = sceneRef.current.solutionCode;
+    if (!solution) return;
+
+    setCode(solution);
+    setShowAnswerUsed(true);
+    setHints(["💡 Answer shown — review the solution below!"]);
+
+    // Auto-mark correct after 2 seconds so Next Task button appears
+    setTimeout(() => {
+      setIsCorrect(true);
+      isCorrectRef.current = true;
+      setHints(["✅ Answer shown — study it and move to the next task!"]);
+      saveProgress(true); // false = shown answer, not self-solved// for the presentation only i changed this as true
+    }, 2000);
   }
 
-  if (isCorrectRef.current) return;
+  // ── Live weakness detection ───────────────────────────────────────────
+  // FIX: increased timeout from 1200ms → 3000ms to avoid premature hints
+  // FIX: increased minimum code length from 3 → 10 characters
+  useEffect(() => {
+    if (!code || code.trim().length < 10) {
+      setHints([]);
+      return;
+    }
 
-  const timeout = setTimeout(async () => {
-    try {
-      setLoadingHints(true);
+    if (isCorrectRef.current) return;
 
-      const idleSeconds = Math.floor((Date.now() - lastTypedAt) / 1000);
-      const requiresFunction =
-        generatedTaskRef.current.toLowerCase().includes("function") ||
-        generatedTaskRef.current.toLowerCase().includes("def ");
+    const timeout = setTimeout(async () => {
+      try {
+        setLoadingHints(true);
+
+        const idleSeconds = Math.floor((Date.now() - lastTypedAt) / 1000);
+        const requiresFunction =
+          generatedTaskRef.current.toLowerCase().includes("function") ||
+          generatedTaskRef.current.toLowerCase().includes("def ");
 
       const result = await analyzeWeakness(
         code,
@@ -553,60 +651,90 @@ useEffect(() => {
         requiresFunction
       );
 
-      const correct = result.hints?.some((h) =>
-        h.toLowerCase().includes("correct")
-      );
+        // ── CODE PATTERN VALIDATION (sanity check on ML predictions) ─────
+        const validatedWeakness = validateWeaknessDetection(code, result.primary, requiresFunction, generatedTaskRef.current);
+        
+        const correct = result.hints?.some((h) =>
+          h.toLowerCase().includes("correct")
+        );
 
-      if (correct) {
-        setIsCorrect(true);
-        isCorrectRef.current = true;
-        setHints(["✅ Your answer is correct!"]);
-        saveProgress(true);
-      } else if (!result.primary && !correct) {
-        setHints(["✔ No issues detected"]);
-      } else if (result.primary) {
-        try {
-          const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              weakness: result.primary,
-              skill: skillLevelRef.current,
-              code,
-              task: generatedTaskRef.current,
-              concept: sceneRef.current.concept,
-              learningMode: sceneRef.current.learningMode,
-            }),
-          });
+        if (correct) {
+          setIsCorrect(true);
+          isCorrectRef.current = true;
+          setHints(["✅ Your answer is correct!"]);
+          saveProgress(true);
+        } else if (!result.primary && !correct) {
+          setHints(["✔ No issues detected"]);
+        } else if (validatedWeakness) {
+          try {
+            const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                weakness:     validatedWeakness,
+                skill:        skillLevelRef.current,
+                code,
+                task:         generatedTaskRef.current,
+                concept:      sceneRef.current.concept,
+                learningMode: sceneRef.current.learningMode,
+              }),
+            });
 
-          const tutorData = await tutor.json();
-          setHints([tutorData.hint]);
-        } catch {
-          setHints(result.hints || []);
+            const tutorData = await tutor.json();
+            // ── COMBINED HINTS: weakness_model + tutorRoutes ─────────────
+            const combinedHints = [];
+            
+            // 1. Add weakness_model hints first
+            if (result.hints && result.hints.length > 0) {
+              combinedHints.push(...result.hints);
+            }
+            
+            // 2. Add tutorRoutes hint (WeaknessHintEngine + fallback)
+            if (tutorData.hint) {
+              combinedHints.push(tutorData.hint);
+            }
+            
+            setHints(combinedHints.length > 0 ? combinedHints : ["Try solving step by step."]);
+          } catch {
+            setHints(result.hints || ["Try solving step by step."]);
+          }
+        } else {
+          const secondaryCorrect = (result.hints || []).some(h =>
+          h.toLowerCase().includes("correct")
+          );
+          if (secondaryCorrect) {
+            setIsCorrect(true);
+            isCorrectRef.current = true;
+            setHints(["✅ Your answer is correct!"]);
+            saveProgress(true);  // ← THIS is what was never being called
+          } else {
+            setHints(["✔ No issues detected"]);
+          }
         }
-      } else {
-        setHints(result.hints || []);
+      } catch (err) {
+        console.error("Demo hint error:", err);
+      } finally {
+        setLoadingHints(false);
       }
-    } catch (err) {
-      console.error("Demo hint error:", err);
-    } finally {
-      setLoadingHints(false);
-    }
-  }, 1200);
+    }, 3000); // ← FIXED: was 1200, now 3000ms
 
   return () => clearTimeout(timeout);
 }, [code, lastTypedAt]);
 
   // ── Navigation ────────────────────────────────────────────────────────
-  // Use sceneIndexRef for current value — avoids stale closure in callbacks
   function handleNext() {
-    const cur = sceneIndexRef.current;
-    if (cur < DEMO_TASKS.length - 1) {
-      const next = cur + 1;
-      sessionStorage.setItem(DEMO_SCENE_KEY, String(next));
-      applyScene(next);  // applyScene also calls setSceneIndex(next) internally
-    }
+  if (!isCorrectRef.current) {
+    alert("⚠️ Complete the task before moving!");
+    return;
   }
+
+  const cur = sceneIndexRef.current;
+  if (cur < DEMO_TASKS.length - 1) {
+    const next = cur + 1;
+    sessionStorage.setItem(DEMO_SCENE_KEY, String(next));
+    applyScene(next);
+  }
+}
 
   function handlePrev() {
     const cur = sceneIndexRef.current;
@@ -774,6 +902,7 @@ useEffect(() => {
                 isCorrectRef.current     = false;
                 progressSavedRef.current = false;
                 setHints([]);
+                setShowAnswerUsed(false);
               }
             }}
             options={{
@@ -801,6 +930,29 @@ useEffect(() => {
                 {hint}
               </p>
             ))}
+
+            {/* ── Show Answer button — always visible unless already correct ── */}
+            {/* NEW: only show if not yet correct and answer not already shown */}
+            {!isCorrect && !showAnswerUsed && (
+              <button
+                type="button"
+                onClick={handleShowAnswer}
+                style={{
+                  marginTop: "10px",
+                  width: "100%",
+                  padding: "9px",
+                  background: "linear-gradient(90deg, #d97706, #f59e0b)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: "bold",
+                  cursor: "pointer"
+                }}
+              >
+                💡 Show Answer
+              </button>
+            )}
 
             {/* Next Task button — only when correct and no level-up overlay */}
             {isCorrect && !levelUpData && (
