@@ -6,7 +6,7 @@ export async function analyzeWeakness(
   testInput,
   requiresFunction = false
 ) {
-  // ✅ FIX: Append function call if student wrote a function but didn't call it
+  // Append function call if student wrote a function but didn't call it
   let codeToAnalyze = code;
   const functionCall = sessionStorage.getItem("functionCall");
 
