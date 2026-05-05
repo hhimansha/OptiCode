@@ -43,6 +43,8 @@ const Form = () => {
       console.log('🟡 Response data:', data);
 
       if (data.success) {
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("userName", data.user.name);
         setLoginSuccess(true);
         console.log(isLogin ? 'Logged in user:' : 'Registered user:', data.user);
         if (isLogin) {

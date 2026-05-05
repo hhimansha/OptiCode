@@ -26,10 +26,10 @@ if (predictedWeakness === "missing_print" && hasPrint) {
 // If model says "hardcoded_value" but the task explicitly mentions a specific number → intentional
 
 // SINGLE clean hardcoded_value check using the passed taskText parameter
-if (predictedWeakness === "hardcoded_value" && /\b\d+\b/.test(taskText)) {
-  console.warn("⚠️ hardcoded_value suppressed — task specifies literal number");
-  return null;
-}
+//if (predictedWeakness === "hardcoded_value" && /\b\d+\b/.test(taskText)) {
+  //console.warn("⚠️ hardcoded_value suppressed — task specifies literal number");
+ // return null;
+//}
 
   // If model says "no_function" but code has def → it's not no_function
   if (predictedWeakness === "no_function" && hasDef) {
@@ -94,7 +94,7 @@ const DEMO_TASKS = [
     concept: "math",
     weakness: null,
     label: "🔒 Beginner — hardcoded_value detected (fix it!)",
-    task: "Calculate 10 - 4 and print the result.",
+    task: "Subtract four from ten and print the result",
     expectedOutput: "6",
     starterCode: "",
     solutionCode: "print(10 - 4)",
@@ -435,7 +435,8 @@ export default function DemoPage() {
   const generatedTaskRef  = useRef("");
   const taskStartRef      = useRef(Date.now());
   const progressSavedRef  = useRef(false);
-  const sceneIndexRef     = useRef(0);
+  const answerSavedRef    = useRef(false);
+  const sceneIndexRef     = useRef(0);//
 
   const initFromProfileRef = useRef(sessionStorage.getItem(DEMO_RETURN_KEY) === "true");
   const initSceneIdxRef    = useRef(() => {
@@ -463,6 +464,19 @@ export default function DemoPage() {
     setShowAnswerUsed(false); // reset on each new scene
     setTimeout(() => {
       const s = DEMO_TASKS[idx];
+      // Clear any stale functionCall from real system
+sessionStorage.removeItem("functionCall");
+
+// Set functionCall for tasks that need it
+if (s.solutionCode.includes("print(") && s.solutionCode.includes("def ")) {
+  // Extract the print call from solutionCode e.g. "print(square(6))"
+  const printMatch = s.solutionCode.match(/print\([^)]+\)/);
+  if (printMatch) {
+    sessionStorage.setItem("functionCall", printMatch[0]);
+  }
+} else {
+  sessionStorage.removeItem("functionCall");
+}
       sceneRef.current          = s;
       generatedTaskRef.current  = s.task;
       expectedOutputRef.current = s.expectedOutput;
@@ -480,6 +494,7 @@ export default function DemoPage() {
       setIsCorrect(false);
       isCorrectRef.current     = false;
       progressSavedRef.current = false;
+      answerSavedRef.current = false;
       taskStartRef.current     = Date.now();
       setTransitioning(false);
     }, 250);
@@ -547,7 +562,11 @@ export default function DemoPage() {
 
   // ── Save progress ─────────────────────────────────────────────────────
   const saveProgress = async (solved) => {
-    if (progressSavedRef.current) return;
+  if (progressSavedRef.current) {
+    console.log("Already saved — skipping.");
+    return;
+  }
+    
     progressSavedRef.current = true;
 
     const s        = sceneRef.current;
@@ -606,27 +625,26 @@ export default function DemoPage() {
   // ── Show Answer handler ───────────────────────────────────────────────
   // NEW: fills editor with solution and auto-marks correct after 2s
   function handleShowAnswer() {
-    const solution = sceneRef.current.solutionCode;
-    if (!solution) return;
+  const solution = sceneRef.current.solutionCode;
+  if (!solution) return;
 
-    setCode(solution);
-    setShowAnswerUsed(true);
-    setHints(["💡 Answer shown — review the solution below!"]);
+  setCode(solution);
+  setShowAnswerUsed(true);
+  setHints(["💡 Answer shown — review the solution below!"]);
 
-    // Auto-mark correct after 2 seconds so Next Task button appears
-    setTimeout(() => {
-      setIsCorrect(true);
-      isCorrectRef.current = true;
-      setHints(["✅ Answer shown — study it and move to the next task!"]);
-      saveProgress(true); // false = shown answer, not self-solved// for the presentation only i changed this as true
-    }, 2000);
-  }
+  setTimeout(() => {
+    setIsCorrect(true);
+    isCorrectRef.current = true;
+    setHints(["✅ Answer shown — study it and move to the next task!"]);
+    saveProgress(true);
+  }, 2000);
+}
 
   // ── Live weakness detection ───────────────────────────────────────────
   // FIX: increased timeout from 1200ms → 3000ms to avoid premature hints
   // FIX: increased minimum code length from 3 → 10 characters
   useEffect(() => {
-    if (!code || code.trim().length < 10) {
+    if (!code || code.trim().length < 3) {
       setHints([]);
       return;
     }
@@ -895,16 +913,14 @@ export default function DemoPage() {
             theme="vs-dark"
             value={code}
             onChange={(value) => {
-              setCode(value || "");
-              setLastTypedAt(Date.now());
-              if (isCorrectRef.current) {
-                setIsCorrect(false);
-                isCorrectRef.current     = false;
-                progressSavedRef.current = false;
-                setHints([]);
-                setShowAnswerUsed(false);
-              }
-            }}
+  setCode(value || "");
+  setLastTypedAt(Date.now());
+  if (isCorrectRef.current) {
+    setIsCorrect(false);
+    isCorrectRef.current = false;
+    setHints([]);
+  }
+}}
             options={{
               fontSize: 16,
               minimap: { enabled: false },

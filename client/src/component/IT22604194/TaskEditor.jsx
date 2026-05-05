@@ -3,14 +3,55 @@ import Editor from "@monaco-editor/react";
 import "../../styles/TaskEditor.css";
 import { useState, useEffect, useRef } from "react";
 import { analyzeWeakness } from "./weaknessApi";
-//import DemoRunner from "./DemoRunner";
+
+
+// ─── CODE PATTERN VALIDATION (sanity check on ML predictions) ──────────────
+function validateWeaknessDetection(code, predictedWeakness, requiresFunction, taskText = "") {
+  // If no prediction, return it as-is
+  if (!predictedWeakness) return null;
+
+  // Check for obvious contradictions
+  const hasPrint = /print\s*\(/.test(code);
+  const hasDef = /def\s+\w+\s*\(/.test(code);
+  const hasReturn = /return\s+/.test(code);
+  const hasLoop = /for\s+|while\s+/.test(code);
+  const hasIf = /if\s+/.test(code);
+
+  // If model says "missing_print" but code has print() → it's not missing_print
+  if (predictedWeakness === "missing_print" && hasPrint) {
+    console.warn("⚠️ Model said missing_print but code has print() — checking logic_error");
+    return "logic_error";
+  }
+
+  // If model says "no_function" but code has def → it's not no_function
+  if (predictedWeakness === "no_function" && hasDef) {
+    console.warn("⚠️ Model said no_function but code has def — checking logic_error");
+    return "logic_error";
+  }
+
+  // If model says "infinite_loop" but code is a for loop with range() → it's logic_error
+  if (predictedWeakness === "infinite_loop") {
+    if (/for\s+.*range\s*\(/.test(code)) {
+      return null; // definitely not infinite loop
+    }
+  }
+
+  // If model says "missing_base_case" but code is not recursive → wrong
+  if (predictedWeakness === "missing_base_case" && !code.match(/\w+\s*\(\s*\w+\s*-\s*\d+/)) {
+    console.warn("⚠️ Model said missing_base_case but code is not recursive — checking logic_error");
+    return "logic_error";
+  }
+
+  // Otherwise trust the model's prediction
+  return predictedWeakness;
+}
 
 export default function TaskEditor() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [generatedTask, setGeneratedTask] = useState("");
-  const [skillLevel, setSkillLevel] = useState("Beginner");
+  const [skillLevel, setSkillLevel] = useState("Beginner");//student's current skill level — synced from MongoDB on load.
   const [code, setCode] = useState("# Write your Python solution here\n");
 
   const [hints, setHints] = useState([]);
@@ -20,8 +61,10 @@ export default function TaskEditor() {
   const [testInput, setTestInput] = useState("");
   const [primaryWeakness, setPrimaryWeakness] = useState(null);
   const [isCorrect, setIsCorrect] = useState(false);
-
-  //const [showDemo, setShowDemo] = useState(false);
+  const [bktMastery, setBktMastery] = useState(0);
+  const [prevBktMastery, setPrevBktMastery] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  
 
   const [learningMode, setLearningMode] = useState(
     sessionStorage.getItem("learningMode") || "level_up"
@@ -54,7 +97,7 @@ export default function TaskEditor() {
     generatedTask.toLowerCase().includes("def ");
 
   // ── Infer concept from task text ───────────────────────────────────────
-  const inferConceptFromTask = (taskText = "") => {
+  const inferConceptFromTask = (taskText = "") => {//Task To Concept mapping
     const text = taskText.toLowerCase();
 
     if (text.includes("recursion") || text.includes("recursive")) return "recursion";
@@ -141,6 +184,7 @@ export default function TaskEditor() {
     fetch(`http://localhost:5000/api/progress/${uid}`)
       .then((r) => r.json())
       .then((data) => {
+        sessionStorage.setItem("solution_code", data.solution_code || "");
         if (data.skillLevel) {
           setSkillLevel(data.skillLevel);
           skillLevelRef.current = data.skillLevel;
@@ -171,6 +215,10 @@ export default function TaskEditor() {
           setCurrentConcept(data.targetConcept);
           currentConceptRef.current = data.targetConcept;
           sessionStorage.setItem("currentConcept", data.targetConcept);
+        }
+        if (data.bktMastery !== undefined) {
+          setBktMastery(data.bktMastery);
+          setPrevBktMastery(data.bktMastery);
         }
       })
       .catch(() => {});
@@ -247,6 +295,7 @@ export default function TaskEditor() {
         })
           .then((r) => r.json())
           .then((data) => {
+            sessionStorage.setItem("solution_code", data.solution_code || "");
             setGeneratedTask(data.generated_task);
             setExpectedOutput(data.expected_output);
             setTestInput(data.test_input);
@@ -389,6 +438,11 @@ export default function TaskEditor() {
       const data = await res.json();
       console.log("Progress saved:", data);
 
+      if (data.bktMastery !== undefined) {
+        setPrevBktMastery(bktMastery);
+        setBktMastery(data.bktMastery);
+      }
+
       if (data.leveledUp) {
         setSkillLevel(data.skillLevel);
         skillLevelRef.current = data.skillLevel;
@@ -457,26 +511,34 @@ export default function TaskEditor() {
           requiresFunction
         );
         const correct = result.hints?.some((h) => h.includes("correct"));
+        
+        // ── CODE PATTERN VALIDATION (sanity check on ML predictions) ─────
+        const validatedWeakness = validateWeaknessDetection(
+          code,
+          result.primary,
+          requiresFunction,
+          generatedTaskRef.current
+        );
 
         if (correct) {
           setIsCorrect(true);
           isCorrectRef.current = true;
           setHints([" Your answer is correct!"]);
-          setPrimaryWeakness(result.primary);
-          primaryWeaknessRef.current = result.primary;
+          setPrimaryWeakness(validatedWeakness);
+          primaryWeaknessRef.current = validatedWeakness;
           saveProgress(true);
         } else {
           setHints(result.hints || []);
-          setPrimaryWeakness(result.primary);
-          primaryWeaknessRef.current = result.primary;
+          setPrimaryWeakness(validatedWeakness);
+          primaryWeaknessRef.current = validatedWeakness;
 
-          if (result.primary) {
+          if (validatedWeakness) {
             try {
               const tutor = await fetch("http://localhost:5000/api/tutor/hint", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  weakness: result.primary,
+                  weakness: validatedWeakness,
                   skill: skillLevelRef.current,
                   code,
                   task: generatedTaskRef.current,
@@ -516,16 +578,26 @@ export default function TaskEditor() {
             requiresFunction
           );
           const correct = result.hints?.some((h) => h.includes("correct"));
+          
+          // ── CODE PATTERN VALIDATION (sanity check on ML predictions) ─────
+          const validatedWeakness = validateWeaknessDetection(
+            code,
+            result.primary,
+            requiresFunction,
+            generatedTaskRef.current
+          );
 
           if (correct) {
             setIsCorrect(true);
             isCorrectRef.current = true;
             setHints([" Your answer is correct!"]);
-            setPrimaryWeakness(result.primary);
-            primaryWeaknessRef.current = result.primary;
+            setPrimaryWeakness(validatedWeakness);
+            primaryWeaknessRef.current = validatedWeakness;
             saveProgress(true);
           } else {
             setHints(result.hints || []);
+            setPrimaryWeakness(validatedWeakness);
+            primaryWeaknessRef.current = validatedWeakness;
           }
         } catch (err) {
           console.error("Idle weakness check failed:", err);
@@ -683,6 +755,40 @@ export default function TaskEditor() {
           {hint}
         </p>
       ))}
+      <button
+  type="button"
+  onClick={() => setShowAnswer((prev) => !prev)}
+  style={{
+    marginTop: "12px",
+    width: "100%",
+    padding: "10px",
+    background: "linear-gradient(90deg, #f59e0b, #f97316)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "15px",
+    fontWeight: "bold",
+    cursor: "pointer"
+  }}
+>
+  {showAnswer ? "🙈 Hide Answer" : "💡 Show Answer"}
+</button>
+{showAnswer && (
+  <div style={{ marginTop: "12px", padding: "10px", background: "#0f172a", borderRadius: "8px" }}>
+    
+    <h4 style={{ color: "#fbbf24" }}>Expected Output</h4>
+    <p style={{ color: "#fff" }}>{expectedOutput}</p>
+
+    <h4 style={{ color: "#60a5fa", marginTop: "10px" }}>Solution Code</h4>
+    <pre style={{ color: "#fff", whiteSpace: "pre-wrap" }}>
+      {sessionStorage.getItem("functionCall")
+        ? sessionStorage.getItem("functionCall") + "\n"
+        : ""}
+      {sessionStorage.getItem("solution_code") || "print solution not available"}
+    </pre>
+
+  </div>
+)}
 
     {/* ✅ Button sits inside hint panel — no overlap */}
     {isCorrect && (
@@ -706,6 +812,33 @@ export default function TaskEditor() {
         Next Task →
       </button>
     )}
+    <div style={{ marginBottom: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+        <span style={{ fontSize: "12px", color: "#94a3b8" }}>BKT Mastery</span>
+        <span style={{ fontSize: "12px", color: "#a78bfa", fontWeight: "bold" }}>
+          {(bktMastery * 100).toFixed(1)}%
+          {bktMastery > prevBktMastery && (
+            <span style={{ color: "#4ade80", marginLeft: "4px" }}>
+              +{((bktMastery - prevBktMastery) * 100).toFixed(1)}%
+            </span>
+          )}
+        </span>
+      </div>
+      <div style={{ background: "#1e293b", borderRadius: "8px", height: "8px", overflow: "hidden" }}>
+        <div style={{
+          height: "100%",
+          borderRadius: "8px",
+          width: `${Math.min(bktMastery * 100, 100)}%`,
+          background: bktMastery >= 0.85
+            ? "linear-gradient(90deg, #4ade80, #22d3ee)"
+            : "linear-gradient(90deg, #6366f1, #a78bfa)",
+          transition: "width 1.2s ease"
+        }} />
+      </div>
+      <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px" }}>
+        Target: 85% to level up
+      </div>
+    </div>
   </div>
 
 </div>
